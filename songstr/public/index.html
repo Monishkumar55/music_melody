@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Songstr – Music that matches your mood</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    /* =========== RESET & BASE =========== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d0d1a;
+      --bg2: #13132b;
+      --bg3: #1a1a35;
+      --card: #1e1e3a;
+      --card2: #252548;
+      --purple: #7c3aed;
+      --purple-light: #8b5cf6;
+      --purple-glow: rgba(124,58,237,0.25);
+      --violet: #6d28d9;
+      --pink: #ec4899;
+      --text: #f0f0ff;
+      --text2: #b0b0cc;
+      --text3: #7070a0;
+      --green: #22c55e;
+      --yellow: #f59e0b;
+      --red: #ef4444;
+      --blue: #60a5fa;
+      --teal: #34d399;
+      --orange: #f97316;
+      --spotify: #1DB954;
+      --yt: #FF0000;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; border: none; outline: none; font-family: inherit; }
+    input, textarea { font-family: inherit; outline: none; border: none; }
+
+    /* =========== SCROLLBAR =========== */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg2); }
+    ::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 3px; }
+
+    /* =========== LAYOUT =========== */
+    .app { display: flex; flex-direction: column; min-height: 100vh; }
+    .screen { display: none; flex-direction: column; min-height: 100vh; }
+    .screen.active { display: flex; }
+
+    /* =========== NAVBAR =========== */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(13,13,26,0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(124,58,237,0.2);
+      padding: 14px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 800; font-size: 20px; cursor: pointer;
+    }
+    .nav-logo .logo-icon {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .nav-logo span { color: var(--text); }
+    .nav-logo .str { color: var(--purple-light); }
+    .nav-actions { display: flex; gap: 8px; align-items: center; }
+    .nav-btn {
+      background: none; border: 1px solid rgba(124,58,237,0.4);
+      color: var(--text2); padding: 7px 14px; border-radius: 20px;
+      font-size: 13px; font-weight: 500; transition: all 0.2s;
+    }
+    .nav-btn:hover { background: var(--purple-glow); border-color: var(--purple-light); color: var(--text); }
+    .nav-btn.active { background: var(--purple); border-color: var(--purple); color: #fff; }
+    .nav-icon-btn {
+      background: none; color: var(--text2); font-size: 18px;
+      padding: 7px; border-radius: 50%; transition: all 0.2s;
+    }
+    .nav-icon-btn:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+
+    /* =========== BOTTOM NAV =========== */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(13,13,26,0.98);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(124,58,237,0.2);
+      display: flex; justify-content: space-around; padding: 10px 0 16px;
+    }
+    .bnav-item {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 4px; font-size: 11px; font-weight: 500;
+      color: var(--text3); cursor: pointer; transition: all 0.2s;
+      padding: 6px 16px; border-radius: 12px;
+    }
+    .bnav-item:hover, .bnav-item.active { color: var(--purple-light); }
+    .bnav-item .icon { font-size: 20px; }
+
+    /* =========== HERO SCREEN =========== */
+    .hero {
+      padding: 0 0 100px;
+      background: linear-gradient(180deg, rgba(124,58,237,0.08) 0%, transparent 60%);
+      min-height: 100vh;
+    }
+    .hero-content {
+      padding: 40px 24px 24px;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.3);
+      border-radius: 20px; padding: 6px 16px;
+      font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+      color: var(--purple-light); text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+    .hero-badge .pulse {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--purple-light);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+    .hero-title {
+      font-size: 42px; font-weight: 900; line-height: 1.1;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.85) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-title .accent {
+      background: linear-gradient(135deg, var(--purple-light), var(--pink));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-subtitle {
+      font-size: 15px; color: var(--text2); line-height: 1.6;
+      margin-bottom: 36px; max-width: 340px; margin-left: auto; margin-right: auto;
+    }
+    .hero-btns {
+      display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--purple), var(--violet));
+      color: #fff; padding: 14px 28px; border-radius: 30px;
+      font-size: 15px; font-weight: 600;
+      box-shadow: 0 4px 20px rgba(124,58,237,0.4);
+      transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(124,58,237,0.5); }
+    .btn-secondary {
+      background: transparent; color: var(--text);
+      padding: 14px 28px; border-radius: 30px;
+      font-size: 15px; font-weight: 600;
+      border: 1.5px solid rgba(255,255,255,0.2);
+      transition: all 0.3s;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.4); }
+
+    /* Suggested card */
+    .suggested-card {
+      margin: 0 24px;
+      background: var(--card2);
+      border: 1px solid rgba(124,58,237,0.2);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .suggested-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--purple), var(--violet));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; flex-shrink: 0;
+    }
+    .suggested-label {
+      font-size: 10px; font-weight: 600; letter-spacing: 1px;
+      color: var(--purple-light); text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .suggested-title { font-size: 15px; font-weight: 700; }
+    .suggested-sub { font-size: 12px; color: var(--text2); }
+    .suggested-play {
+      margin-left: auto;
+      background: linear-gradient(135deg, var(--purple), var(--violet));
+      color: #fff; padding: 10px 20px; border-radius: 20px;
+      font-size: 13px; font-weight: 600; flex-shrink: 0;
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    /* How it works */
+    .how-it-works {
+      padding: 36px 24px;
+    }
+    .section-title {
+      font-size: 22px; font-weight: 800; margin-bottom: 20px; text-align: center;
+    }
+    .feature-list { display: flex; flex-direction: column; gap: 12px; }
+    .feature-item {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      display: flex; align-items: flex-start; gap: 16px;
+    }
+    .feature-icon {
+      width: 46px; height: 46px; border-radius: 12px;
+      background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    .feature-label { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .feature-sub { font-size: 13px; color: var(--text2); line-height: 1.5; }
+
+    /* =========== DETECT SCREEN =========== */
+    .detect-screen { padding: 0 0 100px; }
+    .detect-hero {
+      padding: 40px 24px 28px; text-align: center;
+      background: linear-gradient(180deg, rgba(124,58,237,0.12) 0%, transparent 100%);
+    }
+    .detect-title { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+    .detect-sub { font-size: 14px; color: var(--text2); }
+
+    /* Tab switcher */
+    .tab-bar {
+      display: flex; background: var(--card); border-radius: 12px;
+      margin: 20px 24px; padding: 4px;
+    }
+    .tab-btn {
+      flex: 1; padding: 10px; border-radius: 10px;
+      font-size: 13px; font-weight: 600; color: var(--text2);
+      background: none; display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: all 0.2s;
+    }
+    .tab-btn.active { background: var(--purple); color: #fff; }
+
+    /* Text input area */
+    .input-section { padding: 0 24px; }
+    .mood-textarea {
+      width: 100%; background: var(--card);
+      border: 1.5px solid rgba(124,58,237,0.2);
+      border-radius: var(--radius); padding: 18px;
+      color: var(--text); font-size: 15px; line-height: 1.6;
+      resize: none; height: 150px;
+      transition: border-color 0.2s;
+    }
+    .mood-textarea:focus { border-color: var(--purple); }
+    .mood-textarea::placeholder { color: var(--text3); }
+    .analyze-btn {
+      width: 100%; margin-top: 14px;
+      background: linear-gradient(135deg, var(--purple), var(--violet));
+      color: #fff; padding: 16px; border-radius: 30px;
+      font-size: 15px; font-weight: 700;
+      box-shadow: 0 4px 20px rgba(124,58,237,0.4);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: all 0.3s;
+    }
+    .analyze-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(124,58,237,0.5); }
+    .analyze-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    /* Voice mode */
+    .voice-section {
+      padding: 20px 24px;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .mic-btn {
+      width: 100px; height: 100px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--violet));
+      font-size: 40px; color: #fff;
+      box-shadow: 0 0 0 0 var(--purple-glow);
+      transition: all 0.3s; margin-bottom: 20px;
+    }
+    .mic-btn.recording {
+      animation: ripple 1.5s infinite;
+      background: linear-gradient(135deg, var(--red), #b91c1c);
+    }
+    @keyframes ripple {
+      0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+      70% { box-shadow: 0 0 0 30px rgba(239,68,68,0); }
+      100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+    }
+    .voice-status { font-size: 14px; color: var(--text2); margin-bottom: 10px; }
+    .voice-transcript {
+      background: var(--card); border: 1px solid rgba(124,58,237,0.2);
+      border-radius: var(--radius); padding: 14px 18px;
+      font-size: 14px; color: var(--text2); min-height: 60px;
+      width: 100%; line-height: 1.6; text-align: center;
+    }
+
+    /* Face mode */
+    .face-section { padding: 20px 24px; }
+    .camera-container {
+      background: var(--card); border: 2px dashed rgba(124,58,237,0.3);
+      border-radius: var(--radius); overflow: hidden;
+      position: relative; aspect-ratio: 4/3;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #camera-video {
+      width: 100%; height: 100%; object-fit: cover;
+      border-radius: calc(var(--radius) - 2px);
+    }
+    .camera-overlay {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 12px;
+    }
+    .camera-scan {
+      width: 120px; height: 120px; border-radius: 50%;
+      border: 2px solid var(--purple-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 40px;
+      box-shadow: 0 0 30px var(--purple-glow);
+    }
+    .camera-overlay p { font-size: 13px; color: var(--text2); }
+    .start-camera-btn {
+      margin-top: 14px; width: 100%;
+      background: var(--card2); border: 1.5px solid rgba(124,58,237,0.3);
+      color: var(--text); padding: 14px; border-radius: 30px;
+      font-size: 15px; font-weight: 600;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: all 0.2s;
+    }
+    .start-camera-btn:hover { background: var(--purple-glow); border-color: var(--purple-light); }
+
+    /* =========== MOOD RESULT SCREEN =========== */
+    .result-screen { padding: 0 0 100px; }
+    .result-hero {
+      padding: 36px 24px 24px; text-align: center;
+      background: linear-gradient(180deg, rgba(124,58,237,0.15) 0%, transparent 100%);
+    }
+    .mood-emoji-big {
+      font-size: 64px; margin-bottom: 12px;
+      display: block; animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .mood-label-big { font-size: 32px; font-weight: 900; margin-bottom: 4px; }
+    .mood-desc { font-size: 14px; color: var(--text2); margin-bottom: 20px; }
+    .mood-tags { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+    .mood-tag {
+      background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.3);
+      border-radius: 20px; padding: 5px 14px;
+      font-size: 12px; font-weight: 600; color: var(--purple-light);
+    }
+
+    /* Language filter */
+    .lang-filter {
+      padding: 0 24px; margin-bottom: 16px; overflow-x: auto;
+      display: flex; gap: 8px; padding-bottom: 4px;
+    }
+    .lang-filter::-webkit-scrollbar { height: 0; }
+    .lang-chip {
+      flex-shrink: 0; padding: 8px 18px; border-radius: 20px;
+      font-size: 13px; font-weight: 600;
+      background: var(--card); color: var(--text2);
+      border: 1px solid rgba(255,255,255,0.07);
+      transition: all 0.2s;
+    }
+    .lang-chip.active {
+      background: var(--purple); color: #fff;
+      border-color: var(--purple);
+    }
+    .lang-chip:hover { border-color: var(--purple-light); }
+
+    /* Playlist header */
+    .playlist-header {
+      padding: 0 24px; margin-bottom: 16px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .playlist-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .action-chip {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 14px; border-radius: 20px;
+      font-size: 12px; font-weight: 600;
+      border: 1.5px solid; transition: all 0.2s;
+    }
+    .action-chip.green { color: var(--spotify); border-color: var(--spotify); background: rgba(29,185,84,0.08); }
+    .action-chip.green:hover { background: rgba(29,185,84,0.2); }
+    .action-chip.red { color: var(--yt); border-color: var(--yt); background: rgba(255,0,0,0.08); }
+    .action-chip.red:hover { background: rgba(255,0,0,0.2); }
+    .action-chip.share { color: var(--purple-light); border-color: var(--purple-light); background: rgba(124,58,237,0.08); }
+    .action-chip.share:hover { background: rgba(124,58,237,0.2); }
+
+    /* Song cards */
+    .songs-list { padding: 0 24px; display: flex; flex-direction: column; gap: 12px; }
+    .song-card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 14px;
+      transition: all 0.2s;
+    }
+    .song-card:hover { background: var(--card2); border-color: rgba(124,58,237,0.3); }
+    .song-num {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: #fff;
+      flex-shrink: 0;
+    }
+    .song-art {
+      width: 52px; height: 52px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; flex-shrink: 0;
+    }
+    .song-info { flex: 1; min-width: 0; }
+    .song-title {
+      font-size: 14px; font-weight: 700;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-bottom: 2px;
+    }
+    .song-artist {
+      font-size: 12px; color: var(--text2);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-bottom: 4px;
+    }
+    .song-movie { font-size: 11px; color: var(--text3); margin-bottom: 5px; }
+    .song-chips { display: flex; gap: 5px; flex-wrap: wrap; }
+    .song-chip {
+      font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px;
+      background: rgba(255,255,255,0.08); color: var(--text2);
+    }
+    .song-chip.lang { background: rgba(124,58,237,0.15); color: var(--purple-light); }
+    .song-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+    .song-icon-btn {
+      background: none; color: var(--text3); font-size: 18px;
+      width: 34px; height: 34px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .song-icon-btn:hover { color: var(--text); background: rgba(255,255,255,0.08); }
+    .song-icon-btn.liked { color: var(--pink) !important; }
+    .song-icon-btn.yt-play { color: var(--yt); }
+    .song-icon-btn.yt-play:hover { background: rgba(255,0,0,0.1); }
+
+    /* =========== BROWSE MOODS SCREEN =========== */
+    .browse-screen { padding: 0 0 100px; }
+    .moods-grid {
+      padding: 20px 24px; display: grid;
+      grid-template-columns: 1fr 1fr; gap: 12px;
+    }
+    .mood-card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius);
+      padding: 20px 16px;
+      cursor: pointer; transition: all 0.25s;
+      text-align: center;
+    }
+    .mood-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+    .mood-card.selected { border-width: 2px; }
+    .mood-card .mood-emoji { font-size: 36px; margin-bottom: 10px; display: block; }
+    .mood-card .mood-name { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
+    .mood-card .mood-tagline { font-size: 11px; color: var(--text2); line-height: 1.4; }
+
+    /* =========== FAVORITES SCREEN =========== */
+    .favorites-screen { padding: 0 0 100px; }
+    .fav-hero { padding: 36px 24px 20px; text-align: center; }
+    .empty-state {
+      padding: 60px 24px; text-align: center;
+      display: flex; flex-direction: column; align-items: center; gap: 16px;
+    }
+    .empty-icon { font-size: 60px; opacity: 0.3; }
+    .empty-title { font-size: 20px; font-weight: 700; color: var(--text2); }
+    .empty-sub { font-size: 14px; color: var(--text3); }
+
+    /* =========== LOADING =========== */
+    .loading-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(13,13,26,0.9);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 20px;
+    }
+    .loading-spinner {
+      width: 60px; height: 60px; border-radius: 50%;
+      border: 3px solid rgba(124,58,237,0.2);
+      border-top-color: var(--purple);
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 15px; color: var(--text2); font-weight: 500; }
+
+    /* =========== TOAST =========== */
+    .toast {
+      position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+      background: var(--card2); border: 1px solid rgba(124,58,237,0.3);
+      color: var(--text); padding: 12px 20px; border-radius: 30px;
+      font-size: 13px; font-weight: 600; z-index: 300;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; }
+
+    /* =========== SHARE CARD MODAL =========== */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 250;
+      background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+      display: none; align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    .modal-overlay.open { display: flex; }
+    .share-card {
+      background: linear-gradient(135deg, #1a0a3b 0%, #0d1a3a 50%, #1a0a2e 100%);
+      border: 1px solid rgba(124,58,237,0.3);
+      border-radius: 24px; padding: 30px;
+      width: 100%; max-width: 360px; text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+    }
+    .share-card-logo { font-size: 13px; font-weight: 800; color: var(--text3); letter-spacing: 2px; margin-bottom: 20px; }
+    .share-card-emoji { font-size: 72px; margin-bottom: 16px; display: block; }
+    .share-card-mood { font-size: 26px; font-weight: 900; margin-bottom: 6px; }
+    .share-card-song { font-size: 16px; font-weight: 600; color: var(--purple-light); margin-bottom: 4px; }
+    .share-card-artist { font-size: 13px; color: var(--text2); margin-bottom: 24px; }
+    .share-card-tagline { font-size: 12px; color: var(--text3); margin-bottom: 20px; }
+    .share-actions { display: flex; gap: 10px; }
+    .share-action-btn {
+      flex: 1; padding: 12px; border-radius: 20px;
+      font-size: 13px; font-weight: 600;
+    }
+    .share-close {
+      width: 100%; margin-top: 12px;
+      background: none; border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text2); padding: 12px; border-radius: 20px;
+      font-size: 13px; font-weight: 600;
+    }
+    .share-close:hover { background: rgba(255,255,255,0.05); }
+    #player-modal .share-card { padding: 18px; }
+    #player-modal .share-card-logo { color: var(--text2); font-size: 12px; }
+    #player-modal iframe { background: #000; }
+
+    /* =========== SEARCH BAR =========== */
+    .search-wrap { padding: 12px 24px; }
+    .search-bar {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--card); border: 1.5px solid rgba(255,255,255,0.07);
+      border-radius: 12px; padding: 12px 16px;
+    }
+    .search-bar input {
+      flex: 1; background: none; color: var(--text);
+      font-size: 14px;
+    }
+    .search-bar input::placeholder { color: var(--text3); }
+    .search-icon { color: var(--text3); font-size: 16px; }
+
+    /* Responsive improvements */
+    @media (max-width: 360px) {
+      .hero-title { font-size: 36px; }
+      .moods-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ========== LOADING OVERLAY ========== -->
+  <div class="loading-overlay" id="loading" style="display:none">
+    <div class="loading-spinner"></div>
+    <div class="loading-text" id="loading-text">Detecting your mood...</div>
+  </div>
+
+  <!-- ========== TOAST ========== -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ========== SHARE MODAL ========== -->
+  <div class="modal-overlay" id="share-modal">
+    <div class="share-card" id="share-card">
+      <div class="share-card-logo">🎵 SONGSTR</div>
+      <span class="share-card-emoji" id="sc-emoji">😄</span>
+      <div class="share-card-mood" id="sc-mood">Happy</div>
+      <div class="share-card-song" id="sc-song">Vaadi Pulla Vaadi</div>
+      <div class="share-card-artist" id="sc-artist">Anirudh Ravichander</div>
+      <div class="share-card-tagline">Matching my mood with music ✨</div>
+      <div class="share-actions">
+        <button class="share-action-btn btn-primary" onclick="copyShareText()">📋 Copy</button>
+        <button class="share-action-btn btn-primary" onclick="shareNative()">🔗 Share</button>
+      </div>
+      <button class="share-close" onclick="closeShareModal()">Close</button>
+    </div>
+  </div>
+
+  <!-- ========== PLAYER MODAL ========== -->
+  <div class="modal-overlay" id="player-modal">
+    <div class="share-card" id="player-card" style="max-width:720px; padding: 18px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px;">
+        <div>
+          <div class="share-card-logo">▶️ Now Playing</div>
+          <div id="player-title" style="font-size:18px;font-weight:700;margin-top:6px;color:#fff"></div>
+          <div id="player-artist" style="font-size:13px;color:var(--text2);margin-top:4px"></div>
+        </div>
+        <button class="share-close" onclick="closePlayerModal()">Close</button>
+      </div>
+      <div style="position:relative;padding-top:56.25%;">
+        <iframe id="player-iframe" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;border-radius:16px;"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN 1: HOME ==================== -->
+  <div class="screen active" id="screen-home">
+    <nav>
+      <div class="nav-logo" onclick="showScreen('home')">
+        <div class="logo-icon">🎵</div>
+        <span>Song<span class="str">str</span></span>
+      </div>
+      <div class="nav-actions">
+        <button class="nav-icon-btn" onclick="showScreen('search')" title="Search">🔍</button>
+        <button class="nav-icon-btn" onclick="showScreen('favorites')" title="Favorites">♥</button>
+      </div>
+    </nav>
+
+    <div class="hero">
+      <div class="hero-content">
+        <div class="hero-badge"><div class="pulse"></div>AI-Powered Mood Detection</div>
+        <h1 class="hero-title">Music that matches<br><span class="accent">your mood</span></h1>
+        <p class="hero-subtitle">Tell us how you feel through text or voice, and our AI will recommend the perfect playlist for your current emotional state.</p>
+        <div class="hero-btns">
+          <button class="btn-primary" onclick="showScreen('detect')">Detect My Mood →</button>
+          <button class="btn-secondary" onclick="showScreen('browse')">Browse Moods</button>
+        </div>
+      </div>
+
+      <!-- Suggested for you -->
+      <div class="suggested-card" id="suggested-card">
+        <div class="suggested-icon">⚡</div>
+        <div>
+          <div class="suggested-label">⏰ Suggested for you</div>
+          <div class="suggested-title" id="sug-mood">Energetic vibes</div>
+          <div class="suggested-sub" id="sug-reason">Good morning! Start your day right</div>
+        </div>
+        <button class="suggested-play" id="sug-play-btn" onclick="playSuggested()">Play →</button>
+      </div>
+
+      <div class="how-it-works">
+        <h2 class="section-title">How it works</h2>
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="feature-icon">🧠</div>
+            <div>
+              <div class="feature-label">AI Detection</div>
+              <div class="feature-sub">Analyzes your text &amp; voice to detect emotions using natural language processing</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">T</div>
+            <div>
+              <div class="feature-label">Text Input</div>
+              <div class="feature-sub">Type how you're feeling in your own words — the AI understands context</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🎤</div>
+            <div>
+              <div class="feature-label">Voice Input</div>
+              <div class="feature-sub">Speak and let AI understand your mood from what you say</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">📷</div>
+            <div>
+              <div class="feature-label">Face Detection</div>
+              <div class="feature-sub">Camera reads your facial expression to detect emotion in real-time</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🎵</div>
+            <div>
+              <div class="feature-label">Smart Playlists</div>
+              <div class="feature-sub">Get personalized song recommendations in Tamil, Telugu, Malayalam, Hindi, English &amp; more</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="bnav-item active" onclick="showScreen('home')"><div class="icon">🏠</div>Home</div>
+      <div class="bnav-item" onclick="showScreen('detect')"><div class="icon">🎤</div>Detect</div>
+      <div class="bnav-item" onclick="showScreen('browse')"><div class="icon">⏱</div>Browse</div>
+      <div class="bnav-item" onclick="showScreen('favorites')"><div class="icon">♥</div>Saved</div>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN 2: DETECT ==================== -->
+  <div class="screen" id="screen-detect">
+    <nav>
+      <div class="nav-logo" onclick="showScreen('home')">
+        <div class="logo-icon">🎵</div>
+        <span>Song<span class="str">str</span></span>
+      </div>
+    </nav>
+
+    <div class="detect-screen">
+      <div class="detect-hero">
+        <h1 class="detect-title">How are you feeling?</h1>
+        <p class="detect-sub">Express yourself through text, voice, or let the camera read your face expression</p>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" id="tab-text" onclick="switchTab('text')">T Text</button>
+        <button class="tab-btn" id="tab-voice" onclick="switchTab('voice')">🎤 Voice</button>
+        <button class="tab-btn" id="tab-face" onclick="switchTab('face')">📷 Face</button>
+      </div>
+
+      <!-- Text Panel -->
+      <div id="panel-text" class="input-section">
+        <textarea class="mood-textarea" id="mood-text" placeholder="Tell me how you're feeling... e.g. 'I had an amazing day!' or 'I feel so stressed about work'"></textarea>
+        <button class="analyze-btn" onclick="analyzeMoodFromText()">✈ Analyze My Mood</button>
+      </div>
+
+      <!-- Voice Panel -->
+      <div id="panel-voice" class="voice-section" style="display:none">
+        <button class="mic-btn" id="mic-btn" onclick="toggleRecording()">🎤</button>
+        <div class="voice-status" id="voice-status">Tap to start speaking</div>
+        <div class="voice-transcript" id="voice-transcript">Your words will appear here...</div>
+        <button class="analyze-btn" style="margin-top:14px" onclick="analyzeVoiceText()">✈ Analyze My Mood</button>
+      </div>
+
+      <!-- Face Panel -->
+      <div id="panel-face" class="face-section" style="display:none">
+        <div class="camera-container">
+          <video id="camera-video" autoplay muted playsinline style="display:none;width:100%;height:100%;object-fit:cover;border-radius:16px;"></video>
+          <div class="camera-overlay" id="camera-overlay">
+            <div class="camera-scan">😐</div>
+            <p>Camera will analyze your expression</p>
+          </div>
+        </div>
+        <button class="start-camera-btn" id="start-camera-btn" onclick="startCamera()">📷 Start Camera Analysis</button>
+        <button class="analyze-btn" id="analyze-face-btn" style="display:none;margin-top:8px" onclick="analyzeFace()">📷 Analyze My Expression</button>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="bnav-item" onclick="showScreen('home')"><div class="icon">🏠</div>Home</div>
+      <div class="bnav-item active" onclick="showScreen('detect')"><div class="icon">🎤</div>Detect</div>
+      <div class="bnav-item" onclick="showScreen('browse')"><div class="icon">⏱</div>Browse</div>
+      <div class="bnav-item" onclick="showScreen('favorites')"><div class="icon">♥</div>Saved</div>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN 3: RESULTS ==================== -->
+  <div class="screen" id="screen-results">
+    <nav>
+      <div class="nav-logo" onclick="showScreen('home')">
+        <div class="logo-icon">🎵</div>
+        <span>Song<span class="str">str</span></span>
+      </div>
+      <div class="nav-actions">
+        <button class="nav-btn" onclick="showScreen('detect')">← Back</button>
+      </div>
+    </nav>
+
+    <div class="result-screen">
+      <div class="result-hero">
+        <span class="mood-emoji-big" id="res-emoji">😄</span>
+        <div class="mood-label-big" id="res-mood">Happy Vibes</div>
+        <div class="mood-desc" id="res-desc">Upbeat and joyful vibes</div>
+        <div class="mood-tags" id="res-tags">
+          <span class="mood-tag">Pop</span>
+          <span class="mood-tag">Dance</span>
+          <span class="mood-tag">Funk</span>
+          <span class="mood-tag">Disco</span>
+        </div>
+      </div>
+
+      <div class="playlist-header">
+        <div class="playlist-actions">
+          <button class="action-chip share" onclick="openShareModal()">🔗 Share Vibe</button>
+          <button class="action-chip green" onclick="openSpotifySearch()">🎵 Spotify</button>
+          <button class="action-chip" style="border-color:var(--text3);color:var(--text2)" onclick="refreshSongs()">↻ Refresh</button>
+        </div>
+      </div>
+
+      <div class="lang-filter" id="lang-filter">
+        <button class="lang-chip active" onclick="filterLang('All', this)">All</button>
+      </div>
+
+      <div class="songs-list" id="songs-list">
+        <!-- Songs injected here -->
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="bnav-item" onclick="showScreen('home')"><div class="icon">🏠</div>Home</div>
+      <div class="bnav-item active" onclick="showScreen('detect')"><div class="icon">🎤</div>Detect</div>
+      <div class="bnav-item" onclick="showScreen('browse')"><div class="icon">⏱</div>Browse</div>
+      <div class="bnav-item" onclick="showScreen('favorites')"><div class="icon">♥</div>Saved</div>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN 4: BROWSE MOODS ==================== -->
+  <div class="screen" id="screen-browse">
+    <nav>
+      <div class="nav-logo" onclick="showScreen('home')">
+        <div class="logo-icon">🎵</div>
+        <span>Song<span class="str">str</span></span>
+      </div>
+    </nav>
+
+    <div class="browse-screen">
+      <div style="padding: 28px 24px 8px">
+        <h1 class="section-title" style="text-align:left">Browse Moods</h1>
+        <p style="font-size:13px;color:var(--text2)">Choose a mood to get instant recommendations</p>
+      </div>
+      <div class="moods-grid" id="moods-grid">
+        <!-- Mood cards injected here -->
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="bnav-item" onclick="showScreen('home')"><div class="icon">🏠</div>Home</div>
+      <div class="bnav-item" onclick="showScreen('detect')"><div class="icon">🎤</div>Detect</div>
+      <div class="bnav-item active" onclick="showScreen('browse')"><div class="icon">⏱</div>Browse</div>
+      <div class="bnav-item" onclick="showScreen('favorites')"><div class="icon">♥</div>Saved</div>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN 5: FAVORITES ==================== -->
+  <div class="screen" id="screen-favorites">
+    <nav>
+      <div class="nav-logo" onclick="showScreen('home')">
+        <div class="logo-icon">🎵</div>
+        <span>Song<span class="str">str</span></span>
+      </div>
+    </nav>
+
+    <div class="favorites-screen">
+      <div class="fav-hero">
+        <h1 style="font-size:26px;font-weight:900;margin-bottom:4px">♥ Saved Songs</h1>
+        <p style="font-size:13px;color:var(--text2)">Your personal mood-matched collection</p>
+      </div>
+      <div class="songs-list" id="fav-songs-list">
+        <div class="empty-state">
+          <div class="empty-icon">💔</div>
+          <div class="empty-title">No saved songs yet</div>
+          <div class="empty-sub">Tap the heart icon on any song to save it here</div>
+          <button class="btn-primary" onclick="showScreen('detect')" style="margin-top:8px">Discover Music</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="bnav-item" onclick="showScreen('home')"><div class="icon">🏠</div>Home</div>
+      <div class="bnav-item" onclick="showScreen('detect')"><div class="icon">🎤</div>Detect</div>
+      <div class="bnav-item" onclick="showScreen('browse')"><div class="icon">⏱</div>Browse</div>
+      <div class="bnav-item active" onclick="showScreen('favorites')"><div class="icon">♥</div>Saved</div>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN 6: SEARCH ==================== -->
+  <div class="screen" id="screen-search">
+    <nav>
+      <div class="nav-logo" onclick="showScreen('home')">
+        <div class="logo-icon">🎵</div>
+        <span>Song<span class="str">str</span></span>
+      </div>
+      <div class="nav-actions">
+        <button class="nav-btn" onclick="showScreen('home')">✕</button>
+      </div>
+    </nav>
+    <div style="padding:0 0 100px">
+      <div style="padding:20px 24px 8px">
+        <h2 style="font-size:22px;font-weight:800;margin-bottom:4px">Search Songs</h2>
+        <p style="font-size:13px;color:var(--text2)">Find any song across all moods and languages</p>
+      </div>
+      <div class="search-wrap">
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-input" placeholder="Search songs, artists, movies..." oninput="searchSongs(this.value)" />
+        </div>
+      </div>
+      <div class="songs-list" id="search-results">
+        <div class="empty-state">
+          <div class="empty-icon">🔍</div>
+          <div class="empty-title">Start typing to search</div>
+          <div class="empty-sub">Find songs across Tamil, Hindi, English, Telugu and more</div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <div class="bnav-item" onclick="showScreen('home')"><div class="icon">🏠</div>Home</div>
+      <div class="bnav-item" onclick="showScreen('detect')"><div class="icon">🎤</div>Detect</div>
+      <div class="bnav-item" onclick="showScreen('browse')"><div class="icon">⏱</div>Browse</div>
+      <div class="bnav-item" onclick="showScreen('favorites')"><div class="icon">♥</div>Saved</div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+const API = ''; // same origin
+let currentMood = 'happy';
+let currentLang = 'All';
+let currentSongs = [];
+let renderedSongs = [];
+let searchResults = [];
+let favorites = [];
+try {
+  favorites = JSON.parse(localStorage.getItem('songstr_fav') || '[]');
+  if (!Array.isArray(favorites)) favorites = [];
+} catch (error) {
+  favorites = [];
+}
+let mediaStream = null;
+let isRecording = false;
+let recognition = null;
+let voiceText = '';
+let shareData = {};
+
+const MOOD_COLORS = {
+  happy: '#f59e0b', sad: '#60a5fa', angry: '#ef4444',
+  relaxed: '#34d399', energetic: '#f97316',
+  stressed: '#a78bfa', romantic: '#ec4899', neutral: '#94a3b8'
+};
+const MOOD_GENRES = {
+  happy: ['Pop', 'Dance', 'Funk', 'Disco'],
+  sad: ['Soft', 'Acoustic', 'Melody'],
+  angry: ['Rock', 'Metal', 'Intense'],
+  relaxed: ['Lo-fi', 'Ambient', 'Classical'],
+  energetic: ['Dance', 'Hip-Hop', 'Electronic'],
+  stressed: ['Calm', 'Meditation', 'Nature'],
+  romantic: ['Melody', 'Soul', 'Ballad'],
+  neutral: ['Pop', 'All Genres']
+};
+const MOOD_EMOJIS = {
+  happy:'😄', sad:'😢', angry:'😠', relaxed:'😌',
+  energetic:'⚡', stressed:'😰', romantic:'💕', neutral:'😐'
+};
+const MOOD_LABELS = {
+  happy:'Happy Vibes', sad:'Sad Songs', angry:'Intense Mode',
+  relaxed:'Chill Zone', energetic:'Energy Boost',
+  stressed:'Stress Relief', romantic:'Romantic', neutral:'Everyday Mix'
+};
+const SONG_ART_COLORS = [
+  'linear-gradient(135deg,#7c3aed,#4f46e5)',
+  'linear-gradient(135deg,#0ea5e9,#6366f1)',
+  'linear-gradient(135deg,#f59e0b,#ef4444)',
+  'linear-gradient(135deg,#10b981,#0ea5e9)',
+  'linear-gradient(135deg,#ec4899,#8b5cf6)',
+  'linear-gradient(135deg,#f97316,#eab308)',
+  'linear-gradient(135deg,#06b6d4,#3b82f6)',
+  'linear-gradient(135deg,#84cc16,#22c55e)',
+];
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.querySelectorAll('.bnav-item').forEach(item => {
+    const target = item.getAttribute('onclick') || '';
+    item.classList.toggle('active', target.includes(`showScreen('${name}')`));
+  });
+  window.scrollTo(0, 0);
+  if (name === 'favorites') renderFavorites();
+  if (name === 'browse') renderMoodGrid();
+  if (name === 'home') fetchSuggestedMood();
+}
+
+// ============================================================
+// HOME: TIME-BASED SUGGESTION
+// ============================================================
+async function fetchSuggestedMood() {
+  try {
+    const r = await fetch('/api/suggest-mood');
+    const d = await r.json();
+    document.getElementById('sug-mood').textContent = MOOD_LABELS[d.mood];
+    document.getElementById('sug-reason').textContent = d.reason;
+    document.getElementById('sug-play-btn').dataset.mood = d.mood;
+  } catch(e) {
+    // offline fallback
+    const h = new Date().getHours();
+    const m = h < 9 ? 'energetic' : h < 18 ? 'happy' : 'relaxed';
+    document.getElementById('sug-mood').textContent = MOOD_LABELS[m];
+    document.getElementById('sug-play-btn').dataset.mood = m;
+  }
+}
+
+function playSuggested() {
+  const mood = document.getElementById('sug-play-btn').dataset.mood || 'happy';
+  loadMoodResults(mood);
+}
+
+// ============================================================
+// TAB SWITCHING
+// ============================================================
+function switchTab(name) {
+  if (name !== 'voice' && isRecording) {
+    stopRecording();
+  }
+  ['text','voice','face'].forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('active', t === name);
+    document.getElementById('panel-' + t).style.display = t === name ? (t === 'text' ? 'block' : 'flex') : 'none';
+  });
+  document.getElementById('panel-text').style.display = name === 'text' ? 'block' : 'none';
+  document.getElementById('panel-voice').style.display = name === 'voice' ? 'flex' : 'none';
+  document.getElementById('panel-face').style.display = name === 'face' ? 'block' : 'none';
+  if (name !== 'face' && mediaStream) {
+    mediaStream.getTracks().forEach(t => t.stop());
+    mediaStream = null;
+    document.getElementById('camera-video').style.display = 'none';
+    document.getElementById('camera-overlay').style.display = 'flex';
+    document.getElementById('analyze-face-btn').style.display = 'none';
+    document.getElementById('start-camera-btn').style.display = 'flex';
+  }
+}
+
+// ============================================================
+// TEXT MOOD DETECTION
+// ============================================================
+async function analyzeMoodFromText() {
+  const text = document.getElementById('mood-text').value.trim();
+  if (!text) { showToast('Please enter how you feel'); return; }
+  showLoading('Analyzing your mood...');
+  try {
+    const r = await fetch('/api/detect-mood', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    });
+    const d = await r.json();
+    hideLoading();
+    loadMoodResults(d.mood);
+  } catch(e) {
+    hideLoading();
+    // Fallback offline detection
+    const mood = detectMoodOffline(text);
+    loadMoodResults(mood);
+  }
+}
+
+function detectMoodOffline(text) {
+  const t = text.toLowerCase();
+  const checks = {
+    happy: ['happy','joy','excited','great','amazing','good','wonderful','cheerful','awesome','love'],
+    sad: ['sad','cry','depressed','heartbroken','lonely','miss','grief','unhappy','hurt'],
+    angry: ['angry','mad','furious','hate','frustrated','rage','irritated','annoyed'],
+    relaxed: ['calm','relaxed','peaceful','chill','serene','quiet','content'],
+    energetic: ['energetic','pumped','motivated','workout','gym','run','energy'],
+    stressed: ['stressed','anxious','worried','tense','overwhelmed','pressure','exhausted'],
+    romantic: ['love','romantic','heart','crush','affection','date','kiss','relationship'],
+  };
+  for (const [mood, kws] of Object.entries(checks)) {
+    if (kws.some(kw => t.includes(kw))) return mood;
+  }
+  return 'neutral';
+}
+
+// ============================================================
+// VOICE DETECTION
+// ============================================================
+function toggleRecording() {
+  if (isRecording) stopRecording();
+  else startRecording();
+}
+
+function startRecording() {
+  if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+    showToast('Voice not supported on this browser');
+    return;
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.continuous = false; recognition.interimResults = true; recognition.lang = 'en-US';
+  recognition.onstart = () => {
+    isRecording = true;
+    document.getElementById('mic-btn').classList.add('recording');
+    document.getElementById('mic-btn').textContent = '⏹';
+    document.getElementById('voice-status').textContent = 'Listening... speak now';
+  };
+  recognition.onresult = (e) => {
+    let t = '';
+    for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+    voiceText = t;
+    document.getElementById('voice-transcript').textContent = t;
+  };
+  recognition.onerror = () => stopRecording();
+  recognition.onend = () => stopRecording();
+  recognition.start();
+}
+
+function stopRecording() {
+  isRecording = false;
+  if (recognition) recognition.stop();
+  document.getElementById('mic-btn').classList.remove('recording');
+  document.getElementById('mic-btn').textContent = '🎤';
+  document.getElementById('voice-status').textContent = 'Tap to start speaking';
+}
+
+async function analyzeVoiceText() {
+  const text = voiceText || document.getElementById('voice-transcript').textContent;
+  if (!text || text === 'Your words will appear here...') {
+    showToast('Please record your voice first');
+    return;
+  }
+  showLoading('Analyzing voice mood...');
+  try {
+    const r = await fetch('/api/detect-mood', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    });
+    const d = await r.json();
+    hideLoading();
+    if (!d || !d.mood) throw new Error('Invalid mood response');
+    loadMoodResults(d.mood);
+  } catch (e) {
+    hideLoading();
+    loadMoodResults(detectMoodOffline(text));
+  }
+}
+
+// ============================================================
+// FACE DETECTION
+// ============================================================
+async function startCamera() {
+  try {
+    mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+    const video = document.getElementById('camera-video');
+    video.srcObject = mediaStream;
+    video.muted = true;
+    video.play().catch(e => console.error('Video play error:', e));
+    video.style.display = 'block';
+    document.getElementById('camera-overlay').style.display = 'none';
+    document.getElementById('start-camera-btn').style.display = 'none';
+    document.getElementById('analyze-face-btn').style.display = 'flex';
+    showToast('📷 Camera started — face the camera and click Analyze');
+  } catch(e) {
+    console.error('Camera error:', e);
+    showToast('📷 Camera access denied. Try text mode.');
+  }
+}
+
+function analyzeFace() {
+  // Simulate AI face analysis with random emotion (for demo - real app uses TensorFlow backend)
+  const moods = ['happy', 'sad', 'neutral', 'energetic', 'relaxed'];
+  const detected = moods[Math.floor(Math.random() * moods.length)];
+  showLoading('Analyzing your expression...');
+  setTimeout(() => {
+    hideLoading();
+    showToast(`Expression detected: ${detected.toUpperCase()}`);
+    loadMoodResults(detected);
+  }, 2000);
+}
+
+// ============================================================
+// LOAD MOOD RESULTS
+// ============================================================
+async function loadMoodResults(mood) {
+  currentMood = mood;
+  currentLang = 'All';
+  showLoading('Finding perfect songs...');
+  showScreen('results');
+
+  // Update result header
+  document.getElementById('res-emoji').textContent = MOOD_EMOJIS[mood] || '🎵';
+  document.getElementById('res-mood').textContent = MOOD_LABELS[mood] || mood;
+  document.getElementById('res-desc').textContent = getMoodDesc(mood);
+  const tags = MOOD_GENRES[mood] || ['Music'];
+  document.getElementById('res-tags').innerHTML = tags.map(t => `<span class="mood-tag">${t}</span>`).join('');
+
+  // Build language filter
+  await buildLangFilter(mood);
+
+  // Load songs
+  await loadSongs(mood, 'All');
+  hideLoading();
+}
+
+async function buildLangFilter(mood) {
+  try {
+    const r = await fetch(`/api/languages?mood=${mood}`);
+    const d = await r.json();
+    const filter = document.getElementById('lang-filter');
+    filter.innerHTML = d.languages.map((l, i) =>
+      `<button class="lang-chip ${i === 0 ? 'active' : ''}" onclick="filterLang('${l}', this)">${l}</button>`
+    ).join('');
+  } catch(e) {
+    const langs = ['All','Tamil','Hindi','English','Telugu','Malayalam','Kannada','Bengali','Korean'];
+    const filter = document.getElementById('lang-filter');
+    filter.innerHTML = langs.map((l, i) =>
+      `<button class="lang-chip ${i === 0 ? 'active' : ''}" onclick="filterLang('${l}', this)">${l}</button>`
+    ).join('');
+  }
+}
+
+async function loadSongs(mood, lang) {
+  try {
+    const r = await fetch(`/api/songs?mood=${mood}&lang=${encodeURIComponent(lang)}`);
+    const d = await r.json();
+    currentSongs = d.songs;
+    renderSongs(currentSongs, 'songs-list');
+  } catch(e) {
+    renderSongs(getFallbackSongs(mood, lang), 'songs-list');
+  }
+}
+
+function filterLang(lang, el) {
+  currentLang = lang;
+  document.querySelectorAll('#lang-filter .lang-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  showLoading('Loading songs...');
+  loadSongs(currentMood, lang).then(() => hideLoading());
+}
+
+async function refreshSongs() {
+  showLoading('Refreshing playlist...');
+  await loadSongs(currentMood, currentLang);
+  hideLoading();
+  showToast('Playlist refreshed!');
+}
+
+// ============================================================
+// RENDER SONGS
+// ============================================================
+function renderSongs(songs, containerId) {
+  const el = document.getElementById(containerId);
+  const color = MOOD_COLORS[currentMood] || '#7c3aed';
+  if (!songs || songs.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">🎵</div><div class="empty-title">No songs found</div><div class="empty-sub">Try a different language filter</div></div>`;
+    return;
+  }
+  renderedSongs = songs.slice(0, 20);
+  el.innerHTML = renderedSongs.map((song, i) => {
+    const artColor = SONG_ART_COLORS[i % SONG_ART_COLORS.length];
+    const isFav = favorites.some(f => f.title === song.title && f.artist === song.artist);
+    const spotifyQuery = encodeURIComponent(`${song.title} ${song.artist}`);
+    return `
+    <div class="song-card" id="card-${i}" onclick='playSongByIndex(${i})'>
+      <div class="song-num" style="background:${color}22;color:${color}">${String(i+1).padStart(2,'0')}</div>
+      <div class="song-art" style="background:${artColor}">🎵</div>
+      <div class="song-info">
+        <div class="song-title">${song.title}</div>
+        <div class="song-artist">${song.artist}</div>
+        <div class="song-movie">${song.movie}</div>
+        <div class="song-chips">
+          <span class="song-chip">${song.genre || 'Music'}</span>
+          <span class="song-chip">${song.year}</span>
+          ${song.language ? `<span class="song-chip lang">${song.language}</span>` : ''}
+        </div>
+      </div>
+      <div class="song-actions">
+        <button class="song-icon-btn ${isFav ? 'liked' : ''}" onclick='event.stopPropagation(); toggleFav(this, ${JSON.stringify(song)})' title="Save to favorites">
+          ${isFav ? '♥' : '♡'}
+        </button>
+        <button class="song-icon-btn yt-play" onclick='event.stopPropagation(); playSongByIndex(${i})' title="Play song">▶</button>
+        <a href="https://open.spotify.com/search/${spotifyQuery}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+          <button class="song-icon-btn" style="color:var(--spotify);font-size:14px" title="Find on Spotify">🎵</button>
+        </a>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Store first song for share
+  if (renderedSongs.length > 0) {
+    shareData = { song: renderedSongs[0], mood: currentMood };
+  }
+}
+
+// ============================================================
+// FAVORITES
+// ============================================================
+function toggleFav(btn, song) {
+  const idx = favorites.findIndex(f => f.title === song.title && f.artist === song.artist);
+  if (idx >= 0) {
+    favorites.splice(idx, 1);
+    btn.textContent = '♡';
+    btn.classList.remove('liked');
+    showToast('Removed from favorites');
+  } else {
+    favorites.push(song);
+    btn.textContent = '♥';
+    btn.classList.add('liked');
+    showToast('♥ Saved to favorites!');
+  }
+  localStorage.setItem('songstr_fav', JSON.stringify(favorites));
+}
+
+function renderFavorites() {
+  const el = document.getElementById('fav-songs-list');
+  if (favorites.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">💔</div><div class="empty-title">No saved songs yet</div><div class="empty-sub">Tap the heart icon on any song to save it here</div><button class="btn-primary" onclick="showScreen('detect')" style="margin-top:8px">Discover Music</button></div>`;
+    return;
+  }
+  el.innerHTML = favorites.map((song, i) => {
+    const artColor = SONG_ART_COLORS[i % SONG_ART_COLORS.length];
+    return `
+    <div class="song-card" onclick='playSongFavorite(${i})'>
+      <div class="song-num" style="background:rgba(236,72,153,0.15);color:#ec4899">${String(i+1).padStart(2,'0')}</div>
+      <div class="song-art" style="background:${artColor}">🎵</div>
+      <div class="song-info">
+        <div class="song-title">${song.title}</div>
+        <div class="song-artist">${song.artist}</div>
+        <div class="song-movie">${song.movie || ''}</div>
+        <div class="song-chips">
+          <span class="song-chip">${song.genre || 'Music'}</span>
+          ${song.language ? `<span class="song-chip lang">${song.language}</span>` : ''}
+        </div>
+      </div>
+      <div class="song-actions">
+        <button class="song-icon-btn liked" onclick='event.stopPropagation(); removeFav(this, ${i})' title="Remove">♥</button>
+        <button class="song-icon-btn yt-play" onclick='event.stopPropagation(); playSongFavorite(${i})' title="Play song">▶</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function removeFav(btn, idx) {
+  favorites.splice(idx, 1);
+  localStorage.setItem('songstr_fav', JSON.stringify(favorites));
+  renderFavorites();
+  showToast('Removed from favorites');
+}
+
+// ============================================================
+// BROWSE MOODS GRID
+// ============================================================
+async function renderMoodGrid() {
+  let moods;
+  try {
+    const r = await fetch('/api/moods');
+    const d = await r.json();
+    moods = d.moods;
+  } catch(e) {
+    moods = Object.entries(MOOD_EMOJIS).map(([id, emoji]) => ({
+      id, emoji, label: id.charAt(0).toUpperCase() + id.slice(1),
+      description: getMoodDesc(id), color: MOOD_COLORS[id]
+    }));
+  }
+  const grid = document.getElementById('moods-grid');
+  grid.innerHTML = moods.map(m => `
+    <div class="mood-card" style="border-color: ${m.color}22" onclick="loadMoodResults('${m.id}')">
+      <span class="mood-emoji">${m.emoji}</span>
+      <div class="mood-name" style="color:${m.color}">${m.label}</div>
+      <div class="mood-tagline">${m.description}</div>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// SEARCH
+// ============================================================
+let searchTimeout;
+async function searchSongs(q) {
+  clearTimeout(searchTimeout);
+  if (q.length < 2) {
+    document.getElementById('search-results').innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">Start typing to search</div></div>`;
+    return;
+  }
+  searchTimeout = setTimeout(async () => {
+    try {
+      const r = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+      const d = await r.json();
+      if (d.results.length === 0) {
+        document.getElementById('search-results').innerHTML = `<div class="empty-state"><div class="empty-icon">🎵</div><div class="empty-title">No results for "${q}"</div></div>`;
+        searchResults = [];
+        return;
+      }
+      searchResults = d.results.slice(0, 20);
+      const el = document.getElementById('search-results');
+      el.innerHTML = searchResults.map((song, i) => {
+        return `
+        <div class="song-card" onclick='playSongSearch(${i})'>
+          <div class="song-num" style="background:rgba(124,58,237,0.15);color:var(--purple-light)">${String(i+1).padStart(2,'0')}</div>
+          <div class="song-art" style="background:${SONG_ART_COLORS[i%8]}">🎵</div>
+          <div class="song-info">
+            <div class="song-title">${song.title}</div>
+            <div class="song-artist">${song.artist}</div>
+            <div class="song-movie">${song.movie}</div>
+            <div class="song-chips">
+              <span class="song-chip">${song.mood}</span>
+              <span class="song-chip lang">${song.language}</span>
+            </div>
+          </div>
+          <div class="song-actions">
+            <button class="song-icon-btn yt-play" onclick='event.stopPropagation(); playSongSearch(${i})'>▶</button>
+          </div>
+        </div>`;
+      }).join('');
+    } catch(e) {
+      showToast('Search unavailable offline');
+    }
+  }, 300);
+}
+
+// ============================================================
+// SPOTIFY + YOUTUBE
+// ============================================================
+function openSpotifySearch() {
+  const q = encodeURIComponent(`${currentMood} mood ${currentLang !== 'All' ? currentLang : ''}`);
+  window.open(`https://open.spotify.com/search/${q}`, '_blank');
+}
+
+// ============================================================
+// SHARE MODAL
+// ============================================================
+function openShareModal() {
+  const song = currentSongs[0];
+  if (!song) { showToast('No song to share'); return; }
+  document.getElementById('sc-emoji').textContent = MOOD_EMOJIS[currentMood] || '🎵';
+  document.getElementById('sc-mood').textContent = MOOD_LABELS[currentMood];
+  document.getElementById('sc-song').textContent = song.title;
+  document.getElementById('sc-artist').textContent = song.artist;
+  document.getElementById('share-modal').classList.add('open');
+}
+
+function closeShareModal() {
+  document.getElementById('share-modal').classList.remove('open');
+}
+
+function copyShareText() {
+  const song = currentSongs[0];
+  const text = `🎵 Songstr – My current vibe: ${MOOD_LABELS[currentMood]} ${MOOD_EMOJIS[currentMood]}\nNow playing: ${song?.title} - ${song?.artist}\n#Songstr #MoodMusic`;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text)
+      .then(() => showToast('Copied to clipboard!'))
+      .catch(() => showToast('Unable to copy to clipboard'));
+  } else {
+    showToast('Clipboard not available');
+  }
+  closeShareModal();
+}
+
+function shareNative() {
+  const song = currentSongs[0];
+  const text = `🎵 My mood on Songstr: ${MOOD_LABELS[currentMood]} ${MOOD_EMOJIS[currentMood]}\nNow playing: ${song?.title} - ${song?.artist}`;
+  if (navigator.share) {
+    navigator.share({ title: 'Songstr', text, url: window.location.href });
+  } else {
+    copyShareText();
+  }
+  closeShareModal();
+}
+
+function playSongByIndex(index) {
+  const song = renderedSongs[index];
+  if (!song) return;
+  playSong(song);
+}
+
+function playSongFavorite(index) {
+  const song = favorites[index];
+  if (!song) return;
+  playSong(song);
+}
+
+function playSongSearch(index) {
+  const song = searchResults[index];
+  if (!song) return;
+  playSong(song);
+}
+
+function playSong(song) {
+  const title = song.title || 'Songstr track';
+  const artist = song.artist || '';
+  const query = encodeURIComponent(`${title} ${artist}`);
+  document.getElementById('player-title').textContent = title;
+  document.getElementById('player-artist').textContent = artist;
+  const ytUrl = `https://www.youtube.com/results?search_query=${query}`;
+  window.open(ytUrl, 'youtube-player', 'width=1200,height=700');
+  showToast(`🎵 Playing: ${title}`);
+}
+
+function closePlayerModal() {
+  document.getElementById('player-modal').classList.remove('open');
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function getMoodDesc(mood) {
+  const d = { happy:'Upbeat and joyful vibes', sad:'Soulful and emotional music', angry:'Intense and powerful sounds', relaxed:'Calm and soothing tunes', energetic:'High-energy beats', stressed:'Stress-relief soundscapes', romantic:'Romantic and passionate', neutral:'Versatile everyday mix' };
+  return d[mood] || 'Personalized music picks';
+}
+
+function getFallbackSongs(mood, lang) {
+  return [
+    { title: 'Vaadi Pulla Vaadi', artist: 'Anirudh Ravichander', movie: 'Maari', year: 2015, genre: 'Pop', language: 'Tamil' },
+    { title: 'Happy', artist: 'Pharrell Williams', movie: 'Despicable Me 2', year: 2013, genre: 'Pop', language: 'English' },
+    { title: 'Tum Hi Ho', artist: 'Arijit Singh', movie: 'Aashiqui 2', year: 2013, genre: 'Melody', language: 'Hindi' },
+  ];
+}
+
+function showLoading(text) {
+  document.getElementById('loading-text').textContent = text || 'Loading...';
+  document.getElementById('loading').style.display = 'flex';
+}
+function hideLoading() { document.getElementById('loading').style.display = 'none'; }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  fetchSuggestedMood();
+});
+</script>
+</body>
+</html>
