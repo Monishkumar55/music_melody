@@ -1,5 +1,12 @@
 module.exports = [
   {
+    ignores: [
+      "**/mochawesome-report/**",
+      "**/coverage/**",
+      "**/node_modules/**"
+    ]
+  },
+  {
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "commonjs",
