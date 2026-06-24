@@ -95,6 +95,46 @@
     .auth-toggle span { color: var(--accent-light); cursor: pointer; font-weight: 600; }
     .auth-toggle span:hover { text-decoration: underline; }
 
+    
+    /* =========== AUTH MODAL =========== */
+    .auth-modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+      z-index: 1000; display: none; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .auth-modal-overlay.active { display: flex; opacity: 1; }
+    .auth-modal {
+      background: var(--card); border: 1px solid var(--glass-border);
+      border-radius: var(--radius); padding: 30px; width: 90%; max-width: 400px;
+      box-shadow: var(--shadow); position: relative;
+      transform: translateY(20px); transition: transform 0.3s;
+    }
+    .auth-modal-overlay.active .auth-modal { transform: translateY(0); }
+    .auth-close {
+      position: absolute; top: 15px; right: 15px; background: none; border: none;
+      color: var(--text2); font-size: 24px; cursor: pointer; padding: 5px;
+    }
+    .auth-close:hover { color: var(--text); }
+    .auth-title { font-size: 24px; font-weight: 700; margin-bottom: 20px; text-align: center; }
+    .auth-input {
+      width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-sm); padding: 14px; color: var(--text);
+      font-size: 15px; margin-bottom: 15px; transition: border 0.3s;
+    }
+    .auth-input:focus { border-color: var(--accent); }
+    .auth-btn-submit {
+      width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; padding: 14px; border-radius: var(--radius-sm); font-size: 16px; font-weight: 600;
+      margin-top: 10px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .auth-btn-submit:hover { transform: translateY(-2px); box-shadow: var(--shadow-glow); }
+    .auth-toggle {
+      text-align: center; margin-top: 20px; font-size: 14px; color: var(--text2);
+    }
+    .auth-toggle span { color: var(--accent-light); cursor: pointer; font-weight: 600; }
+    .auth-toggle span:hover { text-decoration: underline; }
+
     /* =========== SCROLLBAR =========== */
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -675,6 +715,23 @@
 </head>
 <body>
 <div class="app">
+
+  <!-- Auth Modal -->
+  <div class="auth-modal-overlay" id="auth-modal">
+    <div class="auth-modal">
+      <button class="auth-close" onclick="closeAuthModal()">×</button>
+      <div class="auth-title" id="auth-title">Welcome Back</div>
+      <form id="auth-form" onsubmit="submitAuth(event)">
+        <input type="text" id="auth-username" class="auth-input" placeholder="Username (min 3 chars)" required minlength="3">
+        <input type="password" id="auth-password" class="auth-input" placeholder="Password (min 5 chars)" required minlength="5">
+        <button type="submit" class="auth-btn-submit" id="auth-submit-btn">Login</button>
+      </form>
+      <div class="auth-toggle" id="auth-toggle-text">
+        Don't have an account? <span onclick="toggleAuthMode()">Register</span>
+      </div>
+    </div>
+  </div>
+
 
   <!-- Auth Modal -->
   <div class="auth-modal-overlay" id="auth-modal">

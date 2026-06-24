@@ -10,7 +10,10 @@
     "test:coverage": "nyc --reporter=html --reporter=text mocha test/**/*.test.js --exit",
     "test:reports": "mocha test/**/*.test.js --reporter mochawesome --reporter-options reportDir=mochawesome-report --exit",
     "test:junit": "mocha test/**/*.test.js --reporter mocha-junit-reporter --reporter-options mochaFile=test-results.xml --exit",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "build": "node update_frontend.js",
+    "test:integration": "mocha test/**/*.test.js --exit",
+    "test:e2e": "python ../run_validation.py"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
