@@ -1,4 +1,7 @@
-const express = require('express');
+const fs = require('fs');
+const path = require('path');
+
+const content = `const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
@@ -13,12 +16,12 @@ app.use(cors({
   methods: ['GET', 'POST', 'DELETE'],
   credentials: true
 }));
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const db = new Database('database.sqlite');
-db.exec(`
+db.exec(\`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
@@ -30,7 +33,7 @@ db.exec(`
     song_json TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
   );
-`);
+\`);
 
 const JWT_SECRET = process.env.JWT_SECRET || 'songstr-super-secret-key';
 
@@ -322,9 +325,9 @@ if (fs.existsSync(audioDir)) {
   const slugify = (str) => String(str).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
   
   for (const file of files) {
-    if (file.match(/.(mp3|m4a|wav)$/i)) {
-      let cleanName = file.replace(/.(mp3|m4a|wav)$/i, '').replace(/-MassTamilan.*?$/i, '').replace(/_MassTamilan.*?$/i, '');
-      slugToFile[slugify(cleanName)] = `/audio/${file}`;
+    if (file.match(/\.(mp3|m4a|wav)$/i)) {
+      let cleanName = file.replace(/\.(mp3|m4a|wav)$/i, '').replace(/-MassTamilan.*?$/i, '').replace(/_MassTamilan.*?$/i, '');
+      slugToFile[slugify(cleanName)] = \`/audio/\${file}\`;
     }
   }
 
@@ -337,7 +340,7 @@ if (fs.existsSync(audioDir)) {
         if (slugToFile[slug]) {
           song.file = slugToFile[slug];
         } else {
-          const combinedSlug = slugify(`${song.artist} ${song.movie}`);
+          const combinedSlug = slugify(\`\${song.artist} \${song.movie}\`);
           if (slugToFile[combinedSlug]) song.file = slugToFile[combinedSlug];
         }
       }
@@ -347,14 +350,14 @@ if (fs.existsSync(audioDir)) {
   const moods = Object.keys(MOOD_KEYWORDS);
   let added = 0;
   for (const file of files) {
-    if (file.match(/.(mp3|m4a|wav)$/i)) {
-      let cleanName = file.replace(/.(mp3|m4a|wav)$/i, '').replace(/-MassTamilan.*?$/i, '').replace(/_MassTamilan.*?$/i, '');
+    if (file.match(/\.(mp3|m4a|wav)$/i)) {
+      let cleanName = file.replace(/\.(mp3|m4a|wav)$/i, '').replace(/-MassTamilan.*?$/i, '').replace(/_MassTamilan.*?$/i, '');
       const slug = slugify(cleanName);
       if (!existingSlugs.has(slug)) {
         let hash = 0;
         for (let i = 0; i < slug.length; i++) hash = (hash << 5) - hash + slug.charCodeAt(i);
         const mood = moods[Math.abs(hash) % moods.length];
-        const title = cleanName.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        const title = cleanName.replace(/-/g, ' ').replace(/\\b\\w/g, c => c.toUpperCase());
         
         if (!SONGS_DB[mood].Tamil) SONGS_DB[mood].Tamil = [];
         SONGS_DB[mood].Tamil.push({
@@ -363,14 +366,14 @@ if (fs.existsSync(audioDir)) {
           movie: "Local",
           year: new Date().getFullYear(),
           genre: "Local",
-          file: `/audio/${file}`
+          file: \`/audio/\${file}\`
         });
         existingSlugs.add(slug);
         added++;
       }
     }
   }
-  console.log(`Auto-linked and added ${added} local songs.`);
+  console.log(\`Auto-linked and added \${added} local songs.\`);
 }
 
 function detectMoodFromText(text) {
@@ -612,12 +615,12 @@ app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-if (require.main === module) {
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
-    console.log(`\nSongstr running on http://localhost:${PORT}`);
-    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  });
-}
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(\`\\nSongstr running on http://localhost:\${PORT}\`);
+  console.log(\`Environment: \${process.env.NODE_ENV || 'development'}\`);
+});
+`;
 
-module.exports = app;
+fs.writeFileSync(path.join(__dirname, 'server.js'), content);
+console.log('Fixed server.js');

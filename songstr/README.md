@@ -12,7 +12,7 @@ node server.js
 - AI mood detection from text/voice/face
 - 200+ songs: Tamil, Telugu, Malayalam, Hindi, English, Kannada, Bengali, Korean, Japanese
 - 8 moods: Happy, Sad, Angry, Relaxed, Energetic, Stressed, Romantic, Neutral
-- YouTube & Spotify search integration
+ - Spotify search integration and local audio playback
 - Save favorites (localStorage)
 - Time-based mood suggestions
 - Share your vibe card

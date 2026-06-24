@@ -3,272 +3,342 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="description" content="Songstr – AI-powered mood-based music recommendation app. Detect your mood through text, voice or face and get personalized playlists." />
   <title>Songstr – Music that matches your mood</title>
+  <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <style>
     /* =========== RESET & BASE =========== */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #0d0d1a;
-      --bg2: #13132b;
-      --bg3: #1a1a35;
-      --card: #1e1e3a;
-      --card2: #252548;
-      --purple: #7c3aed;
-      --purple-light: #8b5cf6;
-      --purple-glow: rgba(124,58,237,0.25);
-      --violet: #6d28d9;
-      --pink: #ec4899;
-      --text: #f0f0ff;
-      --text2: #b0b0cc;
-      --text3: #7070a0;
-      --green: #22c55e;
-      --yellow: #f59e0b;
-      --red: #ef4444;
+      --bg: #000000;
+      --bg2: #0a0a0f;
+      --bg3: #111118;
+      --card: rgba(28, 28, 35, 0.7);
+      --card-solid: #1c1c23;
+      --card2: rgba(38, 38, 48, 0.8);
+      --glass: rgba(255, 255, 255, 0.04);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --accent: #6366f1;
+      --accent-light: #818cf8;
+      --accent-glow: rgba(99, 102, 241, 0.2);
+      --accent2: #a78bfa;
+      --pink: #f472b6;
+      --text: #f5f5f7;
+      --text2: #a1a1aa;
+      --text3: #52525b;
+      --green: #34d399;
+      --yellow: #fbbf24;
+      --red: #f87171;
       --blue: #60a5fa;
-      --teal: #34d399;
-      --orange: #f97316;
+      --teal: #2dd4bf;
+      --orange: #fb923c;
       --spotify: #1DB954;
       --yt: #FF0000;
-      --radius: 16px;
-      --radius-sm: 10px;
-      --shadow: 0 8px 32px rgba(0,0,0,0.5);
+      --radius: 20px;
+      --radius-sm: 14px;
+      --radius-xs: 10px;
+      --shadow: 0 8px 40px rgba(0,0,0,0.6);
+      --shadow-glow: 0 0 60px rgba(99,102,241,0.15);
     }
     html { scroll-behavior: smooth; }
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
       overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
     a { text-decoration: none; color: inherit; }
     button { cursor: pointer; border: none; outline: none; font-family: inherit; }
     input, textarea { font-family: inherit; outline: none; border: none; }
 
+    
+    /* =========== AUTH MODAL =========== */
+    .auth-modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+      z-index: 1000; display: none; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .auth-modal-overlay.active { display: flex; opacity: 1; }
+    .auth-modal {
+      background: var(--card); border: 1px solid var(--glass-border);
+      border-radius: var(--radius); padding: 30px; width: 90%; max-width: 400px;
+      box-shadow: var(--shadow); position: relative;
+      transform: translateY(20px); transition: transform 0.3s;
+    }
+    .auth-modal-overlay.active .auth-modal { transform: translateY(0); }
+    .auth-close {
+      position: absolute; top: 15px; right: 15px; background: none; border: none;
+      color: var(--text2); font-size: 24px; cursor: pointer; padding: 5px;
+    }
+    .auth-close:hover { color: var(--text); }
+    .auth-title { font-size: 24px; font-weight: 700; margin-bottom: 20px; text-align: center; }
+    .auth-input {
+      width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-sm); padding: 14px; color: var(--text);
+      font-size: 15px; margin-bottom: 15px; transition: border 0.3s;
+    }
+    .auth-input:focus { border-color: var(--accent); }
+    .auth-btn-submit {
+      width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; padding: 14px; border-radius: var(--radius-sm); font-size: 16px; font-weight: 600;
+      margin-top: 10px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .auth-btn-submit:hover { transform: translateY(-2px); box-shadow: var(--shadow-glow); }
+    .auth-toggle {
+      text-align: center; margin-top: 20px; font-size: 14px; color: var(--text2);
+    }
+    .auth-toggle span { color: var(--accent-light); cursor: pointer; font-weight: 600; }
+    .auth-toggle span:hover { text-decoration: underline; }
+
     /* =========== SCROLLBAR =========== */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: var(--bg2); }
-    ::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 3px; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); border-radius: 2px; }
 
     /* =========== LAYOUT =========== */
     .app { display: flex; flex-direction: column; min-height: 100vh; }
     .screen { display: none; flex-direction: column; min-height: 100vh; }
     .screen.active { display: flex; }
 
-    /* =========== NAVBAR =========== */
+    /* =========== NAVBAR (SF-style) =========== */
     nav {
       position: sticky; top: 0; z-index: 100;
-      background: rgba(13,13,26,0.95);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(124,58,237,0.2);
-      padding: 14px 20px;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding: 12px 20px;
       display: flex; align-items: center; justify-content: space-between;
     }
     .nav-logo {
       display: flex; align-items: center; gap: 10px;
-      font-weight: 800; font-size: 20px; cursor: pointer;
+      font-weight: 800; font-size: 19px; cursor: pointer;
     }
     .nav-logo .logo-icon {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--purple), var(--pink));
+      width: 34px; height: 34px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), #a855f7);
       display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
+      font-size: 15px;
     }
-    .nav-logo span { color: var(--text); }
-    .nav-logo .str { color: var(--purple-light); }
-    .nav-actions { display: flex; gap: 8px; align-items: center; }
+    .nav-logo span { color: var(--text); letter-spacing: -0.3px; }
+    .nav-logo .str { color: var(--accent-light); }
+    .nav-actions { display: flex; gap: 6px; align-items: center; }
     .nav-btn {
-      background: none; border: 1px solid rgba(124,58,237,0.4);
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);
       color: var(--text2); padding: 7px 14px; border-radius: 20px;
       font-size: 13px; font-weight: 500; transition: all 0.2s;
+      backdrop-filter: blur(10px);
     }
-    .nav-btn:hover { background: var(--purple-glow); border-color: var(--purple-light); color: var(--text); }
-    .nav-btn.active { background: var(--purple); border-color: var(--purple); color: #fff; }
+    .nav-btn:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+    .nav-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
     .nav-icon-btn {
-      background: none; color: var(--text2); font-size: 18px;
-      padding: 7px; border-radius: 50%; transition: all 0.2s;
+      background: rgba(255,255,255,0.06); color: var(--text2); font-size: 16px;
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; border: 1px solid rgba(255,255,255,0.06);
     }
-    .nav-icon-btn:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+    .nav-icon-btn:hover { color: var(--text); background: rgba(255,255,255,0.1); }
 
-    /* =========== BOTTOM NAV =========== */
+    /* =========== BOTTOM NAV (iOS Tab Bar) =========== */
     .bottom-nav {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-      background: rgba(13,13,26,0.98);
-      backdrop-filter: blur(20px);
-      border-top: 1px solid rgba(124,58,237,0.2);
-      display: flex; justify-content: space-around; padding: 10px 0 16px;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex; justify-content: space-around;
+      padding: 8px 0 max(16px, env(safe-area-inset-bottom));
     }
     .bnav-item {
       display: flex; flex-direction: column; align-items: center;
-      gap: 4px; font-size: 11px; font-weight: 500;
+      gap: 3px; font-size: 10px; font-weight: 600;
       color: var(--text3); cursor: pointer; transition: all 0.2s;
-      padding: 6px 16px; border-radius: 12px;
+      padding: 4px 16px; border-radius: 10px;
+      letter-spacing: 0.2px;
     }
-    .bnav-item:hover, .bnav-item.active { color: var(--purple-light); }
-    .bnav-item .icon { font-size: 20px; }
+    .bnav-item:hover, .bnav-item.active { color: var(--accent-light); }
+    .bnav-item .icon { font-size: 22px; transition: transform 0.2s; }
+    .bnav-item.active .icon { transform: scale(1.1); }
 
     /* =========== HERO SCREEN =========== */
     .hero {
       padding: 0 0 100px;
-      background: linear-gradient(180deg, rgba(124,58,237,0.08) 0%, transparent 60%);
+      background: radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.08) 0%, transparent 70%);
       min-height: 100vh;
     }
-    .hero-content {
-      padding: 40px 24px 24px;
-      text-align: center;
-    }
+    .hero-content { padding: 48px 24px 28px; text-align: center; }
     .hero-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.3);
-      border-radius: 20px; padding: 6px 16px;
-      font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
-      color: var(--purple-light); text-transform: uppercase;
-      margin-bottom: 28px;
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(99,102,241,0.08);
+      border: 1px solid rgba(99,102,241,0.15);
+      border-radius: 24px; padding: 6px 18px;
+      font-size: 10px; font-weight: 700; letter-spacing: 1.8px;
+      color: var(--accent-light); text-transform: uppercase;
+      margin-bottom: 32px;
     }
     .hero-badge .pulse {
       width: 6px; height: 6px; border-radius: 50%;
-      background: var(--purple-light);
-      animation: pulse 2s infinite;
+      background: var(--accent-light);
+      animation: pulse 2s ease-in-out infinite;
     }
     @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.8); }
+      50% { opacity: 0.4; transform: scale(0.7); }
     }
     .hero-title {
-      font-size: 42px; font-weight: 900; line-height: 1.1;
-      margin-bottom: 20px;
-      background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.85) 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      font-size: 44px; font-weight: 900; line-height: 1.05;
+      margin-bottom: 20px; letter-spacing: -1.5px;
+      color: #fff;
     }
     .hero-title .accent {
-      background: linear-gradient(135deg, var(--purple-light), var(--pink));
+      background: linear-gradient(135deg, var(--accent-light) 0%, #c084fc 50%, var(--pink) 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     .hero-subtitle {
-      font-size: 15px; color: var(--text2); line-height: 1.6;
-      margin-bottom: 36px; max-width: 340px; margin-left: auto; margin-right: auto;
+      font-size: 15px; color: var(--text2); line-height: 1.7;
+      margin-bottom: 40px; max-width: 360px; margin-left: auto; margin-right: auto;
+      letter-spacing: -0.1px;
     }
     .hero-btns {
       display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
-      margin-bottom: 40px;
+      margin-bottom: 48px;
     }
     .btn-primary {
-      background: linear-gradient(135deg, var(--purple), var(--violet));
-      color: #fff; padding: 14px 28px; border-radius: 30px;
+      background: linear-gradient(135deg, var(--accent), #7c3aed);
+      color: #fff; padding: 14px 30px; border-radius: 50px;
       font-size: 15px; font-weight: 600;
-      box-shadow: 0 4px 20px rgba(124,58,237,0.4);
-      transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px;
+      box-shadow: 0 4px 24px rgba(99,102,241,0.35);
+      transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px;
+      letter-spacing: -0.2px;
     }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(124,58,237,0.5); }
+    .btn-primary:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 8px 32px rgba(99,102,241,0.45); }
+    .btn-primary:active { transform: scale(0.98); }
     .btn-secondary {
-      background: transparent; color: var(--text);
-      padding: 14px 28px; border-radius: 30px;
-      font-size: 15px; font-weight: 600;
-      border: 1.5px solid rgba(255,255,255,0.2);
-      transition: all 0.3s;
+      background: rgba(255,255,255,0.05); color: var(--text);
+      padding: 14px 30px; border-radius: 50px;
+      font-size: 15px; font-weight: 600; letter-spacing: -0.2px;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: all 0.3s; backdrop-filter: blur(10px);
     }
-    .btn-secondary:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.4); }
+    .btn-secondary:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); }
 
-    /* Suggested card */
+    /* Suggested card (SF-style) */
     .suggested-card {
       margin: 0 24px;
-      background: var(--card2);
-      border: 1px solid rgba(124,58,237,0.2);
+      background: var(--card);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
       border-radius: var(--radius);
-      padding: 16px 20px;
+      padding: 18px 20px;
       display: flex; align-items: center; gap: 16px;
+      transition: all 0.3s;
     }
+    .suggested-card:hover { border-color: rgba(99,102,241,0.2); }
     .suggested-icon {
-      width: 48px; height: 48px; border-radius: 12px;
-      background: linear-gradient(135deg, var(--purple), var(--violet));
+      width: 50px; height: 50px; border-radius: 14px;
+      background: linear-gradient(135deg, var(--accent), #a855f7);
       display: flex; align-items: center; justify-content: center;
       font-size: 22px; flex-shrink: 0;
+      box-shadow: 0 4px 16px rgba(99,102,241,0.3);
     }
     .suggested-label {
-      font-size: 10px; font-weight: 600; letter-spacing: 1px;
-      color: var(--purple-light); text-transform: uppercase;
+      font-size: 10px; font-weight: 700; letter-spacing: 1.2px;
+      color: var(--accent-light); text-transform: uppercase;
       margin-bottom: 4px;
     }
-    .suggested-title { font-size: 15px; font-weight: 700; }
-    .suggested-sub { font-size: 12px; color: var(--text2); }
+    .suggested-title { font-size: 15px; font-weight: 700; letter-spacing: -0.2px; }
+    .suggested-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
     .suggested-play {
       margin-left: auto;
-      background: linear-gradient(135deg, var(--purple), var(--violet));
-      color: #fff; padding: 10px 20px; border-radius: 20px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);
+      color: #fff; padding: 10px 18px; border-radius: 50px;
       font-size: 13px; font-weight: 600; flex-shrink: 0;
       display: flex; align-items: center; gap: 6px;
+      transition: all 0.2s;
     }
+    .suggested-play:hover { background: var(--accent); border-color: var(--accent); }
 
     /* How it works */
-    .how-it-works {
-      padding: 36px 24px;
-    }
+    .how-it-works { padding: 44px 24px 24px; }
     .section-title {
-      font-size: 22px; font-weight: 800; margin-bottom: 20px; text-align: center;
+      font-size: 22px; font-weight: 800; margin-bottom: 20px;
+      letter-spacing: -0.5px;
     }
-    .feature-list { display: flex; flex-direction: column; gap: 12px; }
+    .section-title.center { text-align: center; }
+    .feature-list { display: flex; flex-direction: column; gap: 10px; }
     .feature-item {
       background: var(--card);
-      border: 1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
       border-radius: var(--radius);
       padding: 18px 20px;
       display: flex; align-items: flex-start; gap: 16px;
+      transition: all 0.25s;
     }
+    .feature-item:hover { border-color: rgba(99,102,241,0.15); transform: translateX(4px); }
     .feature-icon {
-      width: 46px; height: 46px; border-radius: 12px;
-      background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.25);
+      width: 44px; height: 44px; border-radius: 12px;
+      background: rgba(99,102,241,0.1);
       display: flex; align-items: center; justify-content: center;
-      font-size: 20px; flex-shrink: 0;
+      font-size: 19px; flex-shrink: 0;
     }
-    .feature-label { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
-    .feature-sub { font-size: 13px; color: var(--text2); line-height: 1.5; }
+    .feature-label { font-size: 15px; font-weight: 700; margin-bottom: 4px; letter-spacing: -0.2px; }
+    .feature-sub { font-size: 13px; color: var(--text2); line-height: 1.55; }
 
     /* =========== DETECT SCREEN =========== */
     .detect-screen { padding: 0 0 100px; }
     .detect-hero {
-      padding: 40px 24px 28px; text-align: center;
-      background: linear-gradient(180deg, rgba(124,58,237,0.12) 0%, transparent 100%);
+      padding: 44px 24px 24px; text-align: center;
+      background: radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.08) 0%, transparent 100%);
     }
-    .detect-title { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
-    .detect-sub { font-size: 14px; color: var(--text2); }
+    .detect-title { font-size: 28px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.8px; }
+    .detect-sub { font-size: 14px; color: var(--text2); line-height: 1.5; }
 
-    /* Tab switcher */
+    /* Tab switcher (SF Segmented Control) */
     .tab-bar {
-      display: flex; background: var(--card); border-radius: 12px;
-      margin: 20px 24px; padding: 4px;
+      display: flex; background: rgba(255,255,255,0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px; margin: 20px 24px; padding: 3px;
     }
     .tab-btn {
-      flex: 1; padding: 10px; border-radius: 10px;
+      flex: 1; padding: 10px; border-radius: 11px;
       font-size: 13px; font-weight: 600; color: var(--text2);
       background: none; display: flex; align-items: center; justify-content: center; gap: 6px;
-      transition: all 0.2s;
+      transition: all 0.25s;
     }
-    .tab-btn.active { background: var(--purple); color: #fff; }
+    .tab-btn.active { background: var(--accent); color: #fff; box-shadow: 0 2px 12px rgba(99,102,241,0.3); }
 
     /* Text input area */
     .input-section { padding: 0 24px; }
     .mood-textarea {
-      width: 100%; background: var(--card);
-      border: 1.5px solid rgba(124,58,237,0.2);
+      width: 100%; background: rgba(255,255,255,0.04);
+      border: 1px solid var(--glass-border);
       border-radius: var(--radius); padding: 18px;
       color: var(--text); font-size: 15px; line-height: 1.6;
       resize: none; height: 150px;
-      transition: border-color 0.2s;
+      transition: all 0.3s;
+      backdrop-filter: blur(10px);
     }
-    .mood-textarea:focus { border-color: var(--purple); }
+    .mood-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
     .mood-textarea::placeholder { color: var(--text3); }
     .analyze-btn {
       width: 100%; margin-top: 14px;
-      background: linear-gradient(135deg, var(--purple), var(--violet));
-      color: #fff; padding: 16px; border-radius: 30px;
-      font-size: 15px; font-weight: 700;
-      box-shadow: 0 4px 20px rgba(124,58,237,0.4);
+      background: linear-gradient(135deg, var(--accent), #7c3aed);
+      color: #fff; padding: 16px; border-radius: 50px;
+      font-size: 15px; font-weight: 700; letter-spacing: -0.2px;
+      box-shadow: 0 4px 24px rgba(99,102,241,0.35);
       display: flex; align-items: center; justify-content: center; gap: 8px;
       transition: all 0.3s;
     }
-    .analyze-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(124,58,237,0.5); }
-    .analyze-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .analyze-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(99,102,241,0.45); }
+    .analyze-btn:active { transform: scale(0.98); }
+    .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
     /* Voice mode */
     .voice-section {
@@ -277,32 +347,36 @@
     }
     .mic-btn {
       width: 100px; height: 100px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--purple), var(--violet));
+      background: linear-gradient(135deg, var(--accent), #7c3aed);
       font-size: 40px; color: #fff;
-      box-shadow: 0 0 0 0 var(--purple-glow);
+      box-shadow: 0 0 0 0 var(--accent-glow), 0 8px 32px rgba(99,102,241,0.3);
       transition: all 0.3s; margin-bottom: 20px;
     }
+    .mic-btn:hover { transform: scale(1.05); }
+    .mic-btn:active { transform: scale(0.95); }
     .mic-btn.recording {
       animation: ripple 1.5s infinite;
-      background: linear-gradient(135deg, var(--red), #b91c1c);
+      background: linear-gradient(135deg, var(--red), #dc2626);
+      box-shadow: 0 0 0 0 rgba(248,113,113,0.4), 0 8px 32px rgba(248,113,113,0.3);
     }
     @keyframes ripple {
-      0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
-      70% { box-shadow: 0 0 0 30px rgba(239,68,68,0); }
-      100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+      0% { box-shadow: 0 0 0 0 rgba(248,113,113,0.4); }
+      70% { box-shadow: 0 0 0 30px rgba(248,113,113,0); }
+      100% { box-shadow: 0 0 0 0 rgba(248,113,113,0); }
     }
-    .voice-status { font-size: 14px; color: var(--text2); margin-bottom: 10px; }
+    .voice-status { font-size: 14px; color: var(--text2); margin-bottom: 12px; font-weight: 500; }
     .voice-transcript {
-      background: var(--card); border: 1px solid rgba(124,58,237,0.2);
-      border-radius: var(--radius); padding: 14px 18px;
+      background: var(--card); border: 1px solid var(--glass-border);
+      border-radius: var(--radius); padding: 16px 18px;
       font-size: 14px; color: var(--text2); min-height: 60px;
       width: 100%; line-height: 1.6; text-align: center;
+      backdrop-filter: blur(10px);
     }
 
     /* Face mode */
     .face-section { padding: 20px 24px; }
     .camera-container {
-      background: var(--card); border: 2px dashed rgba(124,58,237,0.3);
+      background: var(--card); border: 2px dashed rgba(99,102,241,0.2);
       border-radius: var(--radius); overflow: hidden;
       position: relative; aspect-ratio: 4/3;
       display: flex; align-items: center; justify-content: center;
@@ -318,63 +392,66 @@
     }
     .camera-scan {
       width: 120px; height: 120px; border-radius: 50%;
-      border: 2px solid var(--purple-light);
+      border: 2px solid rgba(99,102,241,0.4);
       display: flex; align-items: center; justify-content: center;
       font-size: 40px;
-      box-shadow: 0 0 30px var(--purple-glow);
+      box-shadow: 0 0 40px rgba(99,102,241,0.15);
     }
     .camera-overlay p { font-size: 13px; color: var(--text2); }
     .start-camera-btn {
       margin-top: 14px; width: 100%;
-      background: var(--card2); border: 1.5px solid rgba(124,58,237,0.3);
-      color: var(--text); padding: 14px; border-radius: 30px;
+      background: var(--card); border: 1px solid var(--glass-border);
+      color: var(--text); padding: 14px; border-radius: 50px;
       font-size: 15px; font-weight: 600;
       display: flex; align-items: center; justify-content: center; gap: 8px;
-      transition: all 0.2s;
+      transition: all 0.2s; backdrop-filter: blur(10px);
     }
-    .start-camera-btn:hover { background: var(--purple-glow); border-color: var(--purple-light); }
+    .start-camera-btn:hover { background: var(--accent-glow); border-color: rgba(99,102,241,0.3); }
 
     /* =========== MOOD RESULT SCREEN =========== */
     .result-screen { padding: 0 0 100px; }
     .result-hero {
-      padding: 36px 24px 24px; text-align: center;
-      background: linear-gradient(180deg, rgba(124,58,237,0.15) 0%, transparent 100%);
+      padding: 40px 24px 28px; text-align: center;
+      background: radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.1) 0%, transparent 100%);
     }
     .mood-emoji-big {
-      font-size: 64px; margin-bottom: 12px;
+      font-size: 72px; margin-bottom: 16px;
       display: block; animation: float 3s ease-in-out infinite;
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
     }
     @keyframes float {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-10px); }
     }
-    .mood-label-big { font-size: 32px; font-weight: 900; margin-bottom: 4px; }
+    .mood-label-big { font-size: 32px; font-weight: 900; margin-bottom: 6px; letter-spacing: -1px; }
     .mood-desc { font-size: 14px; color: var(--text2); margin-bottom: 20px; }
     .mood-tags { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
     .mood-tag {
-      background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.3);
+      background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.15);
       border-radius: 20px; padding: 5px 14px;
-      font-size: 12px; font-weight: 600; color: var(--purple-light);
+      font-size: 12px; font-weight: 600; color: var(--accent-light);
     }
 
-    /* Language filter */
+    /* Language filter (SF Pills) */
     .lang-filter {
       padding: 0 24px; margin-bottom: 16px; overflow-x: auto;
       display: flex; gap: 8px; padding-bottom: 4px;
+      -ms-overflow-style: none; scrollbar-width: none;
     }
-    .lang-filter::-webkit-scrollbar { height: 0; }
+    .lang-filter::-webkit-scrollbar { height: 0; display: none; }
     .lang-chip {
       flex-shrink: 0; padding: 8px 18px; border-radius: 20px;
       font-size: 13px; font-weight: 600;
-      background: var(--card); color: var(--text2);
-      border: 1px solid rgba(255,255,255,0.07);
-      transition: all 0.2s;
+      background: rgba(255,255,255,0.04); color: var(--text2);
+      border: 1px solid var(--glass-border);
+      transition: all 0.25s;
     }
     .lang-chip.active {
-      background: var(--purple); color: #fff;
-      border-color: var(--purple);
+      background: var(--accent); color: #fff;
+      border-color: var(--accent);
+      box-shadow: 0 2px 12px rgba(99,102,241,0.3);
     }
-    .lang-chip:hover { border-color: var(--purple-light); }
+    .lang-chip:hover:not(.active) { border-color: rgba(99,102,241,0.3); color: var(--text); }
 
     /* Playlist header */
     .playlist-header {
@@ -386,40 +463,47 @@
       display: flex; align-items: center; gap: 6px;
       padding: 8px 14px; border-radius: 20px;
       font-size: 12px; font-weight: 600;
-      border: 1.5px solid; transition: all 0.2s;
+      border: 1px solid; transition: all 0.2s;
+      backdrop-filter: blur(10px);
     }
-    .action-chip.green { color: var(--spotify); border-color: var(--spotify); background: rgba(29,185,84,0.08); }
-    .action-chip.green:hover { background: rgba(29,185,84,0.2); }
-    .action-chip.red { color: var(--yt); border-color: var(--yt); background: rgba(255,0,0,0.08); }
-    .action-chip.red:hover { background: rgba(255,0,0,0.2); }
-    .action-chip.share { color: var(--purple-light); border-color: var(--purple-light); background: rgba(124,58,237,0.08); }
-    .action-chip.share:hover { background: rgba(124,58,237,0.2); }
+    .action-chip.green { color: var(--spotify); border-color: rgba(29,185,84,0.3); background: rgba(29,185,84,0.06); }
+    .action-chip.green:hover { background: rgba(29,185,84,0.15); }
+    .action-chip.red { color: var(--yt); border-color: rgba(255,0,0,0.3); background: rgba(255,0,0,0.06); }
+    .action-chip.red:hover { background: rgba(255,0,0,0.15); }
+    .action-chip.share { color: var(--accent-light); border-color: rgba(99,102,241,0.3); background: rgba(99,102,241,0.06); }
+    .action-chip.share:hover { background: rgba(99,102,241,0.15); }
+    .action-chip.neutral { color: var(--text2); border-color: var(--glass-border); background: var(--glass); }
+    .action-chip.neutral:hover { background: rgba(255,255,255,0.08); }
 
-    /* Song cards */
-    .songs-list { padding: 0 24px; display: flex; flex-direction: column; gap: 12px; }
+    /* Song cards (SF-style List) */
+    .songs-list { padding: 0 24px; display: flex; flex-direction: column; gap: 8px; }
     .song-card {
       background: var(--card);
-      border: 1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
       border-radius: var(--radius);
       padding: 14px 16px;
       display: flex; align-items: center; gap: 14px;
-      transition: all 0.2s;
+      transition: all 0.25s;
+      cursor: pointer;
     }
-    .song-card:hover { background: var(--card2); border-color: rgba(124,58,237,0.3); }
+    .song-card:hover { background: var(--card2); border-color: rgba(99,102,241,0.15); transform: translateY(-1px); }
+    .song-card:active { transform: scale(0.99); }
     .song-num {
-      width: 32px; height: 32px; border-radius: 8px;
+      width: 30px; height: 30px; border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 12px; font-weight: 700; color: #fff;
+      font-size: 11px; font-weight: 800; color: #fff;
       flex-shrink: 0;
     }
     .song-art {
-      width: 52px; height: 52px; border-radius: 10px;
+      width: 50px; height: 50px; border-radius: 12px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 22px; flex-shrink: 0;
+      font-size: 20px; flex-shrink: 0;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
     }
     .song-info { flex: 1; min-width: 0; }
     .song-title {
-      font-size: 14px; font-weight: 700;
+      font-size: 14px; font-weight: 700; letter-spacing: -0.2px;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       margin-bottom: 2px;
     }
@@ -429,13 +513,13 @@
       margin-bottom: 4px;
     }
     .song-movie { font-size: 11px; color: var(--text3); margin-bottom: 5px; }
-    .song-chips { display: flex; gap: 5px; flex-wrap: wrap; }
+    .song-chips { display: flex; gap: 4px; flex-wrap: wrap; }
     .song-chip {
-      font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px;
-      background: rgba(255,255,255,0.08); color: var(--text2);
+      font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 8px;
+      background: rgba(255,255,255,0.06); color: var(--text2);
     }
-    .song-chip.lang { background: rgba(124,58,237,0.15); color: var(--purple-light); }
-    .song-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+    .song-chip.lang { background: rgba(99,102,241,0.12); color: var(--accent-light); }
+    .song-actions { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
     .song-icon-btn {
       background: none; color: var(--text3); font-size: 18px;
       width: 34px; height: 34px; border-radius: 50%;
@@ -444,111 +528,124 @@
     }
     .song-icon-btn:hover { color: var(--text); background: rgba(255,255,255,0.08); }
     .song-icon-btn.liked { color: var(--pink) !important; }
-    .song-icon-btn.yt-play { color: var(--yt); }
-    .song-icon-btn.yt-play:hover { background: rgba(255,0,0,0.1); }
+    .song-icon-btn.yt-play { color: var(--accent-light); }
+    .song-icon-btn.yt-play:hover { background: rgba(99,102,241,0.1); }
 
     /* =========== BROWSE MOODS SCREEN =========== */
     .browse-screen { padding: 0 0 100px; }
     .moods-grid {
-      padding: 20px 24px; display: grid;
-      grid-template-columns: 1fr 1fr; gap: 12px;
+      padding: 16px 24px; display: grid;
+      grid-template-columns: 1fr 1fr; gap: 10px;
     }
     .mood-card {
       background: var(--card);
-      border: 1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
       border-radius: var(--radius);
-      padding: 20px 16px;
-      cursor: pointer; transition: all 0.25s;
+      padding: 22px 16px;
+      cursor: pointer; transition: all 0.3s;
       text-align: center;
+      position: relative; overflow: hidden;
     }
-    .mood-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
-    .mood-card.selected { border-width: 2px; }
-    .mood-card .mood-emoji { font-size: 36px; margin-bottom: 10px; display: block; }
-    .mood-card .mood-name { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
-    .mood-card .mood-tagline { font-size: 11px; color: var(--text2); line-height: 1.4; }
+    .mood-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(circle at 50% 30%, var(--mood-color-glow, rgba(99,102,241,0.08)) 0%, transparent 70%);
+      transition: opacity 0.3s; opacity: 0;
+    }
+    .mood-card:hover::before { opacity: 1; }
+    .mood-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.12); }
+    .mood-card:active { transform: scale(0.97); }
+    .mood-card .mood-emoji { font-size: 38px; margin-bottom: 10px; display: block; position: relative; z-index: 1; }
+    .mood-card .mood-name { font-size: 15px; font-weight: 800; margin-bottom: 4px; position: relative; z-index: 1; letter-spacing: -0.3px; }
+    .mood-card .mood-tagline { font-size: 11px; color: var(--text2); line-height: 1.4; position: relative; z-index: 1; }
 
     /* =========== FAVORITES SCREEN =========== */
     .favorites-screen { padding: 0 0 100px; }
-    .fav-hero { padding: 36px 24px 20px; text-align: center; }
+    .fav-hero { padding: 40px 24px 20px; text-align: center; }
     .empty-state {
       padding: 60px 24px; text-align: center;
-      display: flex; flex-direction: column; align-items: center; gap: 16px;
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
     }
-    .empty-icon { font-size: 60px; opacity: 0.3; }
-    .empty-title { font-size: 20px; font-weight: 700; color: var(--text2); }
+    .empty-icon { font-size: 60px; opacity: 0.2; }
+    .empty-title { font-size: 18px; font-weight: 700; color: var(--text2); letter-spacing: -0.3px; }
     .empty-sub { font-size: 14px; color: var(--text3); }
 
     /* =========== LOADING =========== */
     .loading-overlay {
       position: fixed; inset: 0; z-index: 200;
-      background: rgba(13,13,26,0.9);
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(20px);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       gap: 20px;
     }
     .loading-spinner {
-      width: 60px; height: 60px; border-radius: 50%;
-      border: 3px solid rgba(124,58,237,0.2);
-      border-top-color: var(--purple);
-      animation: spin 0.8s linear infinite;
+      width: 48px; height: 48px; border-radius: 50%;
+      border: 3px solid rgba(99,102,241,0.15);
+      border-top-color: var(--accent);
+      animation: spin 0.7s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .loading-text { font-size: 15px; color: var(--text2); font-weight: 500; }
+    .loading-text { font-size: 14px; color: var(--text2); font-weight: 500; letter-spacing: -0.1px; }
 
-    /* =========== TOAST =========== */
+    /* =========== TOAST (SF-style) =========== */
     .toast {
-      position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
-      background: var(--card2); border: 1px solid rgba(124,58,237,0.3);
-      color: var(--text); padding: 12px 20px; border-radius: 30px;
+      position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: rgba(28,28,35,0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      color: var(--text); padding: 12px 22px; border-radius: 50px;
       font-size: 13px; font-weight: 600; z-index: 300;
       opacity: 0; pointer-events: none;
-      transition: opacity 0.3s; white-space: nowrap;
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
     }
-    .toast.show { opacity: 1; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     /* =========== SHARE CARD MODAL =========== */
     .modal-overlay {
       position: fixed; inset: 0; z-index: 250;
-      background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+      background: rgba(0,0,0,0.8); backdrop-filter: blur(12px);
       display: none; align-items: center; justify-content: center;
       padding: 24px;
     }
     .modal-overlay.open { display: flex; }
     .share-card {
-      background: linear-gradient(135deg, #1a0a3b 0%, #0d1a3a 50%, #1a0a2e 100%);
-      border: 1px solid rgba(124,58,237,0.3);
-      border-radius: 24px; padding: 30px;
+      background: linear-gradient(135deg, #0f0a2a 0%, #0a1628 50%, #0f0a20 100%);
+      border: 1px solid rgba(99,102,241,0.2);
+      border-radius: 28px; padding: 32px;
       width: 100%; max-width: 360px; text-align: center;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.7), var(--shadow-glow);
     }
-    .share-card-logo { font-size: 13px; font-weight: 800; color: var(--text3); letter-spacing: 2px; margin-bottom: 20px; }
+    .share-card-logo { font-size: 12px; font-weight: 800; color: var(--text3); letter-spacing: 2.5px; margin-bottom: 24px; text-transform: uppercase; }
     .share-card-emoji { font-size: 72px; margin-bottom: 16px; display: block; }
-    .share-card-mood { font-size: 26px; font-weight: 900; margin-bottom: 6px; }
-    .share-card-song { font-size: 16px; font-weight: 600; color: var(--purple-light); margin-bottom: 4px; }
-    .share-card-artist { font-size: 13px; color: var(--text2); margin-bottom: 24px; }
-    .share-card-tagline { font-size: 12px; color: var(--text3); margin-bottom: 20px; }
+    .share-card-mood { font-size: 26px; font-weight: 900; margin-bottom: 6px; letter-spacing: -0.5px; }
+    .share-card-song { font-size: 16px; font-weight: 600; color: var(--accent-light); margin-bottom: 4px; }
+    .share-card-artist { font-size: 13px; color: var(--text2); margin-bottom: 28px; }
+    .share-card-tagline { font-size: 12px; color: var(--text3); margin-bottom: 24px; }
     .share-actions { display: flex; gap: 10px; }
     .share-action-btn {
-      flex: 1; padding: 12px; border-radius: 20px;
+      flex: 1; padding: 12px; border-radius: 50px;
       font-size: 13px; font-weight: 600;
     }
     .share-close {
       width: 100%; margin-top: 12px;
-      background: none; border: 1px solid rgba(255,255,255,0.1);
-      color: var(--text2); padding: 12px; border-radius: 20px;
-      font-size: 13px; font-weight: 600;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text2); padding: 12px; border-radius: 50px;
+      font-size: 13px; font-weight: 600; transition: all 0.2s;
     }
-    .share-close:hover { background: rgba(255,255,255,0.05); }
-    #player-modal .share-card { padding: 18px; }
-    #player-modal .share-card-logo { color: var(--text2); font-size: 12px; }
-    #player-modal iframe { background: #000; }
+    .share-close:hover { background: rgba(255,255,255,0.08); }
 
     /* =========== SEARCH BAR =========== */
     .search-wrap { padding: 12px 24px; }
     .search-bar {
       display: flex; align-items: center; gap: 12px;
-      background: var(--card); border: 1.5px solid rgba(255,255,255,0.07);
-      border-radius: 12px; padding: 12px 16px;
+      background: var(--card); border: 1px solid var(--glass-border);
+      border-radius: 14px; padding: 12px 16px;
+      backdrop-filter: blur(20px);
+      transition: all 0.3s;
     }
+    .search-bar:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
     .search-bar input {
       flex: 1; background: none; color: var(--text);
       font-size: 14px;
@@ -556,15 +653,45 @@
     .search-bar input::placeholder { color: var(--text3); }
     .search-icon { color: var(--text3); font-size: 16px; }
 
-    /* Responsive improvements */
+    /* =========== ANIMATIONS =========== */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-in { animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+    /* Responsive */
+    @media (min-width: 640px) {
+      .hero-title { font-size: 56px; }
+      .moods-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (min-width: 768px) {
+      .moods-grid { grid-template-columns: repeat(4, 1fr); }
+    }
     @media (max-width: 360px) {
       .hero-title { font-size: 36px; }
-      .moods-grid { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
 <body>
 <div class="app">
+
+  <!-- Auth Modal -->
+  <div class="auth-modal-overlay" id="auth-modal">
+    <div class="auth-modal">
+      <button class="auth-close" onclick="closeAuthModal()">×</button>
+      <div class="auth-title" id="auth-title">Welcome Back</div>
+      <form id="auth-form" onsubmit="submitAuth(event)">
+        <input type="text" id="auth-username" class="auth-input" placeholder="Username (min 3 chars)" required minlength="3">
+        <input type="password" id="auth-password" class="auth-input" placeholder="Password (min 5 chars)" required minlength="5">
+        <button type="submit" class="auth-btn-submit" id="auth-submit-btn">Login</button>
+      </form>
+      <div class="auth-toggle" id="auth-toggle-text">
+        Don't have an account? <span onclick="toggleAuthMode()">Register</span>
+      </div>
+    </div>
+  </div>
+
 
   <!-- ========== LOADING OVERLAY ========== -->
   <div class="loading-overlay" id="loading" style="display:none">
@@ -576,7 +703,7 @@
   <div class="toast" id="toast"></div>
 
   <!-- ========== SHARE MODAL ========== -->
-  <div class="modal-overlay" id="share-modal">
+  <div class="modal-overlay" id="share-modal" onclick="if(event.target===this)closeShareModal()">
     <div class="share-card" id="share-card">
       <div class="share-card-logo">🎵 SONGSTR</div>
       <span class="share-card-emoji" id="sc-emoji">😄</span>
@@ -592,19 +719,16 @@
     </div>
   </div>
 
-  <!-- ========== PLAYER MODAL ========== -->
-  <div class="modal-overlay" id="player-modal">
-    <div class="share-card" id="player-card" style="max-width:720px; padding: 18px;">
-      <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px;">
-        <div>
-          <div class="share-card-logo">▶️ Now Playing</div>
-          <div id="player-title" style="font-size:18px;font-weight:700;margin-top:6px;color:#fff"></div>
-          <div id="player-artist" style="font-size:13px;color:var(--text2);margin-top:4px"></div>
-        </div>
-        <button class="share-close" onclick="closePlayerModal()">Close</button>
+  <!-- ========== PLAYER MODAL (audio-only) ========== -->
+  <div class="modal-overlay" id="player-modal" onclick="if(event.target===this)closePlayerModal()">
+    <div class="share-card" id="player-card" style="padding:12px; max-width:800px; width:100%;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div class="share-card-logo">🎵 SONGSTR — Player</div>
+        <button class="share-close" onclick="closePlayerModal()" style="margin:0">Close</button>
       </div>
-      <div style="position:relative;padding-top:56.25%;">
-        <iframe id="player-iframe" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;border-radius:16px;"></iframe>
+      <div style="padding: 20px 0 10px 0; text-align: center;">
+        <h3 id="player-song-title" style="margin-bottom: 20px; font-weight: 600; color: var(--text);"></h3>
+        <audio id="player-audio" controls preload="none" style="width:100%; display:none; border-radius:12px; background:rgba(255,255,255,0.05); box-sizing:border-box; outline:none;"></audio>
       </div>
     </div>
   </div>
@@ -617,6 +741,7 @@
         <span>Song<span class="str">str</span></span>
       </div>
       <div class="nav-actions">
+        <button class="nav-icon-btn" onclick="openAuthModal()" title="Login">👤</button>
         <button class="nav-icon-btn" onclick="showScreen('search')" title="Search">🔍</button>
         <button class="nav-icon-btn" onclick="showScreen('favorites')" title="Favorites">♥</button>
       </div>
@@ -626,7 +751,7 @@
       <div class="hero-content">
         <div class="hero-badge"><div class="pulse"></div>AI-Powered Mood Detection</div>
         <h1 class="hero-title">Music that matches<br><span class="accent">your mood</span></h1>
-        <p class="hero-subtitle">Tell us how you feel through text or voice, and our AI will recommend the perfect playlist for your current emotional state.</p>
+        <p class="hero-subtitle">Tell us how you feel through text or voice, and our AI will curate the perfect playlist for your current emotional state.</p>
         <div class="hero-btns">
           <button class="btn-primary" onclick="showScreen('detect')">Detect My Mood →</button>
           <button class="btn-secondary" onclick="showScreen('browse')">Browse Moods</button>
@@ -645,7 +770,7 @@
       </div>
 
       <div class="how-it-works">
-        <h2 class="section-title">How it works</h2>
+        <h2 class="section-title center">How it works</h2>
         <div class="feature-list">
           <div class="feature-item">
             <div class="feature-icon">🧠</div>
@@ -655,7 +780,7 @@
             </div>
           </div>
           <div class="feature-item">
-            <div class="feature-icon">T</div>
+            <div class="feature-icon">✏️</div>
             <div>
               <div class="feature-label">Text Input</div>
               <div class="feature-sub">Type how you're feeling in your own words — the AI understands context</div>
@@ -679,7 +804,7 @@
             <div class="feature-icon">🎵</div>
             <div>
               <div class="feature-label">Smart Playlists</div>
-              <div class="feature-sub">Get personalized song recommendations in Tamil, Telugu, Malayalam, Hindi, English &amp; more</div>
+              <div class="feature-sub">Get personalized songs in Tamil, Telugu, Malayalam, Hindi, English &amp; more</div>
             </div>
           </div>
         </div>
@@ -689,7 +814,7 @@
     <div class="bottom-nav">
       <div class="bnav-item active" onclick="showScreen('home')"><div class="icon">🏠</div>Home</div>
       <div class="bnav-item" onclick="showScreen('detect')"><div class="icon">🎤</div>Detect</div>
-      <div class="bnav-item" onclick="showScreen('browse')"><div class="icon">⏱</div>Browse</div>
+      <div class="bnav-item" onclick="showScreen('browse')"><div class="icon">🎭</div>Browse</div>
       <div class="bnav-item" onclick="showScreen('favorites')"><div class="icon">♥</div>Saved</div>
     </div>
   </div>
@@ -701,16 +826,19 @@
         <div class="logo-icon">🎵</div>
         <span>Song<span class="str">str</span></span>
       </div>
+      <div class="nav-actions">
+        <button class="nav-btn" onclick="showScreen('home')">← Back</button>
+      </div>
     </nav>
 
     <div class="detect-screen">
       <div class="detect-hero">
         <h1 class="detect-title">How are you feeling?</h1>
-        <p class="detect-sub">Express yourself through text, voice, or let the camera read your face expression</p>
+        <p class="detect-sub">Express yourself through text, voice, or let the camera read your expression</p>
       </div>
 
       <div class="tab-bar">
-        <button class="tab-btn active" id="tab-text" onclick="switchTab('text')">T Text</button>
+        <button class="tab-btn active" id="tab-text" onclick="switchTab('text')">✏️ Text</button>
         <button class="tab-btn" id="tab-voice" onclick="switchTab('voice')">🎤 Voice</button>
         <button class="tab-btn" id="tab-face" onclick="switchTab('face')">📷 Face</button>
       </div>
@@ -718,7 +846,7 @@
       <!-- Text Panel -->
       <div id="panel-text" class="input-section">
         <textarea class="mood-textarea" id="mood-text" placeholder="Tell me how you're feeling... e.g. 'I had an amazing day!' or 'I feel so stressed about work'"></textarea>
-        <button class="analyze-btn" onclick="analyzeMoodFromText()">✈ Analyze My Mood</button>
+        <button class="analyze-btn" onclick="analyzeMoodFromText()">✨ Analyze My Mood</button>
       </div>
 
       <!-- Voice Panel -->
@@ -726,13 +854,13 @@
         <button class="mic-btn" id="mic-btn" onclick="toggleRecording()">🎤</button>
         <div class="voice-status" id="voice-status">Tap to start speaking</div>
         <div class="voice-transcript" id="voice-transcript">Your words will appear here...</div>
-        <button class="analyze-btn" style="margin-top:14px" onclick="analyzeVoiceText()">✈ Analyze My Mood</button>
+        <button class="analyze-btn" style="margin-top:14px" onclick="analyzeVoiceText()">✨ Analyze My Mood</button>
       </div>
 
       <!-- Face Panel -->
       <div id="panel-face" class="face-section" style="display:none">
         <div class="camera-container">
-          <video id="camera-video" autoplay muted playsinline style="display:none;width:100%;height:100%;object-fit:cover;border-radius:16px;"></video>
+          <video id="camera-video" autoplay muted playsinline style="display:none;width:100%;height:100%;object-fit:cover;border-radius:18px;"></video>
           <div class="camera-overlay" id="camera-overlay">
             <div class="camera-scan">😐</div>
             <p>Camera will analyze your expression</p>
@@ -746,7 +874,7 @@
     <div class="bottom-nav">
       <div class="bnav-item" onclick="showScreen('home')"><div class="icon">🏠</div>Home</div>
       <div class="bnav-item active" onclick="showScreen('detect')"><div class="icon">🎤</div>Detect</div>
-      <div class="bnav-item" onclick="showScreen('browse')"><div class="icon">⏱</div>Browse</div>
+      <div class="bnav-item" onclick="showScreen('browse')"><div class="icon">🎭</div>Browse</div>
       <div class="bnav-item" onclick="showScreen('favorites')"><div class="icon">♥</div>Saved</div>
     </div>
   </div>
@@ -772,15 +900,13 @@
           <span class="mood-tag">Pop</span>
           <span class="mood-tag">Dance</span>
           <span class="mood-tag">Funk</span>
-          <span class="mood-tag">Disco</span>
         </div>
       </div>
 
       <div class="playlist-header">
         <div class="playlist-actions">
           <button class="action-chip share" onclick="openShareModal()">🔗 Share Vibe</button>
-          <button class="action-chip green" onclick="openSpotifySearch()">🎵 Spotify</button>
-          <button class="action-chip" style="border-color:var(--text3);color:var(--text2)" onclick="refreshSongs()">↻ Refresh</button>
+          <button class="action-chip neutral" onclick="refreshSongs()">↻ Refresh</button>
         </div>
       </div>
 
@@ -796,7 +922,7 @@
     <div class="bottom-nav">
       <div class="bnav-item" onclick="showScreen('home')"><div class="icon">🏠</div>Home</div>
       <div class="bnav-item active" onclick="showScreen('detect')"><div class="icon">🎤</div>Detect</div>
-      <div class="bnav-item" onclick="showScreen('browse')"><div class="icon">⏱</div>Browse</div>
+      <div class="bnav-item" onclick="showScreen('browse')"><div class="icon">🎭</div>Browse</div>
       <div class="bnav-item" onclick="showScreen('favorites')"><div class="icon">♥</div>Saved</div>
     </div>
   </div>
@@ -811,7 +937,7 @@
     </nav>
 
     <div class="browse-screen">
-      <div style="padding: 28px 24px 8px">
+      <div style="padding: 32px 24px 8px">
         <h1 class="section-title" style="text-align:left">Browse Moods</h1>
         <p style="font-size:13px;color:var(--text2)">Choose a mood to get instant recommendations</p>
       </div>
@@ -823,7 +949,7 @@
     <div class="bottom-nav">
       <div class="bnav-item" onclick="showScreen('home')"><div class="icon">🏠</div>Home</div>
       <div class="bnav-item" onclick="showScreen('detect')"><div class="icon">🎤</div>Detect</div>
-      <div class="bnav-item active" onclick="showScreen('browse')"><div class="icon">⏱</div>Browse</div>
+      <div class="bnav-item active" onclick="showScreen('browse')"><div class="icon">🎭</div>Browse</div>
       <div class="bnav-item" onclick="showScreen('favorites')"><div class="icon">♥</div>Saved</div>
     </div>
   </div>
@@ -839,7 +965,7 @@
 
     <div class="favorites-screen">
       <div class="fav-hero">
-        <h1 style="font-size:26px;font-weight:900;margin-bottom:4px">♥ Saved Songs</h1>
+        <h1 style="font-size:26px;font-weight:900;margin-bottom:4px;letter-spacing:-0.8px">♥ Saved Songs</h1>
         <p style="font-size:13px;color:var(--text2)">Your personal mood-matched collection</p>
       </div>
       <div class="songs-list" id="fav-songs-list">
@@ -855,7 +981,7 @@
     <div class="bottom-nav">
       <div class="bnav-item" onclick="showScreen('home')"><div class="icon">🏠</div>Home</div>
       <div class="bnav-item" onclick="showScreen('detect')"><div class="icon">🎤</div>Detect</div>
-      <div class="bnav-item" onclick="showScreen('browse')"><div class="icon">⏱</div>Browse</div>
+      <div class="bnav-item" onclick="showScreen('browse')"><div class="icon">🎭</div>Browse</div>
       <div class="bnav-item active" onclick="showScreen('favorites')"><div class="icon">♥</div>Saved</div>
     </div>
   </div>
@@ -868,12 +994,12 @@
         <span>Song<span class="str">str</span></span>
       </div>
       <div class="nav-actions">
-        <button class="nav-btn" onclick="showScreen('home')">✕</button>
+        <button class="nav-btn" onclick="showScreen('home')">✕ Close</button>
       </div>
     </nav>
     <div style="padding:0 0 100px">
-      <div style="padding:20px 24px 8px">
-        <h2 style="font-size:22px;font-weight:800;margin-bottom:4px">Search Songs</h2>
+      <div style="padding:24px 24px 8px">
+        <h2 style="font-size:22px;font-weight:800;margin-bottom:4px;letter-spacing:-0.5px">Search Songs</h2>
         <p style="font-size:13px;color:var(--text2)">Find any song across all moods and languages</p>
       </div>
       <div class="search-wrap">
@@ -893,7 +1019,7 @@
     <div class="bottom-nav">
       <div class="bnav-item" onclick="showScreen('home')"><div class="icon">🏠</div>Home</div>
       <div class="bnav-item" onclick="showScreen('detect')"><div class="icon">🎤</div>Detect</div>
-      <div class="bnav-item" onclick="showScreen('browse')"><div class="icon">⏱</div>Browse</div>
+      <div class="bnav-item" onclick="showScreen('browse')"><div class="icon">🎭</div>Browse</div>
       <div class="bnav-item" onclick="showScreen('favorites')"><div class="icon">♥</div>Saved</div>
     </div>
   </div>
@@ -901,35 +1027,48 @@
 </div><!-- /app -->
 
 <script>
+let faceApiLoaded = false;
+
+async function initFaceApi() {
+  try {
+    await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/');
+    await faceapi.nets.faceExpressionNet.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/');
+    faceApiLoaded = true;
+    console.log('Face API models loaded successfully');
+  } catch(e) {
+    console.error('Failed to load Face API models', e);
+  }
+}
+
+// Load models as soon as possible
+window.addEventListener('load', initFaceApi);
 // ============================================================
 // STATE
 // ============================================================
-const API = ''; // same origin
 let currentMood = 'happy';
 let currentLang = 'All';
 let currentSongs = [];
 let renderedSongs = [];
 let searchResults = [];
 let favorites = [];
-try {
-  favorites = JSON.parse(localStorage.getItem('songstr_fav') || '[]');
-  if (!Array.isArray(favorites)) favorites = [];
-} catch (error) {
-  favorites = [];
-}
 let mediaStream = null;
 let isRecording = false;
 let recognition = null;
 let voiceText = '';
-let shareData = {};
+
+// Load favorites safely
+try {
+  favorites = JSON.parse(localStorage.getItem('songstr_fav') || '[]');
+  if (!Array.isArray(favorites)) favorites = [];
+} catch(e) { favorites = []; }
 
 const MOOD_COLORS = {
-  happy: '#f59e0b', sad: '#60a5fa', angry: '#ef4444',
-  relaxed: '#34d399', energetic: '#f97316',
-  stressed: '#a78bfa', romantic: '#ec4899', neutral: '#94a3b8'
+  happy: '#fbbf24', sad: '#60a5fa', angry: '#f87171',
+  relaxed: '#2dd4bf', energetic: '#fb923c',
+  stressed: '#a78bfa', romantic: '#f472b6', neutral: '#71717a'
 };
 const MOOD_GENRES = {
-  happy: ['Pop', 'Dance', 'Funk', 'Disco'],
+  happy: ['Pop', 'Dance', 'Funk'],
   sad: ['Soft', 'Acoustic', 'Melody'],
   angry: ['Rock', 'Metal', 'Intense'],
   relaxed: ['Lo-fi', 'Ambient', 'Classical'],
@@ -948,7 +1087,7 @@ const MOOD_LABELS = {
   stressed:'Stress Relief', romantic:'Romantic', neutral:'Everyday Mix'
 };
 const SONG_ART_COLORS = [
-  'linear-gradient(135deg,#7c3aed,#4f46e5)',
+  'linear-gradient(135deg,#6366f1,#4f46e5)',
   'linear-gradient(135deg,#0ea5e9,#6366f1)',
   'linear-gradient(135deg,#f59e0b,#ef4444)',
   'linear-gradient(135deg,#10b981,#0ea5e9)',
@@ -963,15 +1102,20 @@ const SONG_ART_COLORS = [
 // ============================================================
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + name).classList.add('active');
-  document.querySelectorAll('.bnav-item').forEach(item => {
-    const target = item.getAttribute('onclick') || '';
-    item.classList.toggle('active', target.includes(`showScreen('${name}')`));
-  });
+  const screen = document.getElementById('screen-' + name);
+  if (screen) screen.classList.add('active');
   window.scrollTo(0, 0);
   if (name === 'favorites') renderFavorites();
   if (name === 'browse') renderMoodGrid();
   if (name === 'home') fetchSuggestedMood();
+  if (name === 'search') {
+    // Clear any pending search timeout when entering search
+    clearTimeout(searchTimeout);
+    setTimeout(() => {
+      const input = document.getElementById('search-input');
+      if (input) input.focus();
+    }, 100);
+  }
 }
 
 // ============================================================
@@ -980,12 +1124,12 @@ function showScreen(name) {
 async function fetchSuggestedMood() {
   try {
     const r = await fetch('/api/suggest-mood');
+    if (!r.ok) throw new Error('API error');
     const d = await r.json();
-    document.getElementById('sug-mood').textContent = MOOD_LABELS[d.mood];
+    document.getElementById('sug-mood').textContent = MOOD_LABELS[d.mood] || d.mood;
     document.getElementById('sug-reason').textContent = d.reason;
     document.getElementById('sug-play-btn').dataset.mood = d.mood;
   } catch(e) {
-    // offline fallback
     const h = new Date().getHours();
     const m = h < 9 ? 'energetic' : h < 18 ? 'happy' : 'relaxed';
     document.getElementById('sug-mood').textContent = MOOD_LABELS[m];
@@ -999,19 +1143,18 @@ function playSuggested() {
 }
 
 // ============================================================
-// TAB SWITCHING
+// TAB SWITCHING (fixed: proper cleanup, no redundant logic)
 // ============================================================
 function switchTab(name) {
-  if (name !== 'voice' && isRecording) {
-    stopRecording();
-  }
-  ['text','voice','face'].forEach(t => {
+  const tabs = ['text', 'voice', 'face'];
+  const displayMap = { text: 'block', voice: 'flex', face: 'block' };
+
+  tabs.forEach(t => {
     document.getElementById('tab-' + t).classList.toggle('active', t === name);
-    document.getElementById('panel-' + t).style.display = t === name ? (t === 'text' ? 'block' : 'flex') : 'none';
+    document.getElementById('panel-' + t).style.display = t === name ? displayMap[t] : 'none';
   });
-  document.getElementById('panel-text').style.display = name === 'text' ? 'block' : 'none';
-  document.getElementById('panel-voice').style.display = name === 'voice' ? 'flex' : 'none';
-  document.getElementById('panel-face').style.display = name === 'face' ? 'block' : 'none';
+
+  // Stop camera if switching away from face tab
   if (name !== 'face' && mediaStream) {
     mediaStream.getTracks().forEach(t => t.stop());
     mediaStream = null;
@@ -1019,6 +1162,11 @@ function switchTab(name) {
     document.getElementById('camera-overlay').style.display = 'flex';
     document.getElementById('analyze-face-btn').style.display = 'none';
     document.getElementById('start-camera-btn').style.display = 'flex';
+  }
+  
+  // Stop recording if switching away from voice tab
+  if (name !== 'voice' && isRecording) {
+    stopRecording();
   }
 }
 
@@ -1035,12 +1183,12 @@ async function analyzeMoodFromText() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text })
     });
+    if (!r.ok) throw new Error('API error');
     const d = await r.json();
     hideLoading();
     loadMoodResults(d.mood);
   } catch(e) {
     hideLoading();
-    // Fallback offline detection
     const mood = detectMoodOffline(text);
     loadMoodResults(mood);
   }
@@ -1049,17 +1197,19 @@ async function analyzeMoodFromText() {
 function detectMoodOffline(text) {
   const t = text.toLowerCase();
   const checks = {
-    happy: ['happy','joy','excited','great','amazing','good','wonderful','cheerful','awesome','love'],
+    happy: ['happy','joy','excited','great','amazing','good','wonderful','cheerful','awesome'],
     sad: ['sad','cry','depressed','heartbroken','lonely','miss','grief','unhappy','hurt'],
     angry: ['angry','mad','furious','hate','frustrated','rage','irritated','annoyed'],
     relaxed: ['calm','relaxed','peaceful','chill','serene','quiet','content'],
     energetic: ['energetic','pumped','motivated','workout','gym','run','energy'],
     stressed: ['stressed','anxious','worried','tense','overwhelmed','pressure','exhausted'],
-    romantic: ['love','romantic','heart','crush','affection','date','kiss','relationship'],
+    romantic: ['romantic','heart','crush','affection','date','kiss','relationship'],
   };
   for (const [mood, kws] of Object.entries(checks)) {
     if (kws.some(kw => t.includes(kw))) return mood;
   }
+  // Check 'love' separately since it can be happy or romantic
+  if (t.includes('love')) return 'romantic';
   return 'neutral';
 }
 
@@ -1078,7 +1228,9 @@ function startRecording() {
   }
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   recognition = new SR();
-  recognition.continuous = false; recognition.interimResults = true; recognition.lang = 'en-US';
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
   recognition.onstart = () => {
     isRecording = true;
     document.getElementById('mic-btn').classList.add('recording');
@@ -1098,7 +1250,7 @@ function startRecording() {
 
 function stopRecording() {
   isRecording = false;
-  if (recognition) recognition.stop();
+  if (recognition) { try { recognition.stop(); } catch(e) {} }
   document.getElementById('mic-btn').classList.remove('recording');
   document.getElementById('mic-btn').textContent = '🎤';
   document.getElementById('voice-status').textContent = 'Tap to start speaking';
@@ -1107,7 +1259,7 @@ function stopRecording() {
 async function analyzeVoiceText() {
   const text = voiceText || document.getElementById('voice-transcript').textContent;
   if (!text || text === 'Your words will appear here...') {
-    showToast('Please record your voice first');
+    showToast('Please record your voice first'); 
     return;
   }
   showLoading('Analyzing voice mood...');
@@ -1117,12 +1269,18 @@ async function analyzeVoiceText() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text })
     });
+    if (!r.ok) throw new Error('API error');
     const d = await r.json();
     hideLoading();
-    if (!d || !d.mood) throw new Error('Invalid mood response');
+    // Reset voice text after analysis
+    voiceText = '';
+    document.getElementById('voice-transcript').textContent = 'Your words will appear here...';
     loadMoodResults(d.mood);
-  } catch (e) {
+  } catch(e) {
     hideLoading();
+    // Reset voice text after analysis
+    voiceText = '';
+    document.getElementById('voice-transcript').textContent = 'Your words will appear here...';
     loadMoodResults(detectMoodOffline(text));
   }
 }
@@ -1132,6 +1290,10 @@ async function analyzeVoiceText() {
 // ============================================================
 async function startCamera() {
   try {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      showToast('📷 Camera not supported. Please use a secure context (HTTPS/localhost).');
+      return;
+    }
     mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
     const video = document.getElementById('camera-video');
     video.srcObject = mediaStream;
@@ -1148,22 +1310,70 @@ async function startCamera() {
   }
 }
 
-function analyzeFace() {
-  // Simulate AI face analysis with random emotion (for demo - real app uses TensorFlow backend)
-  const moods = ['happy', 'sad', 'neutral', 'energetic', 'relaxed'];
-  const detected = moods[Math.floor(Math.random() * moods.length)];
-  showLoading('Analyzing your expression...');
-  setTimeout(() => {
+async function analyzeFace() {
+  if (!mediaStream) {
+    showToast('Camera not started. Please start camera first.');
+    return;
+  }
+  
+  if (!faceApiLoaded) {
+    showToast('AI Model still loading... please wait a moment.');
+    return;
+  }
+
+  showLoading('Analyzing expression...');
+  
+  try {
+    const video = document.getElementById('camera-video');
+    const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceExpressions();
+    
+    if (!detection) {
+      hideLoading();
+      return showToast('❌ No face detected. Please ensure your face is clearly visible.');
+    }
+
+    const expressions = detection.expressions;
+    const bestExpression = Object.keys(expressions).reduce((a, b) => expressions[a] > expressions[b] ? a : b);
+    const confidence = (expressions[bestExpression] * 100).toFixed(0);
+
+    let mappedMood = 'relaxed';
+    if (bestExpression === 'happy') mappedMood = 'happy';
+    if (bestExpression === 'sad') mappedMood = 'sad';
+    if (bestExpression === 'neutral') mappedMood = 'relaxed';
+    if (bestExpression === 'angry' || bestExpression === 'surprised') mappedMood = 'energetic';
+    if (bestExpression === 'fearful' || bestExpression === 'disgusted') mappedMood = 'stressed';
+    
     hideLoading();
-    showToast(`Expression detected: ${detected.toUpperCase()}`);
-    loadMoodResults(detected);
-  }, 2000);
+    showToast(`Detected: ${mappedMood.toUpperCase()} (${confidence}% ${bestExpression})`);
+    
+    // Stop camera after analysis
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(t => t.stop());
+      mediaStream = null;
+      document.getElementById('camera-video').style.display = 'none';
+      document.getElementById('camera-overlay').style.display = 'flex';
+      document.getElementById('analyze-face-btn').style.display = 'none';
+      document.getElementById('start-camera-btn').style.display = 'flex';
+    }
+    
+    currentMood = mappedMood;
+    await loadMoodResults(mappedMood);
+  } catch (e) {
+    hideLoading();
+    console.error('Face analysis error:', e);
+    showToast('❌ Failed to analyze expression.');
+  }
 }
 
 // ============================================================
 // LOAD MOOD RESULTS
 // ============================================================
 async function loadMoodResults(mood) {
+  // Validate mood
+  if (!mood || typeof mood !== 'string' || !MOOD_LABELS[mood]) {
+    showToast('Invalid mood detected');
+    return;
+  }
   currentMood = mood;
   currentLang = 'All';
   showLoading('Finding perfect songs...');
@@ -1174,36 +1384,40 @@ async function loadMoodResults(mood) {
   document.getElementById('res-mood').textContent = MOOD_LABELS[mood] || mood;
   document.getElementById('res-desc').textContent = getMoodDesc(mood);
   const tags = MOOD_GENRES[mood] || ['Music'];
-  document.getElementById('res-tags').innerHTML = tags.map(t => `<span class="mood-tag">${t}</span>`).join('');
+  document.getElementById('res-tags').innerHTML = tags.map(t => `<span class="mood-tag">${escapeHtml(t)}</span>`).join('');
 
-  // Build language filter
-  await buildLangFilter(mood);
-
-  // Load songs
-  await loadSongs(mood, 'All');
+  try {
+    await buildLangFilter(mood);
+    await loadSongs(mood, 'All');
+  } catch(e) {
+    console.error('Error loading mood results:', e);
+    showToast('Error loading songs');
+  }
   hideLoading();
 }
 
 async function buildLangFilter(mood) {
+  let languages;
   try {
-    const r = await fetch(`/api/languages?mood=${mood}`);
+    const r = await fetch(`/api/languages?mood=${encodeURIComponent(mood)}`);
+    if (!r.ok) throw new Error('API error');
     const d = await r.json();
-    const filter = document.getElementById('lang-filter');
-    filter.innerHTML = d.languages.map((l, i) =>
-      `<button class="lang-chip ${i === 0 ? 'active' : ''}" onclick="filterLang('${l}', this)">${l}</button>`
-    ).join('');
+    languages = d.languages || ['All'];
   } catch(e) {
-    const langs = ['All','Tamil','Hindi','English','Telugu','Malayalam','Kannada','Bengali','Korean'];
-    const filter = document.getElementById('lang-filter');
-    filter.innerHTML = langs.map((l, i) =>
-      `<button class="lang-chip ${i === 0 ? 'active' : ''}" onclick="filterLang('${l}', this)">${l}</button>`
-    ).join('');
+    console.error('Language fetch error:', e);
+    languages = ['All','Tamil','Hindi','English','Telugu','Malayalam','Kannada','Bengali','Korean'];
   }
+  const filter = document.getElementById('lang-filter');
+  if (!filter) return;
+  filter.innerHTML = languages.map((l, i) =>
+    `<button class="lang-chip ${i === 0 ? 'active' : ''}" onclick="filterLang('${escapeHtml(l)}', this)">${escapeHtml(l)}</button>`
+  ).join('');
 }
 
 async function loadSongs(mood, lang) {
   try {
-    const r = await fetch(`/api/songs?mood=${mood}&lang=${encodeURIComponent(lang)}`);
+    const r = await fetch(`/api/songs?mood=${encodeURIComponent(mood)}&lang=${encodeURIComponent(lang)}`);
+    if (!r.ok) throw new Error('API error');
     const d = await r.json();
     currentSongs = d.songs;
     renderSongs(currentSongs, 'songs-list');
@@ -1213,11 +1427,17 @@ async function loadSongs(mood, lang) {
 }
 
 function filterLang(lang, el) {
+  // Validate lang
+  if (!lang || typeof lang !== 'string') return;
   currentLang = lang;
   document.querySelectorAll('#lang-filter .lang-chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
+  if (el) el.classList.add('active');
   showLoading('Loading songs...');
-  loadSongs(currentMood, lang).then(() => hideLoading());
+  loadSongs(currentMood, lang).then(() => hideLoading()).catch(err => {
+    console.error('Error loading songs:', err);
+    hideLoading();
+    showToast('Error loading songs');
+  });
 }
 
 async function refreshSongs() {
@@ -1228,11 +1448,11 @@ async function refreshSongs() {
 }
 
 // ============================================================
-// RENDER SONGS
+// RENDER SONGS (fixed: no JSON.stringify in onclick — uses data-index)
 // ============================================================
 function renderSongs(songs, containerId) {
   const el = document.getElementById(containerId);
-  const color = MOOD_COLORS[currentMood] || '#7c3aed';
+  const color = MOOD_COLORS[currentMood] || '#6366f1';
   if (!songs || songs.length === 0) {
     el.innerHTML = `<div class="empty-state"><div class="empty-icon">🎵</div><div class="empty-title">No songs found</div><div class="empty-sub">Try a different language filter</div></div>`;
     return;
@@ -1241,43 +1461,36 @@ function renderSongs(songs, containerId) {
   el.innerHTML = renderedSongs.map((song, i) => {
     const artColor = SONG_ART_COLORS[i % SONG_ART_COLORS.length];
     const isFav = favorites.some(f => f.title === song.title && f.artist === song.artist);
-    const spotifyQuery = encodeURIComponent(`${song.title} ${song.artist}`);
     return `
-    <div class="song-card" id="card-${i}" onclick='playSongByIndex(${i})'>
-      <div class="song-num" style="background:${color}22;color:${color}">${String(i+1).padStart(2,'0')}</div>
+    <div class="song-card" data-index="${i}" onclick="playSongByIndex(${i})">
+      <div class="song-num" style="background:${color}15;color:${color}">${String(i+1).padStart(2,'0')}</div>
       <div class="song-art" style="background:${artColor}">🎵</div>
       <div class="song-info">
-        <div class="song-title">${song.title}</div>
-        <div class="song-artist">${song.artist}</div>
-        <div class="song-movie">${song.movie}</div>
+        <div class="song-title">${escapeHtml(song.title)}</div>
+        <div class="song-artist">${escapeHtml(song.artist)}</div>
+        <div class="song-movie">${escapeHtml(song.movie || '')}</div>
         <div class="song-chips">
-          <span class="song-chip">${song.genre || 'Music'}</span>
-          <span class="song-chip">${song.year}</span>
-          ${song.language ? `<span class="song-chip lang">${song.language}</span>` : ''}
+          <span class="song-chip">${escapeHtml(song.genre || 'Music')}</span>
+          <span class="song-chip">${song.year || ''}</span>
+          ${song.language ? `<span class="song-chip lang">${escapeHtml(song.language)}</span>` : ''}
         </div>
       </div>
       <div class="song-actions">
-        <button class="song-icon-btn ${isFav ? 'liked' : ''}" onclick='event.stopPropagation(); toggleFav(this, ${JSON.stringify(song)})' title="Save to favorites">
+        <button class="song-icon-btn ${isFav ? 'liked' : ''}" data-fav-index="${i}" onclick="event.stopPropagation(); toggleFavByIndex(this, ${i})" title="Save to favorites">
           ${isFav ? '♥' : '♡'}
         </button>
-        <button class="song-icon-btn yt-play" onclick='event.stopPropagation(); playSongByIndex(${i})' title="Play song">▶</button>
-        <a href="https://open.spotify.com/search/${spotifyQuery}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
-          <button class="song-icon-btn" style="color:var(--spotify);font-size:14px" title="Find on Spotify">🎵</button>
-        </a>
+        <button class="song-icon-btn yt-play" onclick="event.stopPropagation(); playSongByIndex(${i})" title="Play song">▶</button>
       </div>
     </div>`;
   }).join('');
-
-  // Store first song for share
-  if (renderedSongs.length > 0) {
-    shareData = { song: renderedSongs[0], mood: currentMood };
-  }
 }
 
 // ============================================================
-// FAVORITES
+// FAVORITES (fixed: safe index-based operations, no JSON in attributes)
 // ============================================================
-function toggleFav(btn, song) {
+function toggleFavByIndex(btn, index) {
+  const song = renderedSongs[index];
+  if (!song) return;
   const idx = favorites.findIndex(f => f.title === song.title && f.artist === song.artist);
   if (idx >= 0) {
     favorites.splice(idx, 1);
@@ -1285,12 +1498,26 @@ function toggleFav(btn, song) {
     btn.classList.remove('liked');
     showToast('Removed from favorites');
   } else {
-    favorites.push(song);
+    favorites.push({ ...song }); // Clone to avoid reference issues
     btn.textContent = '♥';
     btn.classList.add('liked');
     showToast('♥ Saved to favorites!');
   }
-  localStorage.setItem('songstr_fav', JSON.stringify(favorites));
+  saveFavorites();
+}
+
+function saveFavorites() {
+  try {
+    localStorage.setItem('songstr_fav', JSON.stringify(favorites));
+  } catch(e) {
+    // Handle quota exceeded or other storage errors
+    if (e.name === 'QuotaExceededError') {
+      showToast('Storage limit exceeded. Some favorites may not be saved.');
+      console.error('localStorage quota exceeded:', e);
+    } else {
+      console.error('Failed to save favorites:', e);
+    }
+  }
 }
 
 function renderFavorites() {
@@ -1302,29 +1529,30 @@ function renderFavorites() {
   el.innerHTML = favorites.map((song, i) => {
     const artColor = SONG_ART_COLORS[i % SONG_ART_COLORS.length];
     return `
-    <div class="song-card" onclick='playSongFavorite(${i})'>
-      <div class="song-num" style="background:rgba(236,72,153,0.15);color:#ec4899">${String(i+1).padStart(2,'0')}</div>
+    <div class="song-card" onclick="playSongFavorite(${i})">
+      <div class="song-num" style="background:rgba(244,114,182,0.1);color:#f472b6">${String(i+1).padStart(2,'0')}</div>
       <div class="song-art" style="background:${artColor}">🎵</div>
       <div class="song-info">
-        <div class="song-title">${song.title}</div>
-        <div class="song-artist">${song.artist}</div>
-        <div class="song-movie">${song.movie || ''}</div>
+        <div class="song-title">${escapeHtml(song.title)}</div>
+        <div class="song-artist">${escapeHtml(song.artist)}</div>
+        <div class="song-movie">${escapeHtml(song.movie || '')}</div>
         <div class="song-chips">
-          <span class="song-chip">${song.genre || 'Music'}</span>
-          ${song.language ? `<span class="song-chip lang">${song.language}</span>` : ''}
+          <span class="song-chip">${escapeHtml(song.genre || 'Music')}</span>
+          ${song.language ? `<span class="song-chip lang">${escapeHtml(song.language)}</span>` : ''}
         </div>
       </div>
       <div class="song-actions">
-        <button class="song-icon-btn liked" onclick='event.stopPropagation(); removeFav(this, ${i})' title="Remove">♥</button>
-        <button class="song-icon-btn yt-play" onclick='event.stopPropagation(); playSongFavorite(${i})' title="Play song">▶</button>
+        <button class="song-icon-btn liked" onclick="event.stopPropagation(); removeFav(${i})" title="Remove">♥</button>
+        <button class="song-icon-btn yt-play" onclick="event.stopPropagation(); playSongFavorite(${i})" title="Play song">▶</button>
       </div>
     </div>`;
   }).join('');
 }
 
-function removeFav(btn, idx) {
+function removeFav(idx) {
+  if (idx < 0 || idx >= favorites.length) return;
   favorites.splice(idx, 1);
-  localStorage.setItem('songstr_fav', JSON.stringify(favorites));
+  saveFavorites();
   renderFavorites();
   showToast('Removed from favorites');
 }
@@ -1336,20 +1564,27 @@ async function renderMoodGrid() {
   let moods;
   try {
     const r = await fetch('/api/moods');
+    if (!r.ok) throw new Error('API error');
     const d = await r.json();
-    moods = d.moods;
+    moods = d.moods.map(id => ({
+      id, 
+      emoji: MOOD_EMOJIS[id] || '🎵', 
+      label: id.charAt(0).toUpperCase() + id.slice(1),
+      description: getMoodDesc(id), 
+      color: MOOD_COLORS[id] || '#ffffff'
+    }));
   } catch(e) {
     moods = Object.entries(MOOD_EMOJIS).map(([id, emoji]) => ({
       id, emoji, label: id.charAt(0).toUpperCase() + id.slice(1),
-      description: getMoodDesc(id), color: MOOD_COLORS[id]
+      description: getMoodDesc(id), color: MOOD_COLORS[id] || '#ffffff'
     }));
   }
   const grid = document.getElementById('moods-grid');
   grid.innerHTML = moods.map(m => `
-    <div class="mood-card" style="border-color: ${m.color}22" onclick="loadMoodResults('${m.id}')">
+    <div class="mood-card" style="--mood-color-glow: ${m.color}20; border-color: ${m.color}15" onclick="loadMoodResults('${escapeHtml(m.id)}')">
       <span class="mood-emoji">${m.emoji}</span>
-      <div class="mood-name" style="color:${m.color}">${m.label}</div>
-      <div class="mood-tagline">${m.description}</div>
+      <div class="mood-name" style="color:${m.color}">${escapeHtml(m.label)}</div>
+      <div class="mood-tagline">${escapeHtml(m.description)}</div>
     </div>
   `).join('');
 }
@@ -1360,40 +1595,39 @@ async function renderMoodGrid() {
 let searchTimeout;
 async function searchSongs(q) {
   clearTimeout(searchTimeout);
-  if (q.length < 2) {
+  if (!q || q.length < 2) {
     document.getElementById('search-results').innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">Start typing to search</div></div>`;
     return;
   }
   searchTimeout = setTimeout(async () => {
     try {
       const r = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+      if (!r.ok) throw new Error('API error');
       const d = await r.json();
       if (d.results.length === 0) {
-        document.getElementById('search-results').innerHTML = `<div class="empty-state"><div class="empty-icon">🎵</div><div class="empty-title">No results for "${q}"</div></div>`;
+        document.getElementById('search-results').innerHTML = `<div class="empty-state"><div class="empty-icon">🎵</div><div class="empty-title">No results for "${escapeHtml(q)}"</div></div>`;
         searchResults = [];
         return;
       }
       searchResults = d.results.slice(0, 20);
       const el = document.getElementById('search-results');
-      el.innerHTML = searchResults.map((song, i) => {
-        return `
-        <div class="song-card" onclick='playSongSearch(${i})'>
-          <div class="song-num" style="background:rgba(124,58,237,0.15);color:var(--purple-light)">${String(i+1).padStart(2,'0')}</div>
+      el.innerHTML = searchResults.map((song, i) => `
+        <div class="song-card" onclick="playSongSearch(${i})">
+          <div class="song-num" style="background:rgba(99,102,241,0.1);color:var(--accent-light)">${String(i+1).padStart(2,'0')}</div>
           <div class="song-art" style="background:${SONG_ART_COLORS[i%8]}">🎵</div>
           <div class="song-info">
-            <div class="song-title">${song.title}</div>
-            <div class="song-artist">${song.artist}</div>
-            <div class="song-movie">${song.movie}</div>
+            <div class="song-title">${escapeHtml(song.title)}</div>
+            <div class="song-artist">${escapeHtml(song.artist)}</div>
+            <div class="song-movie">${escapeHtml(song.movie || '')}</div>
             <div class="song-chips">
-              <span class="song-chip">${song.mood}</span>
-              <span class="song-chip lang">${song.language}</span>
+              <span class="song-chip">${escapeHtml(song.mood || '')}</span>
+              <span class="song-chip lang">${escapeHtml(song.language || '')}</span>
             </div>
           </div>
           <div class="song-actions">
-            <button class="song-icon-btn yt-play" onclick='event.stopPropagation(); playSongSearch(${i})'>▶</button>
+            <button class="song-icon-btn yt-play" onclick="event.stopPropagation(); playSongSearch(${i})">▶</button>
           </div>
-        </div>`;
-      }).join('');
+        </div>`).join('');
     } catch(e) {
       showToast('Search unavailable offline');
     }
@@ -1401,21 +1635,79 @@ async function searchSongs(q) {
 }
 
 // ============================================================
-// SPOTIFY + YOUTUBE
+// PLAY
 // ============================================================
-function openSpotifySearch() {
-  const q = encodeURIComponent(`${currentMood} mood ${currentLang !== 'All' ? currentLang : ''}`);
-  window.open(`https://open.spotify.com/search/${q}`, '_blank');
+
+function playSongByIndex(index) {
+  const song = renderedSongs[index];
+  if (song) playSong(song);
+}
+
+function playSongFavorite(index) {
+  const song = favorites[index];
+  if (song) playSong(song);
+}
+
+function playSongSearch(index) {
+  const song = searchResults[index];
+  if (song) playSong(song);
+}
+
+function playSong(song) {
+  const title = song.title || 'Songstr track';
+  const artist = song.artist || '';
+  const audio = document.getElementById('player-audio');
+  const modal = document.getElementById('player-modal');
+
+  try {
+    // Play local uploaded file when available
+    if (song.file) {
+      if (audio) {
+        audio.src = song.file;
+        audio.style.display = 'block';
+        
+        // Update the title element
+        const titleEl = document.getElementById('player-song-title');
+        if (titleEl) titleEl.textContent = artist ? `${title} — ${artist}` : title;
+
+        modal.classList.add('open');
+        audio.play().catch(() => showToast('Tap play to start audio'));
+        showToast(`🎵 Playing: ${title}`);
+        return;
+      }
+    }
+
+    // No local file: suggest uploading the file
+    showToast('No local file available. Please upload the song to /public/audio.');
+  } catch (err) {
+    console.error('Player open error:', err);
+    showToast('Player error. Please try again.');
+  }
+}
+
+function closePlayerModal() {
+  const audio = document.getElementById('player-audio');
+  if (audio) { try { audio.pause(); } catch(e) {} audio.src = ''; audio.style.display = 'none'; }
+  const modal = document.getElementById('player-modal');
+  if (modal) modal.classList.remove('open');
 }
 
 // ============================================================
 // SHARE MODAL
 // ============================================================
 function openShareModal() {
+  // Validate songs exist and have data
+  if (!currentSongs || currentSongs.length === 0) { 
+    showToast('No song to share'); 
+    return; 
+  }
   const song = currentSongs[0];
-  if (!song) { showToast('No song to share'); return; }
+  if (!song || !song.title || !song.artist) {
+    showToast('Invalid song data');
+    return;
+  }
   document.getElementById('sc-emoji').textContent = MOOD_EMOJIS[currentMood] || '🎵';
-  document.getElementById('sc-mood').textContent = MOOD_LABELS[currentMood];
+  document.getElementById('sc-mood').textContent = MOOD_LABELS[currentMood] || currentMood;
   document.getElementById('sc-song').textContent = song.title;
   document.getElementById('sc-artist').textContent = song.artist;
   document.getElementById('share-modal').classList.add('open');
@@ -1426,12 +1718,14 @@ function closeShareModal() {
 }
 
 function copyShareText() {
-  const song = currentSongs[0];
-  const text = `🎵 Songstr – My current vibe: ${MOOD_LABELS[currentMood]} ${MOOD_EMOJIS[currentMood]}\nNow playing: ${song?.title} - ${song?.artist}\n#Songstr #MoodMusic`;
+  const song = currentSongs && currentSongs[0];
+  if (!song || !song.title || !song.artist) {
+    showToast('No valid song to share');
+    return;
+  }
+  const text = `🎵 Songstr – My current vibe: ${MOOD_LABELS[currentMood]} ${MOOD_EMOJIS[currentMood]}\nNow playing: ${song.title} - ${song.artist}\n#Songstr #MoodMusic`;
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text)
-      .then(() => showToast('Copied to clipboard!'))
-      .catch(() => showToast('Unable to copy to clipboard'));
+    navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard!'));
   } else {
     showToast('Clipboard not available');
   }
@@ -1439,54 +1733,34 @@ function copyShareText() {
 }
 
 function shareNative() {
-  const song = currentSongs[0];
-  const text = `🎵 My mood on Songstr: ${MOOD_LABELS[currentMood]} ${MOOD_EMOJIS[currentMood]}\nNow playing: ${song?.title} - ${song?.artist}`;
+  const song = currentSongs && currentSongs[0];
+  if (!song || !song.title || !song.artist) {
+    showToast('No valid song to share');
+    return;
+  }
+  const text = `🎵 My mood on Songstr: ${MOOD_LABELS[currentMood]} ${MOOD_EMOJIS[currentMood]}\nNow playing: ${song.title} - ${song.artist}`;
   if (navigator.share) {
-    navigator.share({ title: 'Songstr', text, url: window.location.href });
+    navigator.share({ title: 'Songstr', text, url: window.location.href }).catch(() => {});
   } else {
     copyShareText();
   }
   closeShareModal();
 }
 
-function playSongByIndex(index) {
-  const song = renderedSongs[index];
-  if (!song) return;
-  playSong(song);
-}
-
-function playSongFavorite(index) {
-  const song = favorites[index];
-  if (!song) return;
-  playSong(song);
-}
-
-function playSongSearch(index) {
-  const song = searchResults[index];
-  if (!song) return;
-  playSong(song);
-}
-
-function playSong(song) {
-  const title = song.title || 'Songstr track';
-  const artist = song.artist || '';
-  const query = encodeURIComponent(`${title} ${artist}`);
-  document.getElementById('player-title').textContent = title;
-  document.getElementById('player-artist').textContent = artist;
-  const ytUrl = `https://www.youtube.com/results?search_query=${query}`;
-  window.open(ytUrl, 'youtube-player', 'width=1200,height=700');
-  showToast(`🎵 Playing: ${title}`);
-}
-
-function closePlayerModal() {
-  document.getElementById('player-modal').classList.remove('open');
-}
-
 // ============================================================
 // HELPERS
 // ============================================================
 function getMoodDesc(mood) {
-  const d = { happy:'Upbeat and joyful vibes', sad:'Soulful and emotional music', angry:'Intense and powerful sounds', relaxed:'Calm and soothing tunes', energetic:'High-energy beats', stressed:'Stress-relief soundscapes', romantic:'Romantic and passionate', neutral:'Versatile everyday mix' };
+  const d = {
+    happy: 'Upbeat and joyful vibes',
+    sad: 'Soulful and emotional music',
+    angry: 'Intense and powerful sounds',
+    relaxed: 'Calm and soothing tunes',
+    energetic: 'High-energy beats',
+    stressed: 'Stress-relief soundscapes',
+    romantic: 'Romantic and passionate',
+    neutral: 'Versatile everyday mix'
+  };
   return d[mood] || 'Personalized music picks';
 }
 
@@ -1496,6 +1770,12 @@ function getFallbackSongs(mood, lang) {
     { title: 'Happy', artist: 'Pharrell Williams', movie: 'Despicable Me 2', year: 2013, genre: 'Pop', language: 'English' },
     { title: 'Tum Hi Ho', artist: 'Arijit Singh', movie: 'Aashiqui 2', year: 2013, genre: 'Melody', language: 'Hindi' },
   ];
+}
+
+// XSS protection - escape HTML in user-generated/dynamic content
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
 function showLoading(text) {
@@ -1508,7 +1788,8 @@ function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2500);
 }
 
 // ============================================================
@@ -1517,6 +1798,111 @@ function showToast(msg) {
 document.addEventListener('DOMContentLoaded', () => {
   fetchSuggestedMood();
 });
+
+
+
+
+
+let isLoginMode = true;
+let currentUser = null;
+
+function openAuthModal() {
+  document.getElementById("auth-modal").classList.add("active");
+}
+
+function closeAuthModal() {
+  document.getElementById("auth-modal").classList.remove("active");
+}
+
+function toggleAuthMode() {
+  isLoginMode = !isLoginMode;
+
+
+  document.getElementById("auth-title").textContent =
+    isLoginMode ? "Login" : "Register";
+
+  document.getElementById("auth-submit-btn").textContent =
+    isLoginMode ? "Login" : "Register";
+
+  document.getElementById("auth-toggle-text").innerHTML =
+    isLoginMode
+      ? `Don't have an account? <span onclick="toggleAuthMode()">Register</span>`
+      : `Already have an account? <span onclick="toggleAuthMode()">Login</span>`;
+}
+
+
+
+async function submitAuth(e) {
+  e.preventDefault();
+
+  const username =
+    document.getElementById("auth-username").value;
+
+  const password =
+    document.getElementById("auth-password").value;
+
+  const endpoint =
+    isLoginMode
+      ? "/api/auth/login"
+      : "/api/auth/register";
+
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    credentials: "include",
+    body: JSON.stringify({
+      username,
+      password
+    })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    alert(data.error);
+    return;
+  }
+
+  currentUser = data.user;
+
+  alert(
+    isLoginMode
+      ? "Login successful"
+      : "Registration successful"
+  );
+
+  closeAuthModal();
+}
+
+
+async function checkLogin() {
+
+  const response =
+    await fetch("/api/auth/me", {
+      credentials: "include"
+    });
+
+  const data =
+    await response.json();
+
+  if (data.loggedIn) {
+    currentUser = data.user;
+
+    console.log(
+      "Logged in as:",
+      currentUser.username
+    );
+  }
+}
+
+window.addEventListener(
+  "load",
+  checkLogin
+);
 </script>
+
+<!-- Firebase Initialization -->
 </body>
 </html>

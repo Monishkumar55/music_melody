@@ -5,11 +5,23 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "test": "mocha test/**/*.test.js --exit",
+    "lint": "eslint ."
   },
   "dependencies": {
-    "body-parser": "^1.20.3",
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.11.1",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "face-api.js": "^0.22.2",
+    "jsonwebtoken": "^9.0.3",
+    "react-router-dom": "^7.18.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.16.0",
+    "mocha": "^10.8.2",
+    "supertest": "^7.0.0"
   }
 }
