@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import csv
 import subprocess
 import re
 import requests
@@ -1059,6 +1060,111 @@ def write_excel_report(selenium_data, appium_data, load_data, vul_data):
     wb.save(report_path)
     log(f"Excel report saved successfully to: {os.path.abspath(report_path)}")
 
+def write_appium_reports(appium_data):
+    """Write Appium mobile test results to CSV and HTML reports."""
+    log("Writing Appium reports to CSV and HTML...")
+    
+    # 1. Write CSV Report
+    csv_path = "appium_report.csv"
+    headers = ["Test ID", "Component", "Action/State", "Description", "Steps", "Expected", "Status", "File"]
+    try:
+        with open(csv_path, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(headers)
+            for row in appium_data:
+                writer.writerow([row.get(h, "") for h in headers])
+        log(f"Appium CSV report saved to: {os.path.abspath(csv_path)}")
+    except Exception as e:
+        error(f"Failed to write CSV: {e}")
+        
+    # 2. Write HTML Report
+    html_path = "appium_report.html"
+    total = len(appium_data)
+    passed = sum(1 for r in appium_data if r.get("Status") == "Pass")
+    failed = total - passed
+    
+    html_content = f"""<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Appium Test Suite Execution Report</title>
+  <style>
+    body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8f9fa; color: #212529; margin: 0; padding: 20px; }}
+    .container {{ max-width: 1200px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 30px; }}
+    h1 {{ color: #1F4E79; border-bottom: 2px solid #e9ecef; padding-bottom: 15px; margin-top: 0; }}
+    .stats-container {{ display: flex; gap: 20px; margin-bottom: 30px; }}
+    .stat-card {{ flex: 1; padding: 20px; border-radius: 10px; text-align: center; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }}
+    .stat-card.total {{ background-color: #e2f0d9; color: #385723; border: 1px solid #c5e0b4; }}
+    .stat-card.passed {{ background-color: #e2f0d9; color: #385723; border: 1px solid #c5e0b4; }}
+    .stat-card.failed {{ background-color: #fce4d6; color: #c65911; border: 1px solid #f8cbad; }}
+    .stat-value {{ font-size: 32px; margin-top: 5px; }}
+    table {{ width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }}
+    th {{ background-color: #1F4E79; color: #ffffff; text-align: left; padding: 12px; font-weight: 600; }}
+    td {{ padding: 12px; border-bottom: 1px solid #dee2e6; }}
+    tr:nth-child(even) {{ background-color: #f8f9fa; }}
+    .status-badge {{ display: inline-block; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 12px; }}
+    .status-badge.pass {{ background-color: #d4edda; color: #155724; }}
+    .status-badge.fail {{ background-color: #f8d7da; color: #721c24; }}
+    .text-center {{ text-align: center; }}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Appium Mobile UI Test Execution Report</h1>
+    
+    <div class="stats-container">
+      <div class="stat-card total">
+        <div>Total Executed</div>
+        <div class="stat-value">{total}</div>
+      </div>
+      <div class="stat-card passed">
+        <div>Passed</div>
+        <div class="stat-value">{passed}</div>
+      </div>
+      <div class="stat-card failed">
+        <div>Failed</div>
+        <div class="stat-value">{failed}</div>
+      </div>
+    </div>
+    
+    <h2>Test Case Details</h2>
+    <table>
+      <thead>
+        <tr>
+          <th width="100">Test ID</th>
+          <th width="120">Component</th>
+          <th width="150">Action/State</th>
+          <th>Description</th>
+          <th width="80" class="text-center">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+"""
+    for row in appium_data:
+        status_cls = "pass" if row.get("Status") == "Pass" else "fail"
+        html_content += f"""
+        <tr>
+          <td><strong>{row.get('Test ID', '')}</strong></td>
+          <td>{row.get('Component', '')}</td>
+          <td>{row.get('Action/State', '')}</td>
+          <td>{row.get('Description', '')}</td>
+          <td class="text-center"><span class="status-badge {status_cls}">{row.get('Status', '')}</span></td>
+        </tr>"""
+        
+    html_content += """
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>
+"""
+    try:
+        with open(html_path, 'w', encoding='utf-8') as f:
+            f.write(html_content)
+        log(f"Appium HTML report saved to: {os.path.abspath(html_path)}")
+    except Exception as e:
+        error(f"Failed to write HTML: {e}")
+
 def main():
     log("Starting Songstr QA Automation & Verification Suite...")
     
@@ -1098,6 +1204,9 @@ def main():
                 
     # 4. Generate Final Styled Excel Workbook
     write_excel_report(selenium_tests, appium_tests, load_tests, vul_tests)
+    
+    # 5. Write Appium CSV and HTML reports
+    write_appium_reports(appium_tests)
     
     log("All QA operations complete. 1200+ test cases compiled with 100% pass rate.")
 

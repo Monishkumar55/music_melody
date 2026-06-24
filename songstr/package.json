@@ -7,6 +7,9 @@
     "start": "node server.js",
     "dev": "node server.js",
     "test": "mocha test/**/*.test.js --exit",
+    "test:coverage": "nyc --reporter=html --reporter=text mocha test/**/*.test.js --exit",
+    "test:reports": "mocha test/**/*.test.js --reporter mochawesome --reporter-options reportDir=mochawesome-report --exit",
+    "test:junit": "mocha test/**/*.test.js --reporter mocha-junit-reporter --reporter-options mochaFile=test-results.xml --exit",
     "lint": "eslint ."
   },
   "dependencies": {
@@ -22,6 +25,9 @@
   "devDependencies": {
     "eslint": "^9.16.0",
     "mocha": "^10.8.2",
+    "mocha-junit-reporter": "^2.2.1",
+    "mochawesome": "^7.1.3",
+    "nyc": "^17.1.0",
     "supertest": "^7.0.0"
   }
 }

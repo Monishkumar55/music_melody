@@ -53,8 +53,15 @@ def main():
         log("Linting completed with 0 errors and 0 warnings.")
 
     # 3. Run Mocha Unit & Integration Tests
-    log("Running Mocha API integration tests...")
-    proc_test = run_cmd(["npm", "test"], subproject_dir)
+    log("Running Mocha API integration tests with coverage and reports...")
+    # Run test coverage
+    proc_cov = run_cmd(["npm", "run", "test:coverage"], subproject_dir)
+    # Run mochawesome HTML reports
+    proc_html = run_cmd(["npm", "run", "test:reports"], subproject_dir)
+    # Run JUnit XML reports
+    proc_junit = run_cmd(["npm", "run", "test:junit"], subproject_dir)
+    
+    proc_test = proc_html
     
     mocha_passed = 0
     mocha_failed = 0
