@@ -258,7 +258,7 @@ jobs:
       - name: Run mobile E2E tests (Chrome mobile emulation, with retries)
         working-directory: songstr
         run: |
-          cat > /tmp/mobile_e2e_runner.js << 'MOBILE_EOF'
+          cat > test/mobile_ci.e2e.js << 'MOBILE_EOF'
           const { Builder } = require('selenium-webdriver');
           const chrome = require('selenium-webdriver/chrome');
           const assert = require('assert');
@@ -319,7 +319,7 @@ jobs:
           });
           MOBILE_EOF
 
-          npx mocha /tmp/mobile_e2e_runner.js \
+          npx mocha test/mobile_ci.e2e.js \
             --retries 3 \
             --timeout 60000 \
             --exit \
