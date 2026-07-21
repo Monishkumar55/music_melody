@@ -20,7 +20,7 @@ export default function () {
   const res = http.get('http://localhost:3000');
   check(res, {
     'status is 200': (r) => r.status === 200,
-    'body contains html': (r) => r.body && r.body.includes('<html>'),
+    'body contains html': (r) => r.body && r.body.includes('<html'),
   });
   sleep(1);
 }
