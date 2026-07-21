@@ -1,7 +1,7 @@
 import { AuthContext } from '../context/AuthContext.js';
 
 // List of screens that require authentication
-const protectedScreens = ['screen-home', 'screen-browse', 'screen-favorites', 'screen-detect'];
+const protectedScreens = ['screen-home', 'screen-browse', 'screen-favorites', 'screen-detect', 'screen-profile'];
 
 export function isScreenProtected(screenId) {
   return protectedScreens.includes(screenId);

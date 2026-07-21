@@ -6,6 +6,12 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const Database = require('better-sqlite3');
+const multer = require('multer');
+
+const upload = multer({
+  dest: path.join(__dirname, 'public', 'uploads', 'avatars'),
+  limits: { fileSize: 5 * 1024 * 1024 }
+});
 
 const app = express();
 app.use(cors({
@@ -25,9 +31,22 @@ db.exec(`
     email TEXT UNIQUE NOT NULL,
     fullname TEXT NOT NULL,
     phone TEXT,
+    dob TEXT,
+    gender TEXT,
+    country TEXT,
+    state TEXT,
+    city TEXT,
+    bio TEXT,
+    favoriteGenres TEXT,
+    avatar TEXT,
+    theme TEXT DEFAULT 'system',
+    language TEXT DEFAULT 'en',
+    notifications TEXT DEFAULT 'true',
     password_hash TEXT NOT NULL,
     role TEXT DEFAULT 'user',
-    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    lastLogin DATETIME
   );
   CREATE TABLE IF NOT EXISTS favorites (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -684,6 +703,8 @@ app.post('/api/auth/login', (req, res) => {
     const match = bcrypt.compareSync(password, user.password_hash);
     if (!match) return res.status(400).json({ error: 'Invalid username or password.' });
 
+    db.prepare('UPDATE users SET lastLogin = CURRENT_TIMESTAMP WHERE id = ?').run(user.id);
+
     const token = jwt.sign({ id: user.id, username: user.username, email: user.email, fullname: user.fullname, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
     res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
     res.json({ success: true, user: { id: user.id, username: user.username, email: user.email, fullname: user.fullname, role: user.role } });
@@ -718,6 +739,153 @@ function authenticateToken(req, res, next) {
     next();
   });
 }
+
+// ============================================================
+// PROFILE ROUTES
+// ============================================================
+app.get('/api/profile', authenticateToken, (req, res) => {
+  try {
+    const stmt = db.prepare('SELECT id, username, email, fullname, phone, dob, gender, country, state, city, bio, favoriteGenres, avatar, theme, language, notifications, createdAt, updatedAt, lastLogin, role FROM users WHERE id = ?');
+    const user = stmt.get(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    
+    const favStmt = db.prepare('SELECT COUNT(*) as count FROM favorites WHERE user_id = ?');
+    const favCount = favStmt.get(req.user.id).count;
+    user.songsLiked = favCount;
+
+    res.json({ success: true, profile: user });
+  } catch(err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.put('/api/profile', authenticateToken, (req, res) => {
+  const { fullname, username, phone, dob, gender, country, state, city, bio, favoriteGenres } = req.body;
+  
+  if (username) {
+    if (username.length < 4 || username.length > 20 || !/^[a-zA-Z0-9_]+$/.test(username)) {
+      return res.status(400).json({ error: 'Invalid username format' });
+    }
+  }
+  if (bio && bio.length > 300) {
+    return res.status(400).json({ error: 'Bio exceeds 300 characters' });
+  }
+
+  try {
+    // Check username uniqueness
+    if (username) {
+      const existing = db.prepare('SELECT id FROM users WHERE username = ? AND id != ?').get(username, req.user.id);
+      if (existing) return res.status(400).json({ error: 'Username taken' });
+    }
+
+    const stmt = db.prepare(`
+      UPDATE users SET 
+        fullname = COALESCE(?, fullname),
+        username = COALESCE(?, username),
+        phone = COALESCE(?, phone),
+        dob = COALESCE(?, dob),
+        gender = COALESCE(?, gender),
+        country = COALESCE(?, country),
+        state = COALESCE(?, state),
+        city = COALESCE(?, city),
+        bio = COALESCE(?, bio),
+        favoriteGenres = COALESCE(?, favoriteGenres),
+        updatedAt = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `);
+    stmt.run(fullname, username, phone, dob, gender, country, state, city, bio, favoriteGenres, req.user.id);
+    res.json({ success: true });
+  } catch(err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.post('/api/profile/avatar', authenticateToken, upload.single('avatar'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+  try {
+    const avatarUrl = '/uploads/avatars/' + req.file.filename;
+    db.prepare('UPDATE users SET avatar = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?').run(avatarUrl, req.user.id);
+    res.json({ success: true, avatarUrl });
+  } catch(err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.delete('/api/profile/avatar', authenticateToken, (req, res) => {
+  try {
+    const user = db.prepare('SELECT avatar FROM users WHERE id = ?').get(req.user.id);
+    if (user && user.avatar) {
+      const filename = path.basename(user.avatar);
+      const filepath = path.join(__dirname, 'public', 'uploads', 'avatars', filename);
+      if (fs.existsSync(filepath)) fs.unlinkSync(filepath);
+    }
+    db.prepare('UPDATE users SET avatar = NULL, updatedAt = CURRENT_TIMESTAMP WHERE id = ?').run(req.user.id);
+    res.json({ success: true });
+  } catch(err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.put('/api/profile/password', authenticateToken, (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  if (!currentPassword || !newPassword) return res.status(400).json({ error: 'Passwords required' });
+  
+  const hasUpperCase = /[A-Z]/.test(newPassword);
+  const hasLowerCase = /[a-z]/.test(newPassword);
+  const hasNumbers = /\d/.test(newPassword);
+  const hasNonalphas = /\W/.test(newPassword);
+  if (newPassword.length < 8 || !(hasUpperCase && hasLowerCase && hasNumbers && hasNonalphas)) {
+    return res.status(400).json({ error: 'Password does not meet requirements' });
+  }
+
+  try {
+    const user = db.prepare('SELECT password_hash FROM users WHERE id = ?').get(req.user.id);
+    if (!bcrypt.compareSync(currentPassword, user.password_hash)) {
+      return res.status(400).json({ error: 'Incorrect current password' });
+    }
+    const salt = bcrypt.genSaltSync(10);
+    const hash = bcrypt.hashSync(newPassword, salt);
+    db.prepare('UPDATE users SET password_hash = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?').run(hash, req.user.id);
+    
+    // Logout
+    res.clearCookie('token');
+    res.json({ success: true });
+  } catch(err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.delete('/api/profile', authenticateToken, (req, res) => {
+  const { password } = req.body;
+  if (!password) return res.status(400).json({ error: 'Password required to delete account' });
+  
+  try {
+    const user = db.prepare('SELECT password_hash, avatar FROM users WHERE id = ?').get(req.user.id);
+    if (!bcrypt.compareSync(password, user.password_hash)) {
+      return res.status(400).json({ error: 'Incorrect password' });
+    }
+    
+    if (user.avatar) {
+      const filename = path.basename(user.avatar);
+      const filepath = path.join(__dirname, 'public', 'uploads', 'avatars', filename);
+      if (fs.existsSync(filepath)) fs.unlinkSync(filepath);
+    }
+    
+    db.prepare('DELETE FROM favorites WHERE user_id = ?').run(req.user.id);
+    db.prepare('DELETE FROM users WHERE id = ?').run(req.user.id);
+    
+    res.clearCookie('token');
+    res.json({ success: true });
+  } catch(err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
 // ============================================================
 // FAVORITES ROUTES
