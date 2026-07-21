@@ -272,16 +272,15 @@ jobs:
             --timeout 60000 \
             --exit \
             --reporter mocha-junit-reporter \
-            --reporter-options mochaFile=../test-results/mobile-e2e.xml 2>&1 | tee ../test-results/mocha-output.txt
+            --reporter-options mochaFile=../test-results/mobile-e2e.xml
 
-      - name: Collect screenshots and logs on failure
+      - name: Collect screenshots on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: mobile-failure-artifacts
+          name: mobile-failure-screenshots
           path: |
             **/*.png
-            test-results/mocha-output.txt
           retention-days: 7
 
       - name: Upload JUnit reports
