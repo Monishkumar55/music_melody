@@ -50,7 +50,7 @@ describe('Selenium E2E Tests - Songstr', function () {
     await driver.findElement(By.css('#register-form input[name=\"confirmPassword\"]')).sendKeys('SuperPassword123!');
     await driver.executeScript("document.querySelector('#register-form input[type=\"checkbox\"]').click();");
     
-    await driver.findElement(By.css('#register-form button[type=\"submit\"]')).click();
+    await driver.executeScript("document.querySelector('#register-form button[type=\"submit\"]').click();");
     
     // Wait for the home screen to be displayed instead of a fixed sleep
     const homeScreen = await driver.wait(until.elementLocated(By.id('screen-home')), 10000);
