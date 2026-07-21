@@ -22,7 +22,12 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL
+    email TEXT UNIQUE NOT NULL,
+    fullname TEXT NOT NULL,
+    phone TEXT,
+    password_hash TEXT NOT NULL,
+    role TEXT DEFAULT 'user',
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
   );
   CREATE TABLE IF NOT EXISTS favorites (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -634,25 +639,35 @@ app.get('/api/search', (req, res) => {
 // AUTHENTICATION ROUTES
 // ============================================================
 app.post('/api/auth/register', (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password || username.length < 3 || password.length < 5) {
-    return res.status(400).json({ error: 'Username (min 3) and password (min 5) required' });
+  const { username, email, fullname, phone, password } = req.body;
+  if (!username || !email || !fullname || !password || username.length < 3 || password.length < 8) {
+    return res.status(400).json({ error: 'All required fields must be filled and meet length requirements' });
+  }
+
+  // Password complexity check
+  const hasUpperCase = /[A-Z]/.test(password);
+  const hasLowerCase = /[a-z]/.test(password);
+  const hasNumbers = /\d/.test(password);
+  const hasNonalphas = /\W/.test(password);
+  if (!(hasUpperCase && hasLowerCase && hasNumbers && hasNonalphas)) {
+    return res.status(400).json({ error: 'Password must contain uppercase, lowercase, number, and special character' });
   }
 
   try {
-    const stmt = db.prepare('SELECT id FROM users WHERE username = ?');
-    if (stmt.get(username)) {
-      return res.status(400).json({ error: 'Username already exists' });
+    const stmt = db.prepare('SELECT id FROM users WHERE username = ? OR email = ?');
+    const existing = stmt.get(username, email);
+    if (existing) {
+      return res.status(400).json({ error: 'Username or email already exists' });
     }
 
     const salt = bcrypt.genSaltSync(10);
     const hash = bcrypt.hashSync(password, salt);
-    const insert = db.prepare('INSERT INTO users (username, password_hash) VALUES (?, ?)');
-    const info = insert.run(username, hash);
+    const insert = db.prepare('INSERT INTO users (username, email, fullname, phone, password_hash) VALUES (?, ?, ?, ?, ?)');
+    const info = insert.run(username, email, fullname, phone || null, hash);
 
-    const token = jwt.sign({ id: info.lastInsertRowid, username }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: info.lastInsertRowid, username, email, fullname, role: 'user' }, JWT_SECRET, { expiresIn: '7d' });
     res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
-    res.json({ success: true, user: { id: info.lastInsertRowid, username } });
+    res.json({ success: true, user: { id: info.lastInsertRowid, username, email, fullname, role: 'user' } });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
@@ -662,16 +677,16 @@ app.post('/api/auth/register', (req, res) => {
 app.post('/api/auth/login', (req, res) => {
   const { username, password } = req.body;
   try {
-    const stmt = db.prepare('SELECT id, username, password_hash FROM users WHERE username = ?');
+    const stmt = db.prepare('SELECT id, username, email, fullname, role, password_hash FROM users WHERE username = ?');
     const user = stmt.get(username);
-    if (!user) return res.status(400).json({ error: 'Invalid credentials' });
+    if (!user) return res.status(400).json({ error: 'Invalid username or password.' });
 
     const match = bcrypt.compareSync(password, user.password_hash);
-    if (!match) return res.status(400).json({ error: 'Invalid credentials' });
+    if (!match) return res.status(400).json({ error: 'Invalid username or password.' });
 
-    const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: user.id, username: user.username, email: user.email, fullname: user.fullname, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
     res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
-    res.json({ success: true, user: { id: user.id, username: user.username } });
+    res.json({ success: true, user: { id: user.id, username: user.username, email: user.email, fullname: user.fullname, role: user.role } });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });

@@ -716,35 +716,57 @@
 <body>
 <div class="app">
 
-  <!-- Auth Modal -->
-  <div class="auth-modal-overlay" id="auth-modal">
-    <div class="auth-modal">
-      <button class="auth-close" onclick="closeAuthModal()">×</button>
-      <div class="auth-title" id="auth-title">Welcome Back</div>
-      <form id="auth-form" onsubmit="submitAuth(event)">
-        <input type="text" id="auth-username" class="auth-input" placeholder="Username (min 3 chars)" required minlength="3">
-        <input type="password" id="auth-password" class="auth-input" placeholder="Password (min 5 chars)" required minlength="5">
-        <button type="submit" class="auth-btn-submit" id="auth-submit-btn">Login</button>
-      </form>
-      <div class="auth-toggle" id="auth-toggle-text">
-        Don't have an account? <span onclick="toggleAuthMode()">Register</span>
+  <!-- ==================== SCREEN: LOGIN ==================== -->
+  <div class="screen active" id="screen-login">
+    <div style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px;">
+      <div class="auth-modal" style="transform: none; max-width: 400px; width: 100%;">
+        <div class="auth-title">Welcome Back</div>
+        <form id="login-form">
+          <input type="text" name="username" class="auth-input" placeholder="Username" required>
+          <div style="position:relative">
+            <input type="password" name="password" class="auth-input" placeholder="Password" required>
+            <span id="login-toggle-password" style="position:absolute; right:15px; top:15px; cursor:pointer">👁️</span>
+          </div>
+          <div style="margin-bottom: 15px; font-size: 13px; color: var(--text2); display: flex; justify-content: space-between;">
+            <label><input type="checkbox" name="remember" checked> Remember me</label>
+            <a href="#" style="color: var(--accent-light);">Forgot Password?</a>
+          </div>
+          <div id="login-error" style="color: var(--red); font-size: 13px; margin-bottom: 10px; display: none;"></div>
+          <button type="submit" class="auth-btn-submit">Login</button>
+        </form>
+        <div class="auth-toggle">
+          Don't have an account? <span style="cursor:pointer;" onclick="showScreen('register')">Register</span>
+        </div>
       </div>
     </div>
   </div>
 
-
-  <!-- Auth Modal -->
-  <div class="auth-modal-overlay" id="auth-modal">
-    <div class="auth-modal">
-      <button class="auth-close" onclick="closeAuthModal()">×</button>
-      <div class="auth-title" id="auth-title">Welcome Back</div>
-      <form id="auth-form" onsubmit="submitAuth(event)">
-        <input type="text" id="auth-username" class="auth-input" placeholder="Username (min 3 chars)" required minlength="3">
-        <input type="password" id="auth-password" class="auth-input" placeholder="Password (min 5 chars)" required minlength="5">
-        <button type="submit" class="auth-btn-submit" id="auth-submit-btn">Login</button>
-      </form>
-      <div class="auth-toggle" id="auth-toggle-text">
-        Don't have an account? <span onclick="toggleAuthMode()">Register</span>
+  <!-- ==================== SCREEN: REGISTER ==================== -->
+  <div class="screen" id="screen-register">
+    <div style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px;">
+      <div class="auth-modal" style="transform: none; max-width: 400px; width: 100%;">
+        <div class="auth-title">Create Account</div>
+        <form id="register-form">
+          <input type="text" name="fullname" class="auth-input" placeholder="Full Name" required>
+          <input type="text" name="username" class="auth-input" placeholder="Username" required>
+          <input type="email" name="email" class="auth-input" placeholder="Email Address" required>
+          <input type="tel" name="phone" class="auth-input" placeholder="Phone Number (Optional)">
+          
+          <div style="position:relative">
+            <input type="password" name="password" class="auth-input" placeholder="Password (min 8 chars, 1 upper, 1 lower, 1 num, 1 special)" required>
+            <span id="register-toggle-password" style="position:absolute; right:15px; top:15px; cursor:pointer">👁️</span>
+          </div>
+          <input type="password" name="confirmPassword" class="auth-input" placeholder="Confirm Password" required>
+          
+          <div style="margin-bottom: 15px; font-size: 13px; color: var(--text2);">
+            <label><input type="checkbox" required> I accept the Terms & Conditions</label>
+          </div>
+          <div id="register-error" style="color: var(--red); font-size: 13px; margin-bottom: 10px; display: none;"></div>
+          <button type="submit" class="auth-btn-submit">Register</button>
+        </form>
+        <div class="auth-toggle">
+          Already have an account? <span style="cursor:pointer;" onclick="showScreen('login')">Login</span>
+        </div>
       </div>
     </div>
   </div>
@@ -791,14 +813,14 @@
   </div>
 
   <!-- ==================== SCREEN 1: HOME ==================== -->
-  <div class="screen active" id="screen-home">
+  <div class="screen" id="screen-home">
     <nav>
       <div class="nav-logo" onclick="showScreen('home')">
         <div class="logo-icon">🎵</div>
         <span>Song<span class="str">str</span></span>
       </div>
       <div class="nav-actions">
-        <button class="nav-icon-btn" onclick="openAuthModal()" title="Login">👤</button>
+        <button class="nav-icon-btn" onclick="window.logout()" title="Logout">🚪</button>
         <button class="nav-icon-btn" onclick="showScreen('search')" title="Search">🔍</button>
         <button class="nav-icon-btn" onclick="showScreen('favorites')" title="Favorites">♥</button>
       </div>
@@ -1158,6 +1180,9 @@ const SONG_ART_COLORS = [
 // NAVIGATION
 // ============================================================
 function showScreen(name) {
+  if (window.handleProtectedRoute && !window.handleProtectedRoute('screen-' + name, window.showScreen)) {
+    return;
+  }
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const screen = document.getElementById('screen-' + name);
   if (screen) screen.classList.add('active');
@@ -1860,104 +1885,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-let isLoginMode = true;
-let currentUser = null;
+window.showScreen = showScreen;
+window.showToast = showToast;
+window.showLoading = showLoading;
+window.hideLoading = hideLoading;
+</script>
 
-function openAuthModal() {
-  document.getElementById("auth-modal").classList.add("active");
-}
+<script type="module">
+  import { handleProtectedRoute } from './components/ProtectedRoute.js';
+  import { initLogin } from './auth/Login.js';
+  import { initRegister } from './auth/Register.js';
+  import { AuthContext } from './context/AuthContext.js';
 
-function closeAuthModal() {
-  document.getElementById("auth-modal").classList.remove("active");
-}
-
-function toggleAuthMode() {
-  isLoginMode = !isLoginMode;
-
-
-  document.getElementById("auth-title").textContent =
-    isLoginMode ? "Login" : "Register";
-
-  document.getElementById("auth-submit-btn").textContent =
-    isLoginMode ? "Login" : "Register";
-
-  document.getElementById("auth-toggle-text").innerHTML =
-    isLoginMode
-      ? `Don't have an account? <span onclick="toggleAuthMode()">Register</span>`
-      : `Already have an account? <span onclick="toggleAuthMode()">Login</span>`;
-}
-
-
-
-async function submitAuth(e) {
-  e.preventDefault();
-
-  const username =
-    document.getElementById("auth-username").value;
-
-  const password =
-    document.getElementById("auth-password").value;
-
-  const endpoint =
-    isLoginMode
-      ? "/api/auth/login"
-      : "/api/auth/register";
-
-  const response = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    credentials: "include",
-    body: JSON.stringify({
-      username,
-      password
-    })
+  window.handleProtectedRoute = handleProtectedRoute;
+  
+  // init AuthContext
+  AuthContext.initialize().then(() => {
+    // Check initial screen
+    const activeScreen = document.querySelector('.screen.active');
+    if (!AuthContext.isAuthenticated) {
+      if (activeScreen && window.isScreenProtected && window.isScreenProtected(activeScreen.id)) {
+        showScreen('login');
+      }
+    } else {
+      if (activeScreen && (activeScreen.id === 'screen-login' || activeScreen.id === 'screen-register')) {
+        showScreen('home');
+      }
+    }
+  });
+  
+  AuthContext.subscribe((isAuthenticated, user) => {
+    if (isAuthenticated) {
+      console.log('User logged in:', user);
+    } else {
+      showScreen('login');
+    }
   });
 
-  const data = await response.json();
+  window.logout = async () => {
+    const { AuthService } = await import('./services/authService.js');
+    await AuthService.logout();
+    AuthContext.logout();
+    showToast('Logged out successfully');
+  };
 
-  if (!response.ok) {
-    alert(data.error);
-    return;
-  }
-
-  currentUser = data.user;
-
-  alert(
-    isLoginMode
-      ? "Login successful"
-      : "Registration successful"
-  );
-
-  closeAuthModal();
-}
-
-
-async function checkLogin() {
-
-  const response =
-    await fetch("/api/auth/me", {
-      credentials: "include"
-    });
-
-  const data =
-    await response.json();
-
-  if (data.loggedIn) {
-    currentUser = data.user;
-
-    console.log(
-      "Logged in as:",
-      currentUser.username
-    );
-  }
-}
-
-window.addEventListener(
-  "load",
-  checkLogin
-);
+  initLogin(window.showScreen, window.showToast, window.showLoading, window.hideLoading);
+  initRegister(window.showScreen, window.showToast, window.showLoading, window.hideLoading);
 </script>
 
 <!-- Firebase Initialization -->
