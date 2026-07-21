@@ -27,12 +27,27 @@ module.exports = [
         setTimeout: "readonly",
         showScreen: "readonly",
         renderedSongs: "readonly",
-        closePlayerModal: "readonly"
+        closePlayerModal: "readonly",
+        fetch: "readonly",
+        FormData: "readonly",
+        FileReader: "readonly",
+        confirm: "readonly",
+        MutationObserver: "readonly",
+        Image: "readonly",
+        File: "readonly",
+        URL: "readonly",
+        Blob: "readonly"
       }
     },
     rules: {
       "no-unused-vars": "warn",
       "no-undef": "error"
+    }
+  },
+  {
+    files: ["public/**/*.js", "load-test.js"],
+    languageOptions: {
+      sourceType: "module"
     }
   }
 ];
