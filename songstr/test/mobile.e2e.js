@@ -16,7 +16,11 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation', function () {
     options.addArguments('--no-sandbox');
     options.addArguments('--disable-dev-shm-usage');
     options.addArguments('--disable-gpu');
-    options.setMobileEmulation({ deviceName: 'Nexus 5' });
+    // Use explicit metrics instead of device name for cross-version compatibility
+    options.setMobileEmulation({
+      deviceMetrics: { width: 360, height: 640, pixelRatio: 3.0 },
+      userAgent: 'Mozilla/5.0 (Linux; Android 12; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
+    });
 
     driver = await new Builder()
       .forBrowser('chrome')
