@@ -11,7 +11,7 @@ export function handleProtectedRoute(screenId, showScreenFn) {
   if (isScreenProtected(screenId)) {
     if (!AuthContext.isAuthenticated) {
       // Redirect to login if unauthenticated
-      showScreenFn('screen-login');
+      showScreenFn('login');
       return false; // Access denied
     }
   }

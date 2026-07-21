@@ -34,7 +34,7 @@ export function initRegister(showScreenFn, showToastFn, showLoaderFn, hideLoader
       const data = await AuthService.register(payload);
       AuthContext.setUser(data.user);
       showToastFn('Registration successful! Welcome to Songstr.');
-      showScreenFn('screen-home');
+      showScreenFn('home');
       form.reset();
     } catch (err) {
       errorDiv.textContent = err.message || 'Registration failed';

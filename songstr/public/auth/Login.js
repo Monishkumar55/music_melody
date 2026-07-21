@@ -19,7 +19,7 @@ export function initLogin(showScreenFn, showToastFn, showLoaderFn, hideLoaderFn)
       const data = await AuthService.login(username, password);
       AuthContext.setUser(data.user);
       showToastFn('Login successful!');
-      showScreenFn('screen-home');
+      showScreenFn('home');
       form.reset();
     } catch (err) {
       errorDiv.textContent = err.message || 'Invalid username or password.';
