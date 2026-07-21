@@ -43,17 +43,18 @@ describe('Selenium E2E Tests - Songstr', function () {
 
     const username = 'e2e_user_' + Date.now();
     
-    await driver.findElement(By.name('fullname')).sendKeys('E2E User');
-    await driver.findElement(By.name('username')).sendKeys(username);
-    await driver.findElement(By.name('email')).sendKeys(username + '@test.com');
-    await driver.findElement(By.name('password')).sendKeys('SuperPassword123!');
-    await driver.findElement(By.name('confirmPassword')).sendKeys('SuperPassword123!');
+    await driver.findElement(By.css('#register-form input[name=\"fullname\"]')).sendKeys('E2E User');
+    await driver.findElement(By.css('#register-form input[name=\"username\"]')).sendKeys(username);
+    await driver.findElement(By.css('#register-form input[name=\"email\"]')).sendKeys(username + '@test.com');
+    await driver.findElement(By.css('#register-form input[name=\"password\"]')).sendKeys('SuperPassword123!');
+    await driver.findElement(By.css('#register-form input[name=\"confirmPassword\"]')).sendKeys('SuperPassword123!');
     await driver.executeScript("document.querySelector('#register-form input[type=\"checkbox\"]').click();");
     
     await driver.findElement(By.css('#register-form button[type=\"submit\"]')).click();
-    await driver.sleep(1500); 
     
-    const homeScreen = await driver.findElement(By.id('screen-home'));
+    // Wait for the home screen to be displayed instead of a fixed sleep
+    const homeScreen = await driver.wait(until.elementLocated(By.id('screen-home')), 10000);
+    await driver.wait(until.elementIsVisible(homeScreen), 10000);
     const isDisplayed = await homeScreen.isDisplayed();
     assert(isDisplayed, 'Home screen should be displayed after registration');
   });
