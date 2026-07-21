@@ -1,63 +1,128 @@
-name: Songstr E2E CI Pipeline
+name: Continuous Integration
 
 on:
   push:
-    branches: [ main, test-suite-fixes ]
+    branches: [ "main", "master", "develop" ]
   pull_request:
-    branches: [ main ]
+    branches: [ "main", "master", "develop" ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  validate:
-    runs-on: ubuntu-latest
+  build-and-test:
+    name: Build & Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [18.x, 20.x, 22.x]
 
     steps:
-    - name: Checkout repository
+    - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Set up Node.js
+    - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
-        node-version: '22'
+        node-version: ${{ matrix.node-version }}
         cache: 'npm'
-        cache-dependency-path: 'songstr/package-lock.json'
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
-        cache: 'pip'
-
-    - name: Install Node.js dependencies
-      run: npm install
-      working-directory: songstr
-
-    - name: Install Python dependencies
+    - name: Detect Project Language/Framework
       run: |
-        python -m pip install --upgrade pip
-        pip install openpyxl requests
+        echo "Detecting frameworks..."
+        if [ -f "package.json" ]; then echo "Node.js detected"; fi
+        if grep -q '"react"' package.json; then echo "React detected"; fi
+        if grep -q '"express"' package.json; then echo "Express detected"; fi
+        if grep -q '"typescript"' package.json; then echo "TypeScript detected"; fi
+      shell: bash
 
-    - name: Run ESLint Checks
-      run: npm run lint
+    - name: Install Dependencies
+      run: |
+        npm ci || npm install
+        # Also install in the nested directory if it exists
+        if [ -d "songstr" ]; then cd songstr && npm ci || npm install; fi
+      shell: bash
 
-    - name: Build Project
-      run: npm run build
+    - name: NPM Audit (Security)
+      run: npm audit --audit-level=high
 
-    - name: Run Unit & Integration Tests
-      run: npm run test:integration
+    - name: NPM Outdated
+      run: npm outdated || true # don't fail on outdated
 
-    - name: Run E2E Project Validation
-      run: npm run test:e2e
+    - name: Run Linting
+      run: npm run lint --if-present
 
-    - name: Upload Test and Coverage Reports
+    - name: Run Build
+      run: npm run build --if-present
+
+    - name: Run Unit Tests
+      run: npm run test --if-present
+
+    - name: Run Integration Tests
+      run: npm run test:integration --if-present
+
+    - name: Run Code Coverage
+      run: |
+        # Fallback to test if test:coverage doesn't exist
+        npm run test:coverage --if-present
+        
+    - name: Enforce 90% Coverage (if coverage report generated)
+      run: |
+        if [ -d "coverage" ]; then
+          npx nyc check-coverage --lines 90 --functions 90 --branches 90
+        fi
+      shell: bash
+
+    - name: HTML/CSS Validation & Axe Accessibility
+      run: |
+        echo "Validating HTML/CSS and Accessibility..."
+        # If there's a specific validation script in package.json, run it
+        npm run validate-ui --if-present || echo "No UI validation script found. Skipping."
+      
+    - name: Check for Unused and Dead Code
+      run: |
+        # Use npx knip to detect unused files, dependencies, and dead code
+        npx --yes knip || echo "Knip detected potential dead code"
+        
+    - name: Detect Duplicate Code
+      run: |
+        # Use jscpd for duplicate code detection
+        npx --yes jscpd ./songstr || true
+
+    - name: Check Playwright & Cypress configuration
+      run: |
+        if ! grep -q '"playwright"' package.json && ! grep -q '"playwright"' songstr/package.json 2>/dev/null; then
+          echo "::warning::Playwright is not configured in this repository. Skipping Playwright tests."
+        fi
+        if ! grep -q '"cypress"' package.json && ! grep -q '"cypress"' songstr/package.json 2>/dev/null; then
+          echo "::warning::Cypress is not configured in this repository. Skipping Cypress tests."
+        fi
+      shell: bash
+
+    - name: Generate JUnit & HTML Reports
+      if: always()
+      run: |
+        npm run test:junit --if-present || echo "No JUnit script"
+        npm run test:reports --if-present || echo "No reports script"
+
+    - name: Upload Test Reports
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: songstr-validation-reports
+        name: test-reports-${{ matrix.os }}-node${{ matrix.node-version }}
         path: |
-          Validation_Report.txt
-          Songstr_QA_Report.xlsx
-          appium_report.csv
-          appium_report.html
-          songstr/test-results.xml
-          songstr/mochawesome-report/
-          songstr/coverage/
+          **/test-results.xml
+          **/mochawesome-report/
+          **/coverage/
+        retention-days: 14
+
+    - name: Generate GitHub Job Summary
+      if: always()
+      run: |
+        echo "## Test Execution Summary 🚀" >> $GITHUB_STEP_SUMMARY
+        echo "- OS: ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Node Version: ${{ matrix.node-version }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY

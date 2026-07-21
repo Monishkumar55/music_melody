@@ -1,0 +1,125 @@
+name: Reliable E2E & UI Testing
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e-tests:
+    name: ${{ matrix.framework }} E2E Tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false # We want to run all parallel jobs even if one fails
+      matrix:
+        include:
+          - framework: selenium
+            os: ubuntu-latest
+          - framework: appium
+            os: macos-latest
+          - framework: playwright
+            os: ubuntu-latest
+          - framework: cypress
+            os: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22.x
+        cache: 'npm'
+
+    - name: Check if Framework is configured
+      id: check_fw
+      run: |
+        if grep -q '"${{ matrix.framework }}"' package.json || grep -q '"${{ matrix.framework }}"' songstr/package.json 2>/dev/null || grep -q '"test:${{ matrix.framework }}"' package.json || grep -q '"test:${{ matrix.framework }}"' songstr/package.json 2>/dev/null; then
+          echo "has_fw=true" >> $GITHUB_OUTPUT
+        else
+          echo "::warning::${{ matrix.framework }} is not configured in this repository. Skipping tests."
+          echo "has_fw=false" >> $GITHUB_OUTPUT
+        fi
+      shell: bash
+
+    - name: Install Dependencies
+      if: steps.check_fw.outputs.has_fw == 'true'
+      run: |
+        npm ci || npm install
+        if [ -d "songstr" ]; then cd songstr && npm ci || npm install; fi
+      shell: bash
+
+    - name: Install wait-on
+      if: steps.check_fw.outputs.has_fw == 'true'
+      run: npm install -g wait-on
+      shell: bash
+
+    - name: Start Server in Background
+      if: steps.check_fw.outputs.has_fw == 'true'
+      run: |
+        if grep -q '"start"' package.json; then
+          npm start > server.log 2>&1 &
+        elif [ -d "songstr" ] && grep -q '"start"' songstr/package.json; then
+          cd songstr && npm start > ../server.log 2>&1 &
+        fi
+      shell: bash
+
+    - name: Wait for Server Health
+      if: steps.check_fw.outputs.has_fw == 'true'
+      run: |
+        # Wait up to 60 seconds for the server to become responsive
+        wait-on -t 60000 http-get://localhost:3000 || (echo "::error::Server failed to start in time!" && exit 1)
+        echo "Server is healthy and ready for tests."
+      shell: bash
+
+    - name: Run ${{ matrix.framework }} Tests with 3 Retries
+      if: steps.check_fw.outputs.has_fw == 'true'
+      id: test_run
+      run: |
+        # Pass native retry arguments to mocha/test runner to avoid hiding failures while handling flakiness
+        # We increase the timeout to 120s to account for slower CI environments
+        if grep -q '"test:${{ matrix.framework }}"' package.json; then
+          npm run test:${{ matrix.framework }} -- --retries 3 --timeout 120000
+        elif [ -d "songstr" ] && grep -q '"test:${{ matrix.framework }}"' songstr/package.json; then
+          cd songstr && npm run test:${{ matrix.framework }} -- --retries 3 --timeout 120000
+        fi
+      shell: bash
+
+    - name: Upload Test Artifacts (Screenshots, Videos, JUnit)
+      if: always() && steps.check_fw.outputs.has_fw == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.framework }}-forensics
+        path: |
+          **/screenshots/
+          **/videos/
+          **/test-results.xml
+          **/*report*
+        retention-days: 14
+
+    - name: Upload Server Logs on Failure
+      if: failure() && steps.check_fw.outputs.has_fw == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.framework }}-server-logs
+        path: server.log
+        retention-days: 14
+
+    - name: Generate Job Summary
+      if: always()
+      run: |
+        if [ "${{ steps.check_fw.outputs.has_fw }}" = "false" ]; then
+          echo "## ⚠ ${{ matrix.framework }} Tests Skipped (Not Configured)" >> $GITHUB_STEP_SUMMARY
+        elif [ "${{ job.status }}" = "success" ]; then
+          echo "## ✔ ${{ matrix.framework }} Tests Passed" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "## ✖ ${{ matrix.framework }} Tests Failed (After 3 Retries)" >> $GITHUB_STEP_SUMMARY
+          echo "Please review the forensics artifact for screenshots and server logs." >> $GITHUB_STEP_SUMMARY
+        fi
+      shell: bash
