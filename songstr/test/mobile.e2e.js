@@ -1,4 +1,4 @@
-const { Builder } = require('selenium-webdriver');
+const { Builder, By, until } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 const assert = require('assert');
 
@@ -28,7 +28,9 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation', function () {
   });
 
   after(async function () {
-    if (driver) await driver.quit();
+    if (driver) {
+      await driver.quit();
+    }
   });
 
   it('should load the homepage on mobile viewport', async function () {
@@ -39,8 +41,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation', function () {
 
   it('should open auth modal on mobile', async function () {
     await driver.executeScript("if (typeof openAuthModal === 'function') openAuthModal();");
-    await driver.sleep(1000);
-    const modal = await driver.findElement({ id: 'auth-modal' });
+    const modal = await driver.wait(until.elementLocated(By.id('auth-modal')), 5000);
     const isDisplayed = await modal.isDisplayed();
     assert(isDisplayed, 'Auth modal should be displayed on mobile');
     await driver.executeScript("if (typeof closeAuthModal === 'function') closeAuthModal();");
@@ -48,16 +49,16 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation', function () {
 
   it('should navigate to browse screen on mobile', async function () {
     await driver.executeScript("showScreen('browse');");
-    await driver.sleep(500);
-    const searchInput = await driver.findElement({ id: 'search-input' });
+    await driver.sleep(500); // Wait for CSS transition
+    const searchInput = await driver.wait(until.elementLocated(By.id('search-input')), 5000);
     const isVisible = await searchInput.isDisplayed();
     assert(isVisible, 'Search input should be visible on mobile browse screen');
   });
 
   it('should render mood detection page on mobile', async function () {
     await driver.executeScript("showScreen('detect');");
-    await driver.sleep(500);
-    const tabFace = await driver.findElement({ id: 'tab-face' });
+    await driver.sleep(500); // Wait for CSS transition
+    const tabFace = await driver.wait(until.elementLocated(By.id('tab-face')), 5000);
     const isVisible = await tabFace.isDisplayed();
     assert(isVisible, 'Face detection tab should be visible on mobile');
   });
