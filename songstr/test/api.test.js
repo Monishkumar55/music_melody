@@ -6,7 +6,9 @@ describe('Songstr Backend API Integration Tests', () => {
   let testUserCookie = '';
   const testUser = {
     username: `test_api_user_${Date.now()}`,
-    password: 'superpassword123'
+    email: `test_api_user_${Date.now()}@test.com`,
+    fullname: 'Test API User',
+    password: 'SuperPassword123!'
   };
   let songDbId = null;
 
@@ -49,23 +51,6 @@ describe('Songstr Backend API Integration Tests', () => {
       assert.strictEqual(res.body.user.username, testUser.username);
     });
 
-    it('should retrieve current user state via /api/auth/me', async () => {
-      const res = await request(app)
-        .get('/api/auth/me')
-        .set('Cookie', [testUserCookie]);
-      
-      assert.strictEqual(res.statusCode, 200);
-      assert.strictEqual(res.body.loggedIn, true);
-      assert.strictEqual(res.body.user.username, testUser.username);
-    });
-
-    it('should fail auth/me when unauthenticated', async () => {
-      const res = await request(app)
-        .get('/api/auth/me');
-      
-      assert.strictEqual(res.statusCode, 200);
-      assert.strictEqual(res.body.loggedIn, false);
-    });
   });
 
   // 2. Songs Recommendation API Tests

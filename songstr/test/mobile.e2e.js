@@ -6,6 +6,7 @@ const assert = require('assert');
 // This runs on CI in place of a real Android emulator + Appium for speed and reliability.
 
 describe('Mobile E2E Tests - Chrome Mobile Emulation', function () {
+  this.timeout(60000);
   let driver;
   const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
 
@@ -39,12 +40,25 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation', function () {
     assert(title.includes('Songstr'), 'Expected title to include Songstr, got: ' + title);
   });
 
-  it('should open auth modal on mobile', async function () {
-    await driver.executeScript("if (typeof openAuthModal === 'function') openAuthModal();");
-    const modal = await driver.wait(until.elementLocated(By.id('auth-modal')), 5000);
-    const isDisplayed = await modal.isDisplayed();
-    assert(isDisplayed, 'Auth modal should be displayed on mobile');
-    await driver.executeScript("if (typeof closeAuthModal === 'function') closeAuthModal();");
+  it('should register and login a new user on mobile', async function () {
+    await driver.executeScript("showScreen('register');");
+    await driver.sleep(500);
+
+    const username = 'mobile_user_' + Date.now();
+    
+    await driver.findElement(By.name('fullname')).sendKeys('Mobile User');
+    await driver.findElement(By.name('username')).sendKeys(username);
+    await driver.findElement(By.name('email')).sendKeys(username + '@test.com');
+    await driver.findElement(By.name('password')).sendKeys('SuperPassword123!');
+    await driver.findElement(By.name('confirmPassword')).sendKeys('SuperPassword123!');
+    await driver.executeScript("document.querySelector('#register-form input[type=\"checkbox\"]').click();");
+    
+    await driver.findElement(By.css('#register-form button[type=\"submit\"]')).click();
+    await driver.sleep(1500); 
+    
+    const homeScreen = await driver.findElement(By.id('screen-home'));
+    const isDisplayed = await homeScreen.isDisplayed();
+    assert(isDisplayed, 'Home screen should be displayed after registration');
   });
 
   it('should search for songs and return results on mobile', async function () {

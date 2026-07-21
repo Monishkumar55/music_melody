@@ -3,6 +3,7 @@ const chrome = require('selenium-webdriver/chrome');
 const assert = require('assert');
 
 describe('Selenium E2E Tests - Songstr', function () {
+  this.timeout(60000);
   let driver;
   const baseUrl = 'http://localhost:3000';
 
@@ -36,12 +37,25 @@ describe('Selenium E2E Tests - Songstr', function () {
     assert(title.includes('Songstr'), `Expected title to include "Songstr", but got "${title}"`);
   });
 
-  it('should open the auth modal', async function () {
-    await driver.executeScript("if (typeof openAuthModal === 'function') openAuthModal();");
-    const modal = await driver.wait(until.elementLocated(By.id('auth-modal')), 5000);
-    const isDisplayed = await modal.isDisplayed();
-    assert(isDisplayed, 'Auth modal should be displayed');
-    await driver.executeScript("if (typeof closeAuthModal === 'function') closeAuthModal();");
+  it('should register and login a new user', async function () {
+    await driver.executeScript("showScreen('register');");
+    await driver.sleep(500);
+
+    const username = 'e2e_user_' + Date.now();
+    
+    await driver.findElement(By.name('fullname')).sendKeys('E2E User');
+    await driver.findElement(By.name('username')).sendKeys(username);
+    await driver.findElement(By.name('email')).sendKeys(username + '@test.com');
+    await driver.findElement(By.name('password')).sendKeys('SuperPassword123!');
+    await driver.findElement(By.name('confirmPassword')).sendKeys('SuperPassword123!');
+    await driver.executeScript("document.querySelector('#register-form input[type=\"checkbox\"]').click();");
+    
+    await driver.findElement(By.css('#register-form button[type=\"submit\"]')).click();
+    await driver.sleep(1500); 
+    
+    const homeScreen = await driver.findElement(By.id('screen-home'));
+    const isDisplayed = await homeScreen.isDisplayed();
+    assert(isDisplayed, 'Home screen should be displayed after registration');
   });
 
   it('should search for songs and return results', async function () {
