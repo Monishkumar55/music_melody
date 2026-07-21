@@ -315,18 +315,19 @@ const MOOD_KEYWORDS = {
   neutral: ['okay', 'fine', 'normal', 'average', 'so so', 'meh', 'nothing', 'neutral', 'not sure', 'alright', 'decent']
 };
 
+const slugify = (str) => String(str).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+const slugToFile = {};
+let files = [];
 const audioDir = path.join(__dirname, 'public', 'audio');
 if (fs.existsSync(audioDir)) {
-  const files = fs.readdirSync(audioDir);
-  const slugToFile = {};
-  const slugify = (str) => String(str).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-  
+  files = fs.readdirSync(audioDir);
   for (const file of files) {
     if (file.match(/.(mp3|m4a|wav)$/i)) {
       let cleanName = file.replace(/.(mp3|m4a|wav)$/i, '').replace(/-MassTamilan.*?$/i, '').replace(/_MassTamilan.*?$/i, '');
       slugToFile[slugify(cleanName)] = `/audio/${file}`;
     }
   }
+}
 
   const existingSlugs = new Set();
   for (const mood in SONGS_DB) {
@@ -370,8 +371,162 @@ if (fs.existsSync(audioDir)) {
       }
     }
   }
-  console.log(`Auto-linked and added ${added} local songs.`);
-}
+
+  const cloudinaryUrls = [
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834787/Suthi-Suthi_u5i8ui.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834785/Un-Vizhigalil_l3surn.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834785/Thodu-Vaanam_fhlgn3.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834783/unakaga_bdpizo.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834782/singappenney_mashpj.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834775/Silu-Siluvena-Katru_cwjjgl.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834774/Thangame_ktqi0e.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834772/simtaangaran_dysuql.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834769/Paalam_ryfafd.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834768/selfie-pulla_hg2wbh.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834767/Roja-Roja_we5f4d.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834766/thaai-kelavi_euvxoh.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834767/Puyale-Puyale_atozzx.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834757/poi-varavaa_fuz3cp.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834758/Roja-Kadale_wntb75.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834755/saitji-saitji_oct3ij.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834754/pugazh-filming-riots-roadblock_fjbtcb.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834749/Puli-Urumudhu_czlaus.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834748/Pookkale-Satru_vxgbcu.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834745/oru-viral-puratchi_o9qz72.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834743/Osaka-Osaka_y1opok.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834736/oru-kutti-katha_o1a1eb.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834736/oliyum-oliyum_wu1quj.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834732/nenjukkul-peidhidum_jxdlqq.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834728/omg-ponnu_oxpcru.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834727/Oru-Chinna-Thamarai_rjmeqs.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834724/Open-The-Tasmac_utugog.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834723/Nijamellam-Maranthupochu_zyhqqk.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834720/Oh-Penne_meuavb.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834719/oh-oh-the-first-love-of-tamizh_sqxcqa.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834715/Neeyum-Naanum_jltx0n.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834714/nee-marlin-manore_isu7ql.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834709/minsara-kanna_diyfpz.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834708/mersal-arasan_jnajv8.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834707/mundhinam-parthene_dx61yd.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834701/never-give-up_l0jhiu.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834702/neethanae-neethane_zgjqax.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834701/Maanja_c4xdfn.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834694/nee-nenacha_a8yr5w.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834693/maduraikku_t0j4qy.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834691/Mersalayitten_yznukh.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834691/maathare_h305yc.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834690/Naan-Adicha-Thaanga_cowg0b.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834686/nalla-nanban_fapopm.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834676/maacho-ennacho_ouyjto.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834676/megham-karukatha_pk36wy.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834650/kutti-story_gfvaic.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834644/Kandangi-Kandangi-Karaoke_pgx0dw.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834643/kelamal-kaiyil_vnl4zf.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834637/Kandangi-Kandangi_hrr70l.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834635/Kadhal-Panna_wutkyq.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834632/Kannana-Kanne_dgguvp.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834631/Karikalan-Kala-Pola_nojs9a.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834630/Jingunamani_ej4dcz.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834624/Kadhal-Kan-Kattudhe_e4ak97.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834622/Irumbile-Oru-Idhaiyam_u8i43x.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834619/En-Peru-Padayappa_e3ltqq.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834616/Ennodu-Nee-Irundhal_ku1l9f.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834615/irukkana-idupu-irukkana_sfykno.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834610/heartiley-battery_ln2qqc.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834608/google-google_rgqu46.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834602/Ethir-Neechal_te3byi.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834596/ella-pugazhum_zaw71i.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834595/ezhu-velaikkara-indre_rdp6dr.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834593/Danga-Maari-Oodhari_nao9yt.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834589/asku-laska_mn4yt2.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834585/Darling-Dambakku_ankos5.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834583/Ennodu-Nee-Irundhal-Reprise_s8vbl1.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834570/Chennai-City-Gangsta_xpcpaz.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834569/Boomi-Enna-Suthudhe_plhssy.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834568/annul-maelae_v13r5k.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834567/Boom-Boom_mhtzjl.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834556/ava-enna-enna_e4pp9i.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834556/Arima-Arima_asj54s.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834550/arabic-kuthu-halamithi-habibo_dy1km3.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834547/antartica_hukl2c.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834548/adiyae-kolluthey_m6e9fa.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834547/aathadi_jcm1vc.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834546/Ambikapathy_nyygos.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834535/vaathi-coming_m35uex.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834529/vengamavan_pjsqr1.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834524/aasa-pulla_t6cmgf.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834522/Varava-Varava_nlvxyd.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834518/vaathi-raid_dgs6t4.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834512/Tamilselvi_qiz8im.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834511/single-pasanga_bolnw7.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834511/vaadi-nee-vaadi_bx7qlw.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834506/Un-Paarvayil_a8kxll.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834503/thenmozhi_e8zwvw.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834502/takkunu-takkunu_j8tojb.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834500/Senjitaley_yfbizi.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834491/quit-pannuda_mq5qs7.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834485/tak-bak-the-tak-bak-of-tamizh_equpd6.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834482/raathu-raasan_dnq2e5.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834481/polakatum-para-para_flvln7.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834481/pavazha-malli_n6iicj.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834473/oru-pere-varalaaru_zquntc.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834460/oh-shanthi-shanthi_rygmpv.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834460/paisa-note_l7v6hq.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834452/naa-ready_kylh4e.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834436/meesaya-murukku_szqkqf.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834433/naanga-naalu-peru_l860ek.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834431/Naanum-Rowdy-Dhaan_fakgx1.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834425/mutta-kalakki_f08vsa.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834416/Kakki-Sattai_yocptn.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834416/loveah-sollitalea_jxfa8p.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834410/i-m-so-cool_zqrg7o.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834403/jolly-o-gymkhana_waqekp.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834387/god-mode_i9o52p.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834385/enthiran_qqsixz.mp3",
+    "https://res.cloudinary.com/dynv6r4b/video/upload/v1782834377/en-frienda-pola_is3ppq.mp3"
+  ];
+
+  // Assign a Cloudinary fallback to any existing song missing a file
+  let cIndex = 0;
+  for (const mood in SONGS_DB) {
+    for (const lang in SONGS_DB[mood]) {
+      for (const song of SONGS_DB[mood][lang]) {
+        if (!song.file) {
+          song.file = cloudinaryUrls[cIndex % cloudinaryUrls.length];
+          cIndex++;
+        }
+      }
+    }
+  }
+
+  // Distribute remaining Cloudinary URLs evenly across all languages
+  const languages = ['Tamil', 'Telugu', 'Malayalam', 'Hindi', 'English', 'Kannada', 'Bengali', 'Punjabi', 'Korean', 'Japanese'];
+  let addedCloudinary = 0;
+  
+  for (let i = cIndex; i < cloudinaryUrls.length; i++) {
+    const url = cloudinaryUrls[i];
+    let filename = url.split('/').pop().replace(/\.mp3$/i, '');
+    const cleanTitle = filename.replace(/_[a-zA-Z0-9]+$/, '').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    const slug = slugify(cleanTitle);
+
+    let hash = 0;
+    for (let j = 0; j < slug.length; j++) hash = (hash << 5) - hash + slug.charCodeAt(j);
+    const mood = moods[Math.abs(hash) % moods.length];
+    const lang = languages[i % languages.length];
+    
+    SONGS_DB[mood][lang].push({
+      title: cleanTitle,
+      artist: "Cloudinary",
+      movie: "Cloudinary",
+      year: 2024,
+      genre: "Pop",
+      file: url
+    });
+    existingSlugs.add(slug);
+    addedCloudinary++;
+  }
+
+  console.log(`Auto-linked ${added} local songs. Filled missing files and added ${addedCloudinary} Cloudinary URLs across all languages.`);
 
 function detectMoodFromText(text) {
   const lower = text.toLowerCase();
@@ -603,6 +758,7 @@ app.delete('/api/favorites/:id', authenticateToken, (req, res) => {
   }
 });
 
+// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Something broke!' });

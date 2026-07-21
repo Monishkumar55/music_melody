@@ -1,125 +1,357 @@
-name: Reliable E2E & UI Testing
+# ─────────────────────────────────────────────────────────────────────
+#  Songstr — Production-Ready CI Workflow
+#  Tailored to: Node.js / Express / Mocha / Selenium / Appium (WDio)
+# ─────────────────────────────────────────────────────────────────────
+name: Reliable E2E Tests
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [main, master, test-suite-fixes]
   pull_request:
-    branches: [ "main", "master" ]
+    branches: [main, master, test-suite-fixes]
 
+# Cancel duplicate runs on the same branch / PR
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: e2e-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  CI: true
+  NODE_ENV: test
+
+# ═══════════════════════════════════════════════════════════════════════
+#  JOB 1 — Unit & Integration Tests (Mocha + Supertest)
+# ═══════════════════════════════════════════════════════════════════════
 jobs:
-  e2e-tests:
-    name: ${{ matrix.framework }} E2E Tests
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false # We want to run all parallel jobs even if one fails
-      matrix:
-        include:
-          - framework: selenium
-            os: ubuntu-latest
-          - framework: appium
-            os: macos-latest
-          - framework: playwright
-            os: ubuntu-latest
-          - framework: cypress
-            os: ubuntu-latest
+  unit-integration:
+    name: Unit & Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 22.x
-        cache: 'npm'
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
-    - name: Check if Framework is configured
-      id: check_fw
-      run: |
-        if grep -q '"${{ matrix.framework }}"' package.json || grep -q '"${{ matrix.framework }}"' songstr/package.json 2>/dev/null || grep -q '"test:${{ matrix.framework }}"' package.json || grep -q '"test:${{ matrix.framework }}"' songstr/package.json 2>/dev/null; then
-          echo "has_fw=true" >> $GITHUB_OUTPUT
-        else
-          echo "::warning::${{ matrix.framework }} is not configured in this repository. Skipping tests."
-          echo "has_fw=false" >> $GITHUB_OUTPUT
-        fi
-      shell: bash
+      # Install deps at BOTH root and songstr/ (nested project)
+      - name: Install dependencies
+        run: |
+          npm ci || npm install
+          cd songstr && npm ci || npm install
 
-    - name: Install Dependencies
-      if: steps.check_fw.outputs.has_fw == 'true'
-      run: |
-        npm ci || npm install
-        if [ -d "songstr" ]; then cd songstr && npm ci || npm install; fi
-      shell: bash
+      # ── Run unit+integration tests with retries ───────────────────
+      - name: Run API tests (with retries)
+        working-directory: songstr
+        run: |
+          npx mocha test/api.test.js test/get.test.js \
+            --retries 3 \
+            --timeout 15000 \
+            --exit \
+            --reporter mocha-junit-reporter \
+            --reporter-options mochaFile=../test-results/unit-integration.xml
 
-    - name: Install wait-on
-      if: steps.check_fw.outputs.has_fw == 'true'
-      run: npm install -g wait-on
-      shell: bash
+      # ── Generate HTML report (Mochawesome) ────────────────────────
+      - name: Generate Mochawesome HTML report
+        if: always()
+        working-directory: songstr
+        run: |
+          npx mocha test/api.test.js test/get.test.js \
+            --retries 3 \
+            --timeout 15000 \
+            --exit \
+            --reporter mochawesome \
+            --reporter-options reportDir=../test-results/mochawesome-report || true
 
-    - name: Start Server in Background
-      if: steps.check_fw.outputs.has_fw == 'true'
-      run: |
-        if grep -q '"start"' package.json; then
-          npm start > server.log 2>&1 &
-        elif [ -d "songstr" ] && grep -q '"start"' songstr/package.json; then
-          cd songstr && npm start > ../server.log 2>&1 &
-        fi
-      shell: bash
+      # ── Upload JUnit XML ──────────────────────────────────────────
+      - name: Upload JUnit reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-unit-integration
+          path: test-results/unit-integration.xml
+          retention-days: 14
 
-    - name: Wait for Server Health
-      if: steps.check_fw.outputs.has_fw == 'true'
-      run: |
-        # Wait up to 60 seconds for the server to become responsive
-        wait-on -t 60000 http-get://localhost:3000 || (echo "::error::Server failed to start in time!" && exit 1)
-        echo "Server is healthy and ready for tests."
-      shell: bash
+      # ── Upload HTML report ────────────────────────────────────────
+      - name: Upload Mochawesome HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: html-report-unit-integration
+          path: test-results/mochawesome-report/
+          retention-days: 14
 
-    - name: Run ${{ matrix.framework }} Tests with 3 Retries
-      if: steps.check_fw.outputs.has_fw == 'true'
-      id: test_run
-      run: |
-        # Pass native retry arguments to mocha/test runner to avoid hiding failures while handling flakiness
-        # We increase the timeout to 120s to account for slower CI environments
-        if grep -q '"test:${{ matrix.framework }}"' package.json; then
-          npm run test:${{ matrix.framework }} -- --retries 3 --timeout 120000
-        elif [ -d "songstr" ] && grep -q '"test:${{ matrix.framework }}"' songstr/package.json; then
-          cd songstr && npm run test:${{ matrix.framework }} -- --retries 3 --timeout 120000
-        fi
-      shell: bash
+# ═══════════════════════════════════════════════════════════════════════
+#  JOB 2 — Selenium Browser E2E Tests
+# ═══════════════════════════════════════════════════════════════════════
+  selenium-e2e:
+    name: Selenium E2E (Chrome Headless)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
 
-    - name: Upload Test Artifacts (Screenshots, Videos, JUnit)
-      if: always() && steps.check_fw.outputs.has_fw == 'true'
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ matrix.framework }}-forensics
-        path: |
-          **/screenshots/
-          **/videos/
-          **/test-results.xml
-          **/*report*
-        retention-days: 14
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Upload Server Logs on Failure
-      if: failure() && steps.check_fw.outputs.has_fw == 'true'
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ matrix.framework }}-server-logs
-        path: server.log
-        retention-days: 14
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
-    - name: Generate Job Summary
-      if: always()
-      run: |
-        if [ "${{ steps.check_fw.outputs.has_fw }}" = "false" ]; then
-          echo "## ⚠ ${{ matrix.framework }} Tests Skipped (Not Configured)" >> $GITHUB_STEP_SUMMARY
-        elif [ "${{ job.status }}" = "success" ]; then
-          echo "## ✔ ${{ matrix.framework }} Tests Passed" >> $GITHUB_STEP_SUMMARY
-        else
-          echo "## ✖ ${{ matrix.framework }} Tests Failed (After 3 Retries)" >> $GITHUB_STEP_SUMMARY
-          echo "Please review the forensics artifact for screenshots and server logs." >> $GITHUB_STEP_SUMMARY
-        fi
-      shell: bash
+      # Install Google Chrome (stable) for Selenium
+      - name: Install Google Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      - name: Verify Chrome installation
+        run: |
+          google-chrome --version || chrome --version || echo "Chrome installed via action"
+
+      - name: Install dependencies
+        run: |
+          npm ci || npm install
+          cd songstr && npm ci || npm install
+
+      # Start the Express server in the background
+      - name: Start application server
+        working-directory: songstr
+        run: node server.js &
+
+      # Wait for the application to become healthy before tests
+      - name: Wait for application health check
+        run: |
+          echo "Waiting for http://localhost:3000 to become ready..."
+          npx -y wait-on http://localhost:3000 --timeout 30000 --interval 1000
+          echo "✅ Application is healthy!"
+
+      # ── Run Selenium tests with retries ───────────────────────────
+      - name: Run Selenium E2E tests (with retries)
+        working-directory: songstr
+        run: |
+          npx mocha test/selenium.e2e.js \
+            --retries 3 \
+            --timeout 60000 \
+            --exit \
+            --reporter mocha-junit-reporter \
+            --reporter-options mochaFile=../test-results/selenium-e2e.xml
+
+      # ── Capture screenshots on failure ────────────────────────────
+      - name: Collect screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selenium-failure-screenshots
+          path: |
+            songstr/demo_reports/screenshots/
+            songstr/demo_output/screenshots/
+            **/*.png
+          retention-days: 7
+
+      # ── Collect server logs on failure ────────────────────────────
+      - name: Collect server logs on failure
+        if: failure()
+        run: |
+          mkdir -p test-results/logs
+          # Capture any log files from the server
+          cp songstr/*.log test-results/logs/ 2>/dev/null || true
+          cp songstr/demo_reports/*.log test-results/logs/ 2>/dev/null || true
+          echo "Server process info:" > test-results/logs/server-info.txt
+          ps aux | grep node >> test-results/logs/server-info.txt 2>/dev/null || true
+
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selenium-failure-logs
+          path: test-results/logs/
+          retention-days: 7
+
+      # ── Upload JUnit XML (always) ─────────────────────────────────
+      - name: Upload JUnit reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-selenium-e2e
+          path: test-results/selenium-e2e.xml
+          retention-days: 14
+
+# ═══════════════════════════════════════════════════════════════════════
+#  JOB 3 — Mobile E2E Tests (Chrome Mobile Emulation)
+#  Uses Chrome mobile emulation rather than a full Android emulator
+#  for reliability and speed on GitHub-hosted runners.
+# ═══════════════════════════════════════════════════════════════════════
+  mobile-e2e:
+    name: Mobile E2E (Chrome Mobile Emulation)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Google Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      - name: Install dependencies
+        run: |
+          npm ci || npm install
+          cd songstr && npm ci || npm install
+
+      - name: Start application server
+        working-directory: songstr
+        run: node server.js &
+
+      - name: Wait for application health check
+        run: |
+          npx -y wait-on http://localhost:3000 --timeout 30000 --interval 1000
+          echo "✅ Application is healthy!"
+
+      # ── Run mobile viewport tests via the master report generator ─
+      # This uses Chrome mobile emulation (Nexus 5 viewport) which is
+      # the same technique used in generate_master_report.js line 116-148
+      - name: Run mobile E2E tests (Chrome mobile emulation, with retries)
+        working-directory: songstr
+        run: |
+          # Create a dedicated mobile test runner that uses Chrome mobile emulation
+          cat > /tmp/mobile_e2e_runner.js << 'MOBILE_EOF'
+          const { Builder } = require('selenium-webdriver');
+          const chrome = require('selenium-webdriver/chrome');
+          const assert = require('assert');
+
+          describe('Mobile E2E Tests - Chrome Mobile Emulation', function () {
+            let driver;
+            const baseUrl = 'http://localhost:3000';
+
+            before(async function () {
+              const options = new chrome.Options();
+              options.addArguments('--headless=new');
+              options.addArguments('--no-sandbox');
+              options.addArguments('--disable-dev-shm-usage');
+              options.addArguments('--disable-gpu');
+              options.setMobileEmulation({ deviceName: 'Nexus 5' });
+
+              driver = await new Builder()
+                .forBrowser('chrome')
+                .setChromeOptions(options)
+                .build();
+            });
+
+            after(async function () {
+              if (driver) await driver.quit();
+            });
+
+            it('should load the homepage on mobile viewport', async function () {
+              await driver.get(baseUrl);
+              const title = await driver.getTitle();
+              assert(title.includes('Songstr'), `Expected title to include "Songstr", got "${title}"`);
+            });
+
+            it('should open auth modal on mobile', async function () {
+              await driver.executeScript("if (typeof openAuthModal === 'function') openAuthModal();");
+              await driver.sleep(1000);
+              const modal = await driver.findElement({ id: 'auth-modal' });
+              const isDisplayed = await modal.isDisplayed();
+              assert(isDisplayed, 'Auth modal should be displayed on mobile');
+              await driver.executeScript("if (typeof closeAuthModal === 'function') closeAuthModal();");
+            });
+
+            it('should navigate to browse screen on mobile', async function () {
+              await driver.executeScript("showScreen('browse');");
+              await driver.sleep(500);
+              const searchInput = await driver.findElement({ id: 'search-input' });
+              const isVisible = await searchInput.isDisplayed();
+              assert(isVisible, 'Search input should be visible on mobile browse screen');
+            });
+
+            it('should render mood detection page on mobile', async function () {
+              await driver.executeScript("showScreen('detect');");
+              await driver.sleep(500);
+              const tabFace = await driver.findElement({ id: 'tab-face' });
+              const isVisible = await tabFace.isDisplayed();
+              assert(isVisible, 'Face detection tab should be visible on mobile');
+            });
+          });
+          MOBILE_EOF
+
+          npx mocha /tmp/mobile_e2e_runner.js \
+            --retries 3 \
+            --timeout 60000 \
+            --exit \
+            --reporter mocha-junit-reporter \
+            --reporter-options mochaFile=../test-results/mobile-e2e.xml
+
+      - name: Collect screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-failure-screenshots
+          path: |
+            **/*.png
+          retention-days: 7
+
+      - name: Upload JUnit reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-mobile-e2e
+          path: test-results/mobile-e2e.xml
+          retention-days: 14
+
+# ═══════════════════════════════════════════════════════════════════════
+#  JOB 4 — Aggregate Test Summary
+#  Merges all JUnit reports and produces a detailed GitHub summary.
+# ═══════════════════════════════════════════════════════════════════════
+  test-summary:
+    name: Test Summary & Reporting
+    needs: [unit-integration, selenium-e2e, mobile-e2e]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Download all JUnit reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: junit-*
+          path: all-reports
+          merge-multiple: true
+
+      # Produce a detailed summary of passed, failed, retried, and skipped tests
+      - name: Generate detailed test summary
+        uses: mikepenz/action-junit-report@v4
+        with:
+          report_paths: 'all-reports/**/*.xml'
+          detailed_summary: true
+          include_passed: true
+          # Do NOT mark failed tests as passed
+          fail_on_failure: true
+          check_name: 'E2E Test Results'
+
+      - name: Generate GitHub Step Summary
+        if: always()
+        run: |
+          echo "## 📊 Songstr CI — Test Execution Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Unit & Integration | \`${{ needs.unit-integration.result }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Selenium E2E | \`${{ needs.selenium-e2e.result }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Mobile E2E | \`${{ needs.mobile-e2e.result }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Retry policy:** Failed tests are retried up to 3 times before being marked as failed." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Artifacts:** JUnit XML, Mochawesome HTML, screenshots, and logs are available in the Artifacts tab." >> $GITHUB_STEP_SUMMARY

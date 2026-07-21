@@ -13,24 +13,33 @@
     "lint": "eslint .",
     "build": "node update_frontend.js",
     "test:integration": "mocha test/**/*.test.js --exit",
-    "test:e2e": "python ../run_validation.py"
+    "test:e2e": "python ../run_validation.py",
+    "demo": "node e2e_demo.js",
+    "test:selenium": "mocha test/selenium.e2e.js --timeout 30000",
+    "test:appium": "mocha test/appium.e2e.js --timeout 60000"
   },
   "dependencies": {
+    "axios": "^1.18.1",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.11.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "exceljs": "^4.4.0",
     "express": "^5.1.0",
     "face-api.js": "^0.22.2",
     "jsonwebtoken": "^9.0.3",
+    "puppeteer": "^25.3.0",
     "react-router-dom": "^7.18.0"
   },
   "devDependencies": {
+    "chromedriver": "^151.0.0",
     "eslint": "^9.16.0",
     "mocha": "^10.8.2",
     "mocha-junit-reporter": "^2.2.1",
     "mochawesome": "^7.1.3",
     "nyc": "^17.1.0",
-    "supertest": "^7.0.0"
+    "selenium-webdriver": "^4.46.0",
+    "supertest": "^7.0.0",
+    "webdriverio": "^9.29.1"
   }
 }
