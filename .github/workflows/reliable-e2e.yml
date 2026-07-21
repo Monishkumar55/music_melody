@@ -15,6 +15,11 @@ concurrency:
   group: e2e-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Grant write permission for the JUnit report action to post check runs
+permissions:
+  contents: read
+  checks: write
+
 env:
   CI: true
   NODE_ENV: test
@@ -39,10 +44,12 @@ jobs:
           cache: 'npm'
 
       # Install deps at BOTH root and songstr/ (nested project)
-      - name: Install dependencies
-        run: |
-          npm ci || npm install
-          cd songstr && npm ci || npm install
+      - name: Install root dependencies
+        run: npm ci || npm install
+
+      - name: Install songstr dependencies
+        working-directory: songstr
+        run: npm ci || npm install
 
       # ── Run unit+integration tests with retries ───────────────────
       - name: Run API tests (with retries)
@@ -103,20 +110,44 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      # Install Google Chrome (stable) for Selenium
+      # Install Google Chrome (stable) and matching ChromeDriver
       - name: Install Google Chrome
         uses: browser-actions/setup-chrome@v1
         with:
           chrome-version: stable
+        id: setup-chrome
 
       - name: Verify Chrome installation
         run: |
-          google-chrome --version || chrome --version || echo "Chrome installed via action"
+          google-chrome --version || true
+          which google-chrome || true
+          which chromedriver || true
 
-      - name: Install dependencies
+      - name: Install root dependencies
+        run: npm ci || npm install
+
+      # Install songstr deps, skipping npm chromedriver download
+      # since setup-chrome already provides a matching chromedriver
+      - name: Install songstr dependencies
+        working-directory: songstr
+        run: npm ci || npm install
+        env:
+          CHROMEDRIVER_SKIP_DOWNLOAD: true
+
+      # Let Selenium Manager (built into selenium-webdriver@4.x) auto-detect
+      # the correct chromedriver, or use the one from setup-chrome
+      - name: Configure ChromeDriver path
         run: |
-          npm ci || npm install
-          cd songstr && npm ci || npm install
+          CHROME_PATH=$(which google-chrome || echo "")
+          echo "CHROME_BIN=${CHROME_PATH}" >> $GITHUB_ENV
+          # Find chromedriver from setup-chrome action
+          CHROMEDRIVER_PATH=$(which chromedriver || echo "")
+          if [ -n "$CHROMEDRIVER_PATH" ]; then
+            echo "CHROMEDRIVER_PATH=${CHROMEDRIVER_PATH}" >> $GITHUB_ENV
+            echo "Found chromedriver at: ${CHROMEDRIVER_PATH}"
+          else
+            echo "ChromeDriver will be auto-resolved by Selenium Manager"
+          fi
 
       # Start the Express server in the background
       - name: Start application server
@@ -128,7 +159,7 @@ jobs:
         run: |
           echo "Waiting for http://localhost:3000 to become ready..."
           npx -y wait-on http://localhost:3000 --timeout 30000 --interval 1000
-          echo "✅ Application is healthy!"
+          echo "Application is healthy!"
 
       # ── Run Selenium tests with retries ───────────────────────────
       - name: Run Selenium E2E tests (with retries)
@@ -158,7 +189,6 @@ jobs:
         if: failure()
         run: |
           mkdir -p test-results/logs
-          # Capture any log files from the server
           cp songstr/*.log test-results/logs/ 2>/dev/null || true
           cp songstr/demo_reports/*.log test-results/logs/ 2>/dev/null || true
           echo "Server process info:" > test-results/logs/server-info.txt
@@ -206,10 +236,14 @@ jobs:
         with:
           chrome-version: stable
 
-      - name: Install dependencies
-        run: |
-          npm ci || npm install
-          cd songstr && npm ci || npm install
+      - name: Install root dependencies
+        run: npm ci || npm install
+
+      - name: Install songstr dependencies
+        working-directory: songstr
+        run: npm ci || npm install
+        env:
+          CHROMEDRIVER_SKIP_DOWNLOAD: true
 
       - name: Start application server
         working-directory: songstr
@@ -218,15 +252,12 @@ jobs:
       - name: Wait for application health check
         run: |
           npx -y wait-on http://localhost:3000 --timeout 30000 --interval 1000
-          echo "✅ Application is healthy!"
+          echo "Application is healthy!"
 
-      # ── Run mobile viewport tests via the master report generator ─
-      # This uses Chrome mobile emulation (Nexus 5 viewport) which is
-      # the same technique used in generate_master_report.js line 116-148
+      # ── Create and run mobile viewport tests ──────────────────────
       - name: Run mobile E2E tests (Chrome mobile emulation, with retries)
         working-directory: songstr
         run: |
-          # Create a dedicated mobile test runner that uses Chrome mobile emulation
           cat > /tmp/mobile_e2e_runner.js << 'MOBILE_EOF'
           const { Builder } = require('selenium-webdriver');
           const chrome = require('selenium-webdriver/chrome');
@@ -237,6 +268,7 @@ jobs:
             const baseUrl = 'http://localhost:3000';
 
             before(async function () {
+              this.timeout(30000);
               const options = new chrome.Options();
               options.addArguments('--headless=new');
               options.addArguments('--no-sandbox');
@@ -257,7 +289,7 @@ jobs:
             it('should load the homepage on mobile viewport', async function () {
               await driver.get(baseUrl);
               const title = await driver.getTitle();
-              assert(title.includes('Songstr'), `Expected title to include "Songstr", got "${title}"`);
+              assert(title.includes('Songstr'), 'Expected title to include Songstr, got: ' + title);
             });
 
             it('should open auth modal on mobile', async function () {
@@ -344,7 +376,7 @@ jobs:
       - name: Generate GitHub Step Summary
         if: always()
         run: |
-          echo "## 📊 Songstr CI — Test Execution Report" >> $GITHUB_STEP_SUMMARY
+          echo "## Songstr CI - Test Execution Report" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
