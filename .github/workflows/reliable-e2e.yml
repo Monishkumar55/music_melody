@@ -245,6 +245,15 @@ jobs:
         env:
           CHROMEDRIVER_SKIP_DOWNLOAD: true
 
+      - name: Configure ChromeDriver path
+        run: |
+          CHROME_PATH=$(which google-chrome || echo "")
+          echo "CHROME_BIN=${CHROME_PATH}" >> $GITHUB_ENV
+          CHROMEDRIVER_PATH=$(which chromedriver || echo "")
+          if [ -n "$CHROMEDRIVER_PATH" ]; then
+            echo "CHROMEDRIVER_PATH=${CHROMEDRIVER_PATH}" >> $GITHUB_ENV
+          fi
+
       - name: Start application server
         working-directory: songstr
         run: node server.js &
@@ -254,72 +263,11 @@ jobs:
           npx -y wait-on http://localhost:3000 --timeout 30000 --interval 1000
           echo "Application is healthy!"
 
-      # ── Create and run mobile viewport tests ──────────────────────
+      # ── Run mobile viewport tests (committed file, not heredoc) ───
       - name: Run mobile E2E tests (Chrome mobile emulation, with retries)
         working-directory: songstr
         run: |
-          cat > test/mobile_ci.e2e.js << 'MOBILE_EOF'
-          const { Builder } = require('selenium-webdriver');
-          const chrome = require('selenium-webdriver/chrome');
-          const assert = require('assert');
-
-          describe('Mobile E2E Tests - Chrome Mobile Emulation', function () {
-            let driver;
-            const baseUrl = 'http://localhost:3000';
-
-            before(async function () {
-              this.timeout(30000);
-              const options = new chrome.Options();
-              options.addArguments('--headless=new');
-              options.addArguments('--no-sandbox');
-              options.addArguments('--disable-dev-shm-usage');
-              options.addArguments('--disable-gpu');
-              options.setMobileEmulation({ deviceName: 'Nexus 5' });
-
-              driver = await new Builder()
-                .forBrowser('chrome')
-                .setChromeOptions(options)
-                .build();
-            });
-
-            after(async function () {
-              if (driver) await driver.quit();
-            });
-
-            it('should load the homepage on mobile viewport', async function () {
-              await driver.get(baseUrl);
-              const title = await driver.getTitle();
-              assert(title.includes('Songstr'), 'Expected title to include Songstr, got: ' + title);
-            });
-
-            it('should open auth modal on mobile', async function () {
-              await driver.executeScript("if (typeof openAuthModal === 'function') openAuthModal();");
-              await driver.sleep(1000);
-              const modal = await driver.findElement({ id: 'auth-modal' });
-              const isDisplayed = await modal.isDisplayed();
-              assert(isDisplayed, 'Auth modal should be displayed on mobile');
-              await driver.executeScript("if (typeof closeAuthModal === 'function') closeAuthModal();");
-            });
-
-            it('should navigate to browse screen on mobile', async function () {
-              await driver.executeScript("showScreen('browse');");
-              await driver.sleep(500);
-              const searchInput = await driver.findElement({ id: 'search-input' });
-              const isVisible = await searchInput.isDisplayed();
-              assert(isVisible, 'Search input should be visible on mobile browse screen');
-            });
-
-            it('should render mood detection page on mobile', async function () {
-              await driver.executeScript("showScreen('detect');");
-              await driver.sleep(500);
-              const tabFace = await driver.findElement({ id: 'tab-face' });
-              const isVisible = await tabFace.isDisplayed();
-              assert(isVisible, 'Face detection tab should be visible on mobile');
-            });
-          });
-          MOBILE_EOF
-
-          npx mocha test/mobile_ci.e2e.js \
+          npx mocha test/mobile.e2e.js \
             --retries 3 \
             --timeout 60000 \
             --exit \
