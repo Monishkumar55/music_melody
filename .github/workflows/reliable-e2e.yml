@@ -410,12 +410,58 @@ jobs:
           retention-days: 14
 
 # ═══════════════════════════════════════════════════════════════════════
-#  JOB 6 — Aggregate Test Summary
+#  JOB 6 — Vulnerability & Security Testing
+#  Executes security integration suite, npm audit, and vulnerability checks.
+# ═══════════════════════════════════════════════════════════════════════
+  vulnerability-security:
+    name: Vulnerability & Security Tests
+    needs: [validation-tests]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        working-directory: songstr
+        run: npm ci || npm install
+
+      - name: Run Vulnerability & Security Test Suite
+        working-directory: songstr
+        run: |
+          npx mocha test/security.test.js \
+            --retries 2 \
+            --timeout 15000 \
+            --exit \
+            --reporter mocha-junit-reporter \
+            --reporter-options mochaFile=../test-results/security.xml
+
+      - name: Run NPM Audit Security Check
+        working-directory: songstr
+        run: npm audit --audit-level=high || true
+
+      - name: Upload Security JUnit Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-security
+          path: test-results/security.xml
+          retention-days: 14
+
+# ═══════════════════════════════════════════════════════════════════════
+#  JOB 7 — Aggregate Test Summary
 #  Merges all JUnit reports and produces a detailed GitHub summary.
 # ═══════════════════════════════════════════════════════════════════════
   test-summary:
     name: Test Summary & Reporting
-    needs: [unit-integration, selenium-e2e, mobile-e2e, validation-tests, load-tests]
+    needs: [unit-integration, selenium-e2e, mobile-e2e, validation-tests, load-tests, vulnerability-security]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -451,7 +497,9 @@ jobs:
           echo "| Mobile E2E | \`${{ needs.mobile-e2e.result }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Validation Tests | \`${{ needs.validation-tests.result }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Load Tests | \`${{ needs.load-tests.result }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Vulnerability & Security | \`${{ needs.vulnerability-security.result }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Retry policy:** Failed tests are retried up to 3 times before being marked as failed." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Artifacts:** JUnit XML, Mochawesome HTML, k6 reports, screenshots, and logs are available in the Artifacts tab." >> $GITHUB_STEP_SUMMARY
+
