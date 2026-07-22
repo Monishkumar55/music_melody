@@ -1,45 +1,45 @@
 export const AuthService = {
-  async register(data) {
-    const res = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-      credentials: 'include'
+  async register(userData) {
+    const { data, error } = await window.supabaseClient.auth.signUp({
+      email: userData.email || `${userData.username}@songstr.local`,
+      password: userData.password,
+      options: {
+        data: {
+          username: userData.username,
+          fullname: userData.fullname || '',
+        }
+      }
     });
-    const result = await res.json();
-    if (!res.ok) throw new Error(result.error || 'Registration failed');
-    return result;
+    if (error) throw new Error(error.message);
+    return { success: true, user: data.user };
   },
 
   async login(username, password) {
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-      credentials: 'include'
+    const email = username.includes('@') ? username : `${username}@songstr.local`;
+    const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+      email,
+      password
     });
-    const result = await res.json();
-    if (!res.ok) throw new Error(result.error || 'Login failed');
-    return result;
+    if (error) throw new Error(error.message);
+    return { success: true, user: data.user };
   },
 
   async logout() {
-    const res = await fetch('/api/auth/logout', {
-      method: 'POST',
-      credentials: 'include'
-    });
-    const result = await res.json();
-    if (!res.ok) throw new Error(result.error || 'Logout failed');
-    return result;
+    const { error } = await window.supabaseClient.auth.signOut();
+    if (error) throw new Error(error.message);
+    return { success: true };
   },
 
   async checkAuth() {
     try {
-      const res = await fetch('/api/auth/me', { credentials: 'include' });
-      if (!res.ok) return { loggedIn: false };
-      return await res.json();
+      const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+      if (error) throw error;
+      if (session) {
+        return { loggedIn: true, user: session.user };
+      }
+      return { loggedIn: false, user: null };
     } catch {
-      return { loggedIn: false };
+      return { loggedIn: false, user: null };
     }
   }
 };
