@@ -340,8 +340,7 @@ describe('Selenium E2E Tests - Songstr', function () {
       await driver.executeScript("const cb = document.querySelector('#register-form input[type=\"checkbox\"]'); if (cb && !cb.checked) cb.click();");
       await driver.executeScript("document.querySelector('#register-form button[type=\"submit\"]').click();");
       await driver.sleep(2000);
-      const homeScreen = await driver.wait(until.elementLocated(By.id('screen-home')), 10000);
-      await driver.wait(until.elementIsVisible(homeScreen), 10000);
+      const homeScreen = await driver.wait(until.elementLocated(By.id('screen-home')), 5000);
       assert(await homeScreen.isDisplayed(), 'Home screen visible after valid login');
     });
   });

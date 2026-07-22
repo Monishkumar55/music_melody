@@ -8,6 +8,7 @@
     "start:server": "node server.js",
     "start:web": "node server.js",
     "start:app": "cd app && npm start",
+    "build:apk": "cd app && npx eas-cli build -p android --profile preview",
     "dev": "node server.js",
     "test": "mocha --require test/globalHooks.js test/**/*.test.js test/*.e2e.js --exit",
     "test:coverage": "nyc --reporter=html --reporter=text mocha --require test/globalHooks.js test/**/*.test.js test/*.e2e.js --exit",
