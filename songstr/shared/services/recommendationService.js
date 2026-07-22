@@ -1,36 +1,43 @@
-// Universal Recommendation Service for Web and React Native App
-import { API_CONFIG } from '../constants/config.js';
+import { supabase } from './supabaseClient.js';
 
 export const RecommendationService = {
   async getSongs(mood = 'happy', language = 'All') {
-    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SONGS.RECOMMENDATIONS}?mood=${encodeURIComponent(mood)}&language=${encodeURIComponent(language)}`;
-    const res = await fetch(url, { credentials: 'include' });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'Failed to fetch recommendations');
-    return data.songs || [];
+    let query = supabase.from('songs').select('*').eq('mood', mood);
+    if (language && language !== 'All') {
+      query = query.eq('language', language);
+    }
+    const { data, error } = await query;
+    if (error) throw new Error(error.message);
+    // Shuffle the songs manually
+    const shuffled = (data || []).sort(() => 0.5 - Math.random());
+    return shuffled;
   },
 
   async getMoods() {
-    const res = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SONGS.MOODS}`, { credentials: 'include' });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'Failed to fetch moods');
-    return data.moods || [];
+    // Return hardcoded mood list consistent with the original app design
+    return ['happy', 'sad', 'angry', 'relaxed', 'energetic', 'stressed', 'romantic', 'neutral'];
   },
 
   async getLanguages(mood = 'happy') {
-    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SONGS.LANGUAGES}?mood=${encodeURIComponent(mood)}`;
-    const res = await fetch(url, { credentials: 'include' });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'Failed to fetch languages');
-    return data.languages || ['All'];
+    const { data, error } = await supabase
+      .from('songs')
+      .select('language')
+      .eq('mood', mood);
+    
+    if (error) throw new Error(error.message);
+    const langs = new Set(data.map(d => d.language));
+    return ['All', ...langs];
   },
 
-  async searchSongs(query) {
-    if (!query) return [];
-    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SONGS.SEARCH}?q=${encodeURIComponent(query)}`;
-    const res = await fetch(url, { credentials: 'include' });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'Search failed');
-    return data.results || [];
+  async searchSongs(searchQuery) {
+    if (!searchQuery) return [];
+    const { data, error } = await supabase
+      .from('songs')
+      .select('*')
+      .or(`title.ilike.%${searchQuery}%,artist.ilike.%${searchQuery}%,movie.ilike.%${searchQuery}%`)
+      .limit(20);
+      
+    if (error) throw new Error(error.message);
+    return data || [];
   }
 };

@@ -4,18 +4,18 @@
   "description": "AI-Powered Mood-Based Music Recommendation App",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "start:server": "node server.js",
-    "start:web": "node server.js",
+    "start": "serve public",
+    "start:server": "serve public",
+    "start:web": "serve public",
     "start:app": "cd app && npm start",
     "build:apk": "cd app && npx eas-cli build -p android --profile preview",
-    "dev": "node server.js",
+    "dev": "serve public",
     "test": "mocha --require test/globalHooks.js test/**/*.test.js test/*.e2e.js --exit",
     "test:coverage": "nyc --reporter=html --reporter=text mocha --require test/globalHooks.js test/**/*.test.js test/*.e2e.js --exit",
     "test:reports": "mocha --require test/globalHooks.js test/**/*.test.js test/*.e2e.js --reporter mochawesome --reporter-options reportDir=mochawesome-report --exit",
     "test:junit": "mocha --require test/globalHooks.js test/**/*.test.js test/*.e2e.js --reporter mocha-junit-reporter --reporter-options mochaFile=test-results.xml --exit",
     "lint": "eslint .",
-    "build": "node update_frontend.js",
+    "build": "echo \"No build required\"",
     "test:integration": "mocha --require test/globalHooks.js test/**/*.test.js --exit",
     "test:e2e": "python ../run_validation.py",
     "demo": "node e2e_demo.js",
@@ -23,6 +23,7 @@
     "test:appium": "mocha --require test/globalHooks.js test/appium.e2e.js --timeout 60000"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.110.8",
     "axios": "^1.18.1",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.11.1",
@@ -44,6 +45,7 @@
     "mochawesome": "^7.1.3",
     "nyc": "^17.1.0",
     "selenium-webdriver": "^4.46.0",
+    "serve": "^14.2.6",
     "supertest": "^7.0.0",
     "webdriverio": "^9.29.1"
   }
