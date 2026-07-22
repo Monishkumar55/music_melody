@@ -26,7 +26,7 @@ def main():
             
     # 1. Install all dependencies (including new devDependencies)
     log("Installing dependencies via npm install...")
-    proc_install = run_cmd(["npm", "install"], subproject_dir)
+    proc_install = run_cmd(["npm", "install", "--legacy-peer-deps"], subproject_dir)
     if proc_install.returncode != 0:
         log("Npm install failed, attempting clean npm install...")
         log(proc_install.stderr)

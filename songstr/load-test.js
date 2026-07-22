@@ -16,12 +16,54 @@ export const options = {
   },
 };
 
+const BASE_URL = 'http://localhost:3000';
+
 export default function () {
-  const res = http.get('http://localhost:3000');
-  check(res, {
-    'status is 200': (r) => r.status === 200,
-    'body contains html': (r) => r.body && r.body.includes('<html'),
+  // 1. Homepage Load
+  const resHome = http.get(BASE_URL);
+  check(resHome, {
+    'homepage status is 200': (r) => r.status === 200,
+    'homepage body contains html': (r) => r.body && r.body.includes('<html'),
   });
+
+  // 2. GET /api/moods
+  const resMoods = http.get(`${BASE_URL}/api/moods`);
+  check(resMoods, {
+    'moods status is 200': (r) => r.status === 200,
+    'moods json valid': (r) => r.json() && Array.isArray(r.json().moods),
+  });
+
+  // 3. GET /api/languages
+  const resLangs = http.get(`${BASE_URL}/api/languages?mood=happy`);
+  check(resLangs, {
+    'languages status is 200': (r) => r.status === 200,
+  });
+
+  // 4. GET /api/songs
+  const resSongs = http.get(`${BASE_URL}/api/songs?mood=happy&lang=Tamil`);
+  check(resSongs, {
+    'songs status is 200': (r) => r.status === 200,
+    'songs list returned': (r) => r.json() && Array.isArray(r.json().songs),
+  });
+
+  // 5. GET /api/search
+  const resSearch = http.get(`${BASE_URL}/api/search?q=tamil`);
+  check(resSearch, {
+    'search status is 200': (r) => r.status === 200,
+    'search results returned': (r) => r.json() && Array.isArray(r.json().results),
+  });
+
+  // 6. POST /api/detect-mood
+  const resDetect = http.post(
+    `${BASE_URL}/api/detect-mood`,
+    JSON.stringify({ text: 'I am feeling happy and joyful today' }),
+    { headers: { 'Content-Type': 'application/json' } }
+  );
+  check(resDetect, {
+    'detect mood status is 200': (r) => r.status === 200,
+    'detected mood is happy': (r) => r.json() && r.json().mood === 'happy',
+  });
+
   sleep(1);
 }
 

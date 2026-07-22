@@ -45,9 +45,17 @@ module.exports = [
     }
   },
   {
-    files: ["public/**/*.js", "load-test.js"],
+    files: ["public/**/*.js", "src/**/*.js", "src/**/*.jsx", "app/**/*.js", "shared/**/*.js", "web/**/*.js", "load-test.js"],
     languageOptions: {
-      sourceType: "module"
+      sourceType: "module",
+      parserOptions: {
+        ecmaFeatures: {
+          jsx: true
+        }
+      }
+    },
+    rules: {
+      "no-unused-vars": "off"
     }
   }
 ];

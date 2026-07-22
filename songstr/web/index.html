@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Songstr - AI-Powered Mood Music Web Application</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app-root">
+    <!-- Web Navigation Header -->
+    <header class="web-header">
+      <div class="logo">🎵 Songstr Web</div>
+      <nav class="nav-links">
+        <button class="nav-btn active" data-screen="home">Home</button>
+        <button class="nav-btn" data-screen="detect">Mood AI</button>
+        <button class="nav-btn" data-screen="browse">Search</button>
+        <button class="nav-btn" data-screen="favorites">Favorites</button>
+        <button class="nav-btn" data-screen="profile">Profile</button>
+      </nav>
+    </header>
+
+    <!-- Main Screen Content -->
+    <main class="web-main">
+      <section id="screen-home" class="screen-section active">
+        <h1>AI Mood-Based Music Recommendations</h1>
+        <div class="mood-selector" id="mood-chips"></div>
+        <div class="song-grid" id="recommended-songs-grid"></div>
+      </section>
+    </main>
+
+    <!-- Web Audio Player Bar -->
+    <footer class="web-player">
+      <div class="player-info" id="player-track-info">Select a song to start listening</div>
+      <div class="player-controls">
+        <button id="btn-prev">⏮</button>
+        <button id="btn-play">▶</button>
+        <button id="btn-next">⏭</button>
+      </div>
+    </footer>
+  </div>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

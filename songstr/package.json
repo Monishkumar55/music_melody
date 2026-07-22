@@ -5,18 +5,21 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "start:server": "node server.js",
+    "start:web": "node server.js",
+    "start:app": "cd app && npm start",
     "dev": "node server.js",
-    "test": "mocha test/**/*.test.js --exit",
-    "test:coverage": "nyc --reporter=html --reporter=text mocha test/**/*.test.js --exit",
-    "test:reports": "mocha test/**/*.test.js --reporter mochawesome --reporter-options reportDir=mochawesome-report --exit",
-    "test:junit": "mocha test/**/*.test.js --reporter mocha-junit-reporter --reporter-options mochaFile=test-results.xml --exit",
+    "test": "mocha --require test/globalHooks.js test/**/*.test.js test/*.e2e.js --exit",
+    "test:coverage": "nyc --reporter=html --reporter=text mocha --require test/globalHooks.js test/**/*.test.js test/*.e2e.js --exit",
+    "test:reports": "mocha --require test/globalHooks.js test/**/*.test.js test/*.e2e.js --reporter mochawesome --reporter-options reportDir=mochawesome-report --exit",
+    "test:junit": "mocha --require test/globalHooks.js test/**/*.test.js test/*.e2e.js --reporter mocha-junit-reporter --reporter-options mochaFile=test-results.xml --exit",
     "lint": "eslint .",
     "build": "node update_frontend.js",
-    "test:integration": "mocha test/**/*.test.js --exit",
+    "test:integration": "mocha --require test/globalHooks.js test/**/*.test.js --exit",
     "test:e2e": "python ../run_validation.py",
     "demo": "node e2e_demo.js",
-    "test:selenium": "mocha test/selenium.e2e.js --timeout 30000",
-    "test:appium": "mocha test/appium.e2e.js --timeout 60000"
+    "test:selenium": "mocha --require test/globalHooks.js test/selenium.e2e.js --timeout 30000",
+    "test:appium": "mocha --require test/globalHooks.js test/appium.e2e.js --timeout 60000"
   },
   "dependencies": {
     "axios": "^1.18.1",

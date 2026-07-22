@@ -55,7 +55,7 @@ jobs:
       - name: Run API tests (with retries)
         working-directory: songstr
         run: |
-          npx mocha test/api.test.js test/get.test.js \
+          npx mocha test/api.test.js test/get.test.js test/profile.test.js test/security.test.js \
             --retries 3 \
             --timeout 15000 \
             --exit \
@@ -67,7 +67,7 @@ jobs:
         if: always()
         working-directory: songstr
         run: |
-          npx mocha test/api.test.js test/get.test.js \
+          npx mocha test/api.test.js test/get.test.js test/profile.test.js test/security.test.js \
             --retries 3 \
             --timeout 15000 \
             --exit \
@@ -209,6 +209,16 @@ jobs:
         with:
           name: junit-selenium-e2e
           path: test-results/selenium-e2e.xml
+          retention-days: 14
+
+      - name: Upload Excel E2E Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: excel-e2e-report-selenium
+          path: |
+            songstr/reports/E2E-Test-Results.xlsx
+            reports/E2E-Test-Results.xlsx
           retention-days: 14
 
 # ═══════════════════════════════════════════════════════════════════════

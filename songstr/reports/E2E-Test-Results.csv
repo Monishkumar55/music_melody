@@ -1,0 +1,96 @@
+testId,module,feature,platform,browser,device,status,executionTime,duration,durationMs,screenshot,failureReason,retryCount,date
+"TC-API-001","API & Database","Auth Endpoint","Backend API","N/A (HTTP)","Server Node.js","PASSED","04:28:47","511ms","511","N/A","N/A","0","2026-07-22"
+"TC-API-002","API & Database","Login Endpoint","Backend API","N/A (HTTP)","Server Node.js","PASSED","04:28:47","474ms","474","N/A","N/A","0","2026-07-22"
+"TC-API-003","API & Database","Songs API","Backend API","N/A (HTTP)","Server Node.js","PASSED","04:28:47","6ms","6","N/A","N/A","0","2026-07-22"
+"TC-API-004","API & Database","Invalid Request","Backend API","N/A (HTTP)","Server Node.js","PASSED","04:28:47","8ms","8","N/A","N/A","0","2026-07-22"
+"TC-API-005","API & Database","Database Validation","Backend API","N/A (HTTP)","Server Node.js","PASSED","04:28:47","7ms","7","N/A","N/A","0","2026-07-22"
+"TC-API-006","API & Database","Database Favorites","Backend API","N/A (HTTP)","Server Node.js","PASSED","04:28:47","8ms","8","N/A","N/A","0","2026-07-22"
+"TC-LOAD-100","Load Testing","100 VUsers Load","Backend Infrastructure","HTTP Virtual Users","Concurrent Connections","PASSED","04:28:51","181ms","181","N/A","N/A","0","2026-07-22"
+"TC-LOAD-200","Load Testing","200 VUsers Load","Backend Infrastructure","HTTP Virtual Users","Concurrent Connections","PASSED","04:28:51","417ms","417","N/A","N/A","0","2026-07-22"
+"TC-LOAD-500","Load Testing","500 VUsers Load","Backend Infrastructure","HTTP Virtual Users","Concurrent Connections","PASSED","04:28:52","857ms","857","N/A","N/A","0","2026-07-22"
+"TC-LOAD-1000","Load Testing","1000 VUsers Load","Backend Infrastructure","HTTP Virtual Users","Concurrent Connections","PASSED","04:28:53","1421ms","1421","N/A","N/A","0","2026-07-22"
+"TC-LOAD-STRESS","Load Testing","Stress Test","Backend Infrastructure","HTTP Virtual Users","Concurrent Connections","PASSED","04:28:54","408ms","408","N/A","N/A","0","2026-07-22"
+"TC-LOAD-SPIKE","Load Testing","Spike Test","Backend Infrastructure","HTTP Virtual Users","Concurrent Connections","PASSED","04:28:54","537ms","537","N/A","N/A","0","2026-07-22"
+"TC-LOAD-ENDURANCE","Load Testing","Endurance Test","Backend Infrastructure","HTTP Virtual Users","Concurrent Connections","PASSED","04:28:55","468ms","468","N/A","N/A","0","2026-07-22"
+"TC-APP-001","Appium Android","Session Setup","Android","Chrome Android","Android Emulator","PASSED","04:29:05","0ms","0","N/A","N/A","0","2026-07-22"
+"TC-APP-002","Appium Android","Native WebView","Android","Chrome Android","Android Emulator","PASSED","04:29:05","0ms","0","N/A","N/A","0","2026-07-22"
+"TC-APP-003","Appium Android","Touch & Orientation","Android","Chrome Android","Android Emulator","PASSED","04:29:05","0ms","0","N/A","N/A","0","2026-07-22"
+"TC-MOB-001","Mobile Chrome","Mobile View","Mobile Web","Chrome Mobile","Pixel 5 (Emulated)","PASSED","04:29:11","11ms","11","N/A","N/A","0","2026-07-22"
+"TC-MOB-002","Mobile Chrome","Mobile Auth","Mobile Web","Chrome Mobile","Pixel 5 (Emulated)","PASSED","04:29:12","1018ms","1018","N/A","N/A","0","2026-07-22"
+"TC-MOB-003","Mobile Chrome","Mobile Touch UX","Mobile Web","Chrome Mobile","Pixel 5 (Emulated)","FAILED","04:29:22","10295ms","10295","E:\songstr\songstr\songstr\screenshots\TC_MOB_003_1784694562295.png","Waiting until element is visible
+Wait timed out after 10106ms","0","2026-07-22"
+"TC-MOB-004","Mobile Chrome","Mobile Bottom Bar","Mobile Web","Chrome Mobile","Pixel 5 (Emulated)","PASSED","04:29:22","52ms","52","N/A","N/A","0","2026-07-22"
+"TC-ACC-001","Accessibility","Keyboard Navigation","Desktop","Chrome Headless","PC Desktop","PASSED","04:29:42","166ms","166","N/A","N/A","0","2026-07-22"
+"TC-ACC-002","Accessibility","ARIA Attributes","Desktop","Chrome Headless","PC Desktop","FAILED","04:29:42","233ms","233","E:\songstr\songstr\songstr\screenshots\TC_ACC_002_1784694582627.png","DOM contains accessibility ARIA elements","0","2026-07-22"
+"TC-ACC-003","Accessibility","Focus Ring","Desktop","Chrome Headless","PC Desktop","PASSED","04:29:42","39ms","39","N/A","N/A","0","2026-07-22"
+"TC-AUTH-001","Authentication","User Registration","Desktop","Chrome Headless","PC Desktop","FAILED","04:29:53","2328ms","2328","E:\songstr\songstr\songstr\screenshots\TC_AUTH_001_1784694591790.png","Home screen should be active after registration","0","2026-07-22"
+"TC-AUTH-002","Authentication","User Login","Desktop","Chrome Headless","PC Desktop","PASSED","04:29:53","404ms","404","N/A","N/A","0","2026-07-22"
+"TC-AUTH-003","Authentication","Invalid Login","Desktop","Chrome Headless","PC Desktop","PASSED","04:29:55","2079ms","2079","N/A","N/A","0","2026-07-22"
+"TC-AUTH-004","Authentication","Empty Field Validation","Desktop","Chrome Headless","PC Desktop","PASSED","04:29:55","72ms","72","N/A","N/A","0","2026-07-22"
+"TC-AUTH-005","Authentication","Logout & Session","Desktop","Chrome Headless","PC Desktop","PASSED","04:29:55","21ms","21","N/A","N/A","0","2026-07-22"
+"TC-AUTH-006","Authentication","Password Validation","Desktop","Chrome Headless","PC Desktop","PASSED","04:29:56","480ms","480","N/A","N/A","0","2026-07-22"
+"TC-AUTH-007","Authentication","Token Validation","Desktop","Chrome Headless","PC Desktop","PASSED","04:29:56","10ms","10","N/A","N/A","0","2026-07-22"
+"TC-FAV-001","Favorites","Add Favorite","Desktop","Chrome Headless","PC Desktop","PASSED","04:30:12","10816ms","10816","N/A","N/A","0","2026-07-22"
+"TC-FAV-002","Favorites","View Favorites","Desktop","Chrome Headless","PC Desktop","FAILED","04:30:22","10169ms","10169","E:\songstr\songstr\songstr\screenshots\TC_FAV_002_1784694622599.png","Waiting until element is visible
+Wait timed out after 10000ms","0","2026-07-22"
+"TC-FAV-003","Favorites","Remove Favorite","Desktop","Chrome Headless","PC Desktop","PASSED","04:30:22","8ms","8","N/A","N/A","0","2026-07-22"
+"TC-FAV-004","Favorites","Multiple Favorites","Desktop","Chrome Headless","PC Desktop","PASSED","04:30:22","17ms","17","N/A","N/A","0","2026-07-22"
+"TC-MUS-001","Music","Mood Detection","Desktop","Chrome Headless","PC Desktop","FAILED","04:30:38","10319ms","10319","E:\songstr\songstr\songstr\screenshots\TC_MUS_001_1784694638878.png","Waiting until element is visible
+Wait timed out after 10169ms","0","2026-07-22"
+"TC-MUS-002","Music","Face & Emotion Detection","Desktop","Chrome Headless","PC Desktop","FAILED","04:30:49","10327ms","10327","E:\songstr\songstr\songstr\screenshots\TC_MUS_002_1784694649212.png","Waiting until element is visible
+Wait timed out after 10198ms","0","2026-07-22"
+"TC-MUS-003","Music","Recommendation Engine","Desktop","Chrome Headless","PC Desktop","PASSED","04:30:49","10ms","10","N/A","N/A","0","2026-07-22"
+"TC-MUS-004","Music","Play & Pause","Desktop","Chrome Headless","PC Desktop","FAILED","04:30:49","231ms","231","E:\songstr\songstr\songstr\screenshots\TC_MUS_004_1784694649365.png","Player bar is functional","0","2026-07-22"
+"TC-MUS-005","Music","Next & Previous","Desktop","Chrome Headless","PC Desktop","PASSED","04:30:49","18ms","18","N/A","N/A","0","2026-07-22"
+"TC-MUS-006","Music","Shuffle & Repeat","Desktop","Chrome Headless","PC Desktop","PASSED","04:30:49","18ms","18","N/A","N/A","0","2026-07-22"
+"TC-MUS-007","Music","Volume & Seek","Desktop","Chrome Headless","PC Desktop","PASSED","04:30:49","18ms","18","N/A","N/A","0","2026-07-22"
+"TC-NAV-001","Navigation","Page Navigation","Desktop","Chrome Headless","PC Desktop","FAILED","04:31:08","10262ms","10262","E:\songstr\songstr\songstr\screenshots\TC_NAV_001_1784694668099.png","Waiting until element is visible
+Wait timed out after 10013ms","0","2026-07-22"
+"TC-NAV-002","Navigation","Page Navigation","Desktop","Chrome Headless","PC Desktop","FAILED","04:31:18","10301ms","10301","E:\songstr\songstr\songstr\screenshots\TC_NAV_002_1784694678507.png","Waiting until element is visible
+Wait timed out after 10155ms","0","2026-07-22"
+"TC-NAV-003","Navigation","Page Navigation","Desktop","Chrome Headless","PC Desktop","FAILED","04:31:28","10187ms","10187","E:\songstr\songstr\songstr\screenshots\TC_NAV_003_1784694688700.png","Waiting until element is visible
+Wait timed out after 10060ms","0","2026-07-22"
+"TC-NAV-004","Navigation","History Traversal","Desktop","Chrome Headless","PC Desktop","FAILED","04:31:39","10284ms","10284","E:\songstr\songstr\songstr\screenshots\TC_NAV_004_1784694698924.png","Waiting until element is visible
+Wait timed out after 10101ms","0","2026-07-22"
+"TC-NAV-005","Navigation","Page Refresh","Desktop","Chrome Headless","PC Desktop","PASSED","04:31:39","267ms","267","N/A","N/A","0","2026-07-22"
+"TC-PERF-001","Performance","Page Load","Desktop","Chrome Headless","PC Desktop","PASSED","04:31:45","14ms","14","N/A","N/A","0","2026-07-22"
+"TC-PERF-002","Performance","Memory & DOM","Desktop","Chrome Headless","PC Desktop","PASSED","04:31:45","9ms","9","N/A","N/A","0","2026-07-22"
+"TC-PERF-003","Performance","Image Loading","Desktop","Chrome Headless","PC Desktop","PASSED","04:31:45","9ms","9","N/A","N/A","0","2026-07-22"
+"TC-PL-001","Playlist","View Playlists","Desktop","Chrome Headless","PC Desktop","FAILED","04:32:04","10489ms","10489","E:\songstr\songstr\songstr\screenshots\TC_PL_001_1784694723941.png","Waiting for element to be located By(css selector, *[id=""screen-playlist""])
+Wait timed out after 10345ms","0","2026-07-22"
+"TC-PL-002","Playlist","Create Playlist","Desktop","Chrome Headless","PC Desktop","FAILED","04:32:14","10233ms","10233","E:\songstr\songstr\songstr\screenshots\TC_PL_002_1784694734228.png","Waiting for element to be located By(css selector, *[id=""screen-playlist""])
+Wait timed out after 10141ms","0","2026-07-22"
+"TC-PL-003","Playlist","Rename Playlist","Desktop","Chrome Headless","PC Desktop","PASSED","04:32:14","9ms","9","N/A","N/A","0","2026-07-22"
+"TC-PL-004","Playlist","Delete Playlist","Desktop","Chrome Headless","PC Desktop","PASSED","04:32:14","9ms","9","N/A","N/A","0","2026-07-22"
+"TC-PL-005","Playlist","Add/Remove Song","Desktop","Chrome Headless","PC Desktop","PASSED","04:32:14","8ms","8","N/A","N/A","0","2026-07-22"
+"TC-PL-006","Playlist","Duplicate Handling","Desktop","Chrome Headless","PC Desktop","PASSED","04:32:14","8ms","8","N/A","N/A","0","2026-07-22"
+"TC-PL-007","Playlist","Empty Playlist","Desktop","Chrome Headless","PC Desktop","PASSED","04:32:14","8ms","8","N/A","N/A","0","2026-07-22"
+"TC-PROF-001","User Profile","View Profile","Desktop","Chrome Headless","PC Desktop","FAILED","04:32:31","10495ms","10495","E:\songstr\songstr\songstr\screenshots\TC_PROF_001_1784694751079.png","Waiting until element is visible
+Wait timed out after 10186ms","0","2026-07-22"
+"TC-PROF-002","User Profile","Edit Profile","Desktop","Chrome Headless","PC Desktop","FAILED","04:32:41","10408ms","10408","E:\songstr\songstr\songstr\screenshots\TC_PROF_002_1784694761597.png","Waiting until element is visible
+Wait timed out after 10219ms","0","2026-07-22"
+"TC-PROF-003","User Profile","Update Details","Desktop","Chrome Headless","PC Desktop","FAILED","04:32:51","10182ms","10182","E:\songstr\songstr\songstr\screenshots\TC_PROF_003_1784694771831.png","Waiting until element is visible
+Wait timed out after 10051ms","0","2026-07-22"
+"TC-PROF-004","User Profile","Cancel Changes","Desktop","Chrome Headless","PC Desktop","FAILED","04:33:02","10347ms","10347","E:\songstr\songstr\songstr\screenshots\TC_PROF_004_1784694782176.png","Waiting until element is visible
+Wait timed out after 10210ms","0","2026-07-22"
+"TC-PROF-005","User Profile","Upload Avatar","Desktop","Chrome Headless","PC Desktop","FAILED","04:33:12","10216ms","10216","E:\songstr\songstr\songstr\screenshots\TC_PROF_005_1784694792388.png","Waiting until element is visible
+Wait timed out after 10075ms","0","2026-07-22"
+"TC-PROF-006","User Profile","Change Password","Desktop","Chrome Headless","PC Desktop","FAILED","04:33:23","10537ms","10537","E:\songstr\songstr\songstr\screenshots\TC_PROF_006_1784694802690.png","Waiting until element is visible
+Wait timed out after 10161ms","0","2026-07-22"
+"TC-RESP-001","Responsive Layout","Desktop Layout","Desktop","Chrome Headless","1920x1080","PASSED","04:33:38","12ms","12","N/A","N/A","0","2026-07-22"
+"TC-RESP-002","Responsive Layout","Tablet Layout","Tablet","Chrome Headless","768x1024","PASSED","04:33:44","13ms","13","N/A","N/A","0","2026-07-22"
+"TC-RESP-003","Responsive Layout","Mobile Layout","Mobile","Chrome Headless","360x640","FAILED","04:33:51","65ms","65","E:\songstr\songstr\songstr\screenshots\TC_RESP_003_1784694831374.png","Mobile width verified","0","2026-07-22"
+"TC-SRC-001","Search","Song Search","Desktop","Chrome Headless","PC Desktop","FAILED","04:34:07","10181ms","10181","E:\songstr\songstr\songstr\screenshots\TC_SRC_001_1784694847675.png","Waiting until element is visible
+Wait timed out after 10047ms","0","2026-07-22"
+"TC-SRC-002","Search","Artist Search","Desktop","Chrome Headless","PC Desktop","FAILED","04:34:17","10144ms","10144","E:\songstr\songstr\songstr\screenshots\TC_SRC_002_1784694857811.png","Waiting until element is visible
+Wait timed out after 10014ms","0","2026-07-22"
+"TC-SRC-003","Search","Album Search","Desktop","Chrome Headless","PC Desktop","FAILED","04:34:28","10503ms","10503","E:\songstr\songstr\songstr\screenshots\TC_SRC_003_1784694867972.png","Waiting until element is visible
+Wait timed out after 10033ms","0","2026-07-22"
+"TC-SRC-004","Search","Invalid Search","Desktop","Chrome Headless","PC Desktop","FAILED","04:34:38","10213ms","10213","E:\songstr\songstr\songstr\screenshots\TC_SRC_004_1784694878529.png","Waiting until element is visible
+Wait timed out after 10084ms","0","2026-07-22"
+"TC-SRC-005","Search","Empty Search","Desktop","Chrome Headless","PC Desktop","FAILED","04:34:48","10250ms","10250","E:\songstr\songstr\songstr\screenshots\TC_SRC_005_1784694888772.png","Waiting until element is visible
+Wait timed out after 10115ms","0","2026-07-22"
+"TC-SEC-001","Security","Protected Routes","Desktop","Chrome Headless","PC Desktop","PASSED","04:34:55","20ms","20","N/A","N/A","0","2026-07-22"
+"TC-SEC-002","Security","XSS Validation","Desktop","Chrome Headless","PC Desktop","PASSED","04:34:55","17ms","17","N/A","N/A","0","2026-07-22"
+"TC-SEC-003","Security","SQL Injection Validation","Desktop","Chrome Headless","PC Desktop","PASSED","04:34:55","10ms","10","N/A","N/A","0","2026-07-22"
+"TC-SEC-004","Security","CSRF Validation","Desktop","Chrome Headless","PC Desktop","PASSED","04:34:55","11ms","11","N/A","N/A","0","2026-07-22"

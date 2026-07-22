@@ -3,12 +3,8 @@ import { AuthContext } from '../context/AuthContext.js';
 
 export async function initProfile(showScreenFn, showToastFn, showLoaderFn, hideLoaderFn) {
   // Elements
-  const profileContainer = document.getElementById('profile-data-container');
   const avatarImg = document.getElementById('profile-avatar-img');
   const avatarInput = document.getElementById('profile-avatar-input');
-  const btnEdit = document.getElementById('btn-edit-profile');
-  const btnPassword = document.getElementById('btn-change-password');
-  const btnDelete = document.getElementById('btn-delete-account');
 
   // Modals
   const editModal = document.getElementById('modal-edit-profile');

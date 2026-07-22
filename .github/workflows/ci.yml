@@ -117,6 +117,8 @@ jobs:
           **/test-results.xml
           **/mochawesome-report/
           **/coverage/
+          **/reports/
+          **/*.xlsx
         retention-days: 14
 
     - name: Generate GitHub Job Summary

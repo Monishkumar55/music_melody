@@ -14,7 +14,7 @@ class AuthContextClass {
         this.user = data.user;
         this.isAuthenticated = true;
       }
-    } catch (e) {
+    } catch {
       this.user = null;
       this.isAuthenticated = false;
     }
