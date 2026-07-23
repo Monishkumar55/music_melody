@@ -18,14 +18,21 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     options.addArguments('--disable-gpu');
     options.addArguments('--disable-extensions');
     options.addArguments('--window-size=1280,800');
-    if (process.env.CHROME_PATH) {
-      options.setChromeBinaryPath(process.env.CHROME_PATH);
-    }
 
-    driver = await new Builder()
-      .forBrowser('chrome')
-      .setChromeOptions(options)
-      .build();
+    try {
+      driver = await new Builder()
+        .forBrowser('chrome')
+        .setChromeOptions(options)
+        .build();
+    } catch (err) {
+      if (process.env.CHROME_PATH) {
+        options.setChromeBinaryPath(process.env.CHROME_PATH);
+      }
+      driver = await new Builder()
+        .forBrowser('chrome')
+        .setChromeOptions(options)
+        .build();
+    }
   });
 
   after(async function () {

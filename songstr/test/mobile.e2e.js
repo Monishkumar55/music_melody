@@ -17,14 +17,21 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
     options.addArguments('--disable-dev-shm-usage');
     options.addArguments('--disable-gpu');
     options.setMobileEmulation({ deviceName: 'Pixel 7' });
-    if (process.env.CHROME_PATH) {
-      options.setChromeBinaryPath(process.env.CHROME_PATH);
-    }
 
-    driver = await new Builder()
-      .forBrowser('chrome')
-      .setChromeOptions(options)
-      .build();
+    try {
+      driver = await new Builder()
+        .forBrowser('chrome')
+        .setChromeOptions(options)
+        .build();
+    } catch (err) {
+      if (process.env.CHROME_PATH) {
+        options.setChromeBinaryPath(process.env.CHROME_PATH);
+      }
+      driver = await new Builder()
+        .forBrowser('chrome')
+        .setChromeOptions(options)
+        .build();
+    }
   });
 
   after(async function () {

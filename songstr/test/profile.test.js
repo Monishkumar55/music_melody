@@ -12,10 +12,6 @@ describe('Profile API', function() {
   let server;
 
   before(function(done) {
-    try {
-      if (fs.existsSync(dbPath)) fs.unlinkSync(dbPath);
-    } catch {}
-    
     server = require('../server.js');
     try {
       db = new Database(dbPath);
