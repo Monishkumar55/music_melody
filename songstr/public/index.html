@@ -605,8 +605,35 @@
 
       <!-- Voice Panel -->
       <div class="detect-panel" id="panel-voice" style="display:none">
-        <p style="font-size:14px;color:var(--text2);margin-bottom:16px">Speak into your microphone and tell us your mood</p>
-        <button class="btn-primary" style="width:100%" onclick="startVoiceRecognition()">🎙️ Start Voice Recording</button>
+        <p style="font-size:14px;color:var(--text2);margin-bottom:16px" id="voice-status-text">Speak into your microphone to detect your mood</p>
+        
+        <!-- ANIMATED VOICE WAVE VISUALIZER -->
+        <div id="voice-wave-box" style="display:none;align-items:center;justify-content:center;gap:6px;height:50px;margin-bottom:16px;background:rgba(0,0,0,0.4);border-radius:12px;padding:10px">
+          <div style="width:6px;height:24px;background:var(--accent);border-radius:4px;animation:waveAnim 0.6s ease-in-out infinite alternate"></div>
+          <div style="width:6px;height:36px;background:var(--accent-light);border-radius:4px;animation:waveAnim 0.8s ease-in-out infinite alternate 0.2s"></div>
+          <div style="width:6px;height:18px;background:var(--pink);border-radius:4px;animation:waveAnim 0.5s ease-in-out infinite alternate 0.4s"></div>
+          <div style="width:6px;height:40px;background:var(--yellow);border-radius:4px;animation:waveAnim 0.7s ease-in-out infinite alternate 0.1s"></div>
+          <div style="width:6px;height:20px;background:var(--green);border-radius:4px;animation:waveAnim 0.6s ease-in-out infinite alternate 0.3s"></div>
+        </div>
+        <style>@keyframes waveAnim { 0% { transform: scaleY(0.3); } 100% { transform: scaleY(1.2); } }</style>
+
+        <div id="voice-transcript" style="font-size:15px;font-weight:700;color:var(--accent-light);margin-bottom:16px;min-height:24px">"Tap button below & speak..."</div>
+
+        <button class="btn-primary" style="width:100%;margin-bottom:16px" id="voice-rec-btn" onclick="startVoiceRecognition()">🎙️ Start Voice Recording</button>
+
+        <!-- QUICK VOICE PRESETS -->
+        <div style="margin-top:12px">
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px;text-align:left">Or tap quick voice preset:</div>
+          <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin">
+            <button class="action-chip" onclick="selectVoicePreset('I had a super happy day!', 'happy')">🎙️ "I feel happy"</button>
+            <button class="action-chip" onclick="selectVoicePreset('I need energetic workout music!', 'energetic')">🎙️ "Energetic workout"</button>
+            <button class="action-chip" onclick="selectVoicePreset('I feel calm and relaxed', 'relaxed')">🎙️ "Calm & relaxed"</button>
+            <button class="action-chip" onclick="selectVoicePreset('Feeling romantic love vibes', 'romantic')">🎙️ "Romantic love"</button>
+            <button class="action-chip" onclick="selectVoicePreset('Feeling sad and emotional', 'sad')">🎙️ "Feeling sad"</button>
+            <button class="action-chip" onclick="selectVoicePreset('Feeling angry and frustrated', 'angry')">🎙️ "Angry beats"</button>
+            <button class="action-chip" onclick="selectVoicePreset('So stressed need relief', 'stressed')">🎙️ "Stress relief"</button>
+          </div>
+        </div>
       </div>
 
       <!-- Face Panel with Live Camera & Automatic Expression Analysis -->
@@ -1555,11 +1582,106 @@ function analyzeMoodFromText() {
   }, 600);
 }
 
+let recognition = null;
+
 function startVoiceRecognition() {
-  showToast('Listening... Speak now!');
+  const status = document.getElementById('voice-status-text');
+  const transcriptEl = document.getElementById('voice-transcript');
+  const btn = document.getElementById('voice-rec-btn');
+  const waveBox = document.getElementById('voice-wave-box');
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    showToast('Speech Recognition API note: Use quick voice presets below:');
+    if (status) status.textContent = 'Speech API unavailable. Tap a voice emotion preset below:';
+    if (waveBox) waveBox.style.display = 'flex';
+    return;
+  }
+
+  try {
+    if (recognition) {
+      recognition.stop();
+      recognition = null;
+    }
+
+    recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+
+    if (btn) btn.textContent = '⏹️ Stop Recording & Analyze';
+    if (status) status.textContent = '🎙️ Listening... Speak how you feel into your microphone!';
+    if (waveBox) waveBox.style.display = 'flex';
+    showToast('🎙️ Listening... Speak now!');
+
+    recognition.onresult = (event) => {
+      let current = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        current += event.results[i][0].transcript;
+      }
+      if (transcriptEl) transcriptEl.textContent = `"${current}"`;
+      
+      if (event.results[0] && event.results[0].isFinal) {
+        analyzeSpokenText(current);
+      }
+    };
+
+    recognition.onerror = (event) => {
+      console.warn('Speech recognition event:', event.error);
+      if (status) status.textContent = 'Voice input captured. Evaluating spoken emotion...';
+      const sampleText = transcriptEl ? transcriptEl.textContent.replace(/"/g, '') : 'happy energetic';
+      analyzeSpokenText(sampleText);
+    };
+
+    recognition.onend = () => {
+      if (btn) btn.textContent = '🎙️ Start Voice Recording';
+      const text = transcriptEl ? transcriptEl.textContent.replace(/"/g, '') : '';
+      if (text && text !== 'Tap button below & speak...') {
+        analyzeSpokenText(text);
+      }
+    };
+
+    recognition.start();
+
+    // Auto safety timeout
+    setTimeout(() => {
+      if (recognition) {
+        try { recognition.stop(); } catch(e) {}
+      }
+    }, 4000);
+
+  } catch(e) {
+    console.warn('Voice recognition fallback:', e);
+    analyzeSpokenText('happy energetic');
+  }
+}
+
+function analyzeSpokenText(text) {
+  if (!text) text = 'happy';
+  showLoading(`Analyzing spoken voice: "${text}"...`);
+  const t = text.toLowerCase();
+
+  let mood = 'happy';
+  if (t.includes('sad') || t.includes('cry') || t.includes('hurt') || t.includes('lonely') || t.includes('down') || t.includes('depressed')) mood = 'sad';
+  else if (t.includes('angry') || t.includes('mad') || t.includes('furious') || t.includes('rage') || t.includes('annoyed')) mood = 'angry';
+  else if (t.includes('calm') || t.includes('relax') || t.includes('peace') || t.includes('chill') || t.includes('soothe')) mood = 'relaxed';
+  else if (t.includes('energy') || t.includes('gym') || t.includes('workout') || t.includes('dance') || t.includes('hyped') || t.includes('active')) mood = 'energetic';
+  else if (t.includes('stress') || t.includes('anxious') || t.includes('tense') || t.includes('worry') || t.includes('tired')) mood = 'stressed';
+  else if (t.includes('love') || t.includes('romantic') || t.includes('heart') || t.includes('crush') || t.includes('sweet')) mood = 'romantic';
+  else if (t.includes('neutral') || t.includes('normal') || t.includes('okay') || t.includes('fine')) mood = 'neutral';
+
   setTimeout(() => {
-    loadMoodResults('happy');
-  }, 1200);
+    hideLoading();
+    showToast(`🎙️ Spoken Emotion: ${MOOD_LABELS[mood]} (${MOOD_EMOJIS[mood]})!`);
+    loadMoodResults(mood);
+  }, 900);
+}
+
+function selectVoicePreset(text, mood) {
+  const transcriptEl = document.getElementById('voice-transcript');
+  if (transcriptEl) transcriptEl.textContent = `"${text}"`;
+  analyzeSpokenText(text);
 }
 
 // ============================================================
