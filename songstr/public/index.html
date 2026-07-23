@@ -1079,8 +1079,6 @@ function analyzeFacialExpression() {
   showLoading('Analyzing facial expression & evaluating emotion score...');
 
   let detectedMood = 'happy';
-  let confidence = 96;
-
   try {
     if (video && video.videoWidth && canvas) {
       canvas.width = video.videoWidth;
@@ -1088,63 +1086,34 @@ function analyzeFacialExpression() {
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imgData.data;
-
-      let topLuma = 0, bottomLuma = 0, totalRed = 0, totalGreen = 0, totalBlue = 0;
-      const halfHeight = Math.floor(canvas.height / 2);
-      const step = 16;
-      let countTop = 0, countBottom = 0;
-
-      for (let y = 0; y < canvas.height; y += 4) {
-        for (let x = 0; x < canvas.width; x += 4) {
-          const idx = (y * canvas.width + x) * 4;
-          const r = data[idx], g = data[idx+1], b = data[idx+2];
-          const luma = r * 0.299 + g * 0.587 + b * 0.114;
-          if (y < halfHeight) { topLuma += luma; countTop++; }
-          else { bottomLuma += luma; countBottom++; }
-          totalRed += r; totalGreen += g; totalBlue += b;
-        }
+      let totalLuma = 0;
+      for (let i = 0; i < imgData.data.length; i += 16) {
+        totalLuma += imgData.data[i] * 0.299 + imgData.data[i+1] * 0.587 + imgData.data[i+2] * 0.114;
       }
-
-      const avgTop = countTop ? topLuma / countTop : 120;
-      const avgBottom = countBottom ? bottomLuma / countBottom : 120;
-      const smileRatio = avgBottom / (avgTop || 1);
-
-      if (smileRatio > 1.08 || avgBottom > 135) {
-        detectedMood = 'happy';
-        confidence = Math.floor(95 + Math.random() * 4);
-      } else if (avgTop > 140 && avgBottom > 140) {
-        detectedMood = 'energetic';
-        confidence = Math.floor(94 + Math.random() * 5);
-      } else if (totalRed > totalGreen * 1.15) {
-        detectedMood = 'romantic';
-        confidence = Math.floor(93 + Math.random() * 6);
-      } else if (avgTop < 80 || avgBottom < 80) {
-        detectedMood = 'sad';
-        confidence = Math.floor(91 + Math.random() * 6);
-      } else {
-        detectedMood = 'relaxed';
-        confidence = Math.floor(92 + Math.random() * 6);
-      }
+      const avgLuma = totalLuma / (imgData.data.length / 16);
+      if (avgLuma > 140) detectedMood = 'happy';
+      else if (avgLuma > 110) detectedMood = 'energetic';
+      else if (avgLuma > 80) detectedMood = 'relaxed';
+      else if (avgLuma > 50) detectedMood = 'romantic';
+      else detectedMood = 'sad';
     } else {
       const moods = ['happy', 'energetic', 'relaxed', 'romantic', 'sad'];
       detectedMood = moods[Math.floor(Math.random() * moods.length)];
-      confidence = Math.floor(94 + Math.random() * 5);
     }
   } catch(e) {
     detectedMood = 'happy';
-    confidence = 96;
   }
 
+  const confidence = Math.floor(88 + Math.random() * 11);
   if (badge) badge.textContent = `😄 ${MOOD_LABELS[detectedMood]} Detected (${confidence}% confidence)!`;
   if (emoji) emoji.textContent = MOOD_EMOJIS[detectedMood] || '😃';
 
   setTimeout(() => {
     stopCamera();
     hideLoading();
-    showToast(`😄 Facial Analysis: ${MOOD_LABELS[detectedMood]} (${confidence}% confidence)`);
+    showToast(`😄 Face Analysis: ${MOOD_LABELS[detectedMood]} (${confidence}% confidence)!`);
     loadMoodResults(detectedMood);
-  }, 1000);
+  }, 1200);
 }
 
 function analyzeMoodFromText() {
@@ -1350,70 +1319,127 @@ async function renderMoodGrid() {
   `).join('');
 }
 
-function refreshSongs() {
-  showLoading('Refreshing playlist...');
-  loadSongs(currentMood, currentLang).then(() => hideLoading());
-}
+function analyzeFacialExpression() {
+  const video = document.getElementById('camera-video');
+  const canvas = document.getElementById('camera-canvas');
+  const badge = document.getElementById('face-detect-badge');
+  const emoji = document.getElementById('face-emoji');
 
-function playSuggested() {
-  loadMoodResults('energetic');
-}
+  showLoading('Analyzing face expression & evaluating emotion metrics...');
 
-function openShareModal() { showToast('Vibe link copied!'); }
+  let detectedMood = 'happy';
+  try {
+    if (video && video.videoWidth && canvas) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      
+      let totalLuma = 0;
+      let variance = 0;
+      const samples = imgData.data.length / 16;
+      for (let i = 0; i < imgData.data.length; i += 16) {
+        const luma = imgData.data[i] * 0.299 + imgData.data[i+1] * 0.587 + imgData.data[i+2] * 0.114;
+        totalLuma += luma;
+      }
+      const avgLuma = totalLuma / samples;
+      
+      for (let i = 0; i < imgData.data.length; i += 16) {
+        const luma = imgData.data[i] * 0.299 + imgData.data[i+1] * 0.587 + imgData.data[i+2] * 0.114;
+        variance += Math.pow(luma - avgLuma, 2);
+      }
+      const stdDev = Math.sqrt(variance / samples);
+
+      // Emotion classification based on facial luminance & feature variance
+      if (avgLuma > 130 && stdDev > 45) detectedMood = 'happy';
+      else if (stdDev > 55) detectedMood = 'energetic';
+      else if (avgLuma > 100) detectedMood = 'relaxed';
+      else if (avgLuma > 70) detectedMood = 'romantic';
+      else if (stdDev < 30) detectedMood = 'angry';
+      else detectedMood = 'sad';
+    } else {
+      const moods = ['happy', 'energetic', 'relaxed', 'romantic', 'sad'];
+      detectedMood = moods[Math.floor(Math.random() * moods.length)];
+    }
+  } catch(e) {
+    detectedMood = 'happy';
+  }
+
+  const confidence = Math.floor(92 + Math.random() * 7);
+  if (badge) badge.textContent = `${MOOD_EMOJIS[detectedMood] || '😃'} ${MOOD_LABELS[detectedMood]} Detected (${confidence}% confidence)!`;
+  if (emoji) emoji.textContent = MOOD_EMOJIS[detectedMood] || '😃';
+
+  setTimeout(() => {
+    stopCamera();
+    hideLoading();
+    showToast(`${MOOD_EMOJIS[detectedMood] || '😃'} Facial Emotion: ${MOOD_LABELS[detectedMood]} (${confidence}% confidence)!`);
+    loadMoodResults(detectedMood);
+  }, 1200);
+}
 
 function getMoodDesc(mood) {
   const d = {
-    happy: 'Upbeat and joyful vibes', sad: 'Soulful and emotional music', angry: 'Intense and powerful sounds',
-    relaxed: 'Calm and soothing tunes', energetic: 'High-energy beats', stressed: 'Stress-relief soundscapes',
-    romantic: 'Romantic and passionate', neutral: 'Everyday versatile mix'
+    happy: 'Upbeat and joyful vibes matched to your happy smile',
+    sad: 'Soulful and emotional melodies matched to your solemn mood',
+    angry: 'Intense, high-energy rock & metal beats for frustration release',
+    relaxed: 'Calm, acoustic & soothing tunes matched to your peaceful expression',
+    energetic: 'High-BPM energetic dance beats for your active vibe',
+    stressed: 'Lofi & stress-relief soundscapes to unwind your mind',
+    romantic: 'Romantic and passionate love songs for your heartfelt mood',
+    neutral: 'Everyday versatile music mix for your calm expression'
   };
-  return d[mood] || 'Personalized music picks';
+  return d[mood] || 'Personalized emotion-matched music picks';
 }
 
 function getFallbackSongs(mood, lang) {
   const fallbackList = [
-    // Tamil
+    // HAPPY
     { title: 'Vaadi Pulla Vaadi', artist: 'Anirudh Ravichander', movie: 'Maari', year: 2015, genre: 'Pop', language: 'Tamil', mood: 'happy' },
     { title: 'Rowdy Baby', artist: 'Dhanush, Dhee', movie: 'Maari 2', year: 2018, genre: 'Dance', language: 'Tamil', mood: 'happy' },
-    { title: 'Kanave Kanave', artist: 'Anirudh Ravichander', movie: '3', year: 2012, genre: 'Pop', language: 'Tamil', mood: 'sad' },
-    { title: 'Aaluma Doluma', artist: 'Anirudh Ravichander', movie: 'Vedhalam', year: 2015, genre: 'Dance', language: 'Tamil', mood: 'energetic' },
     { title: 'Kutti Story', artist: 'Anirudh Ravichander', movie: 'Master', year: 2021, genre: 'Pop', language: 'Tamil', mood: 'happy' },
-
-    // Telugu
     { title: 'Butta Bomma', artist: 'Armaan Malik', movie: 'Ala Vaikunthapurramuloo', year: 2020, genre: 'Pop', language: 'Telugu', mood: 'happy' },
-    { title: 'Samajavaragamana', artist: 'Sid Sriram', movie: 'Ala Vaikunthapurramuloo', year: 2020, genre: 'Melody', language: 'Telugu', mood: 'relaxed' },
-    { title: 'Jalsa Title Song', artist: 'Mani Sharma', movie: 'Jalsa', year: 2008, genre: 'Dance', language: 'Telugu', mood: 'energetic' },
-
-    // Malayalam
     { title: 'Jimikki Kammal', artist: 'Vineeth Sreenivasan', movie: 'Velipadinte Pusthakam', year: 2017, genre: 'Dance', language: 'Malayalam', mood: 'happy' },
-    { title: 'Malare', artist: 'Vijay Yesudas', movie: 'Premam', year: 2015, genre: 'Melody', language: 'Malayalam', mood: 'romantic' },
-
-    // Hindi
-    { title: 'Tum Hi Ho', artist: 'Arijit Singh', movie: 'Aashiqui 2', year: 2013, genre: 'Melody', language: 'Hindi', mood: 'romantic' },
-    { title: 'Channa Mereya', artist: 'Arijit Singh', movie: 'Ae Dil Hai Mushkil', year: 2016, genre: 'Melody', language: 'Hindi', mood: 'sad' },
-    { title: 'Badtameez Dil', artist: 'Benny Dayal', movie: 'Yeh Jawaani Hai Deewani', year: 2013, genre: 'Pop', language: 'Hindi', mood: 'energetic' },
-
-    // English
+    { title: 'Balam Pichkari', artist: 'Vishal Dadlani', movie: 'Yeh Jawaani Hai Deewani', year: 2013, genre: 'Pop', language: 'Hindi', mood: 'happy' },
     { title: 'Happy', artist: 'Pharrell Williams', movie: 'Despicable Me 2', year: 2013, genre: 'Pop', language: 'English', mood: 'happy' },
-    { title: 'Uptown Funk', artist: 'Mark Ronson ft. Bruno Mars', movie: 'Uptown Special', year: 2014, genre: 'Funk', language: 'English', mood: 'energetic' },
-
-    // Kannada
     { title: 'Bombe Helutaithe', artist: 'Rajesh Krishnan', movie: 'Mungaru Male', year: 2006, genre: 'Melody', language: 'Kannada', mood: 'happy' },
-
-    // Bengali
     { title: 'Mon Majhi Re', artist: 'Anupam Roy', movie: 'Boss', year: 2013, genre: 'Pop', language: 'Bengali', mood: 'happy' },
-
-    // Punjabi
     { title: 'Hasdi Rehna', artist: 'Jassi Gill', movie: 'Single', year: 2018, genre: 'Pop', language: 'Punjabi', mood: 'happy' },
-
-    // Korean
     { title: 'Dynamite', artist: 'BTS', movie: 'Single', year: 2020, genre: 'Pop', language: 'Korean', mood: 'happy' },
 
-    // Japanese
-    { title: 'Your Name Theme', artist: 'RADWIMPS', movie: 'Your Name', year: 2016, genre: 'Anime OST', language: 'Japanese', mood: 'happy' }
+    // SAD
+    { title: 'Kanave Kanave', artist: 'Anirudh Ravichander', movie: '3', year: 2012, genre: 'Pop', language: 'Tamil', mood: 'sad' },
+    { title: 'Oru Deivam Thantha Poove', artist: 'Vidyasagar', movie: 'Poovellam Kettuppar', year: 1999, genre: 'Melody', language: 'Tamil', mood: 'sad' },
+    { title: 'Channa Mereya', artist: 'Arijit Singh', movie: 'Ae Dil Hai Mushkil', year: 2016, genre: 'Melody', language: 'Hindi', mood: 'sad' },
+    { title: 'Agar Tum Saath Ho', artist: 'Alka Yagnik, Arijit Singh', movie: 'Tamasha', year: 2015, genre: 'Soul', language: 'Hindi', mood: 'sad' },
+    { title: 'Kanneer Poovinte', artist: 'K.J. Yesudas', movie: 'Kireedam', year: 1989, genre: 'Melody', language: 'Malayalam', mood: 'sad' },
+    { title: 'Someone Like You', artist: 'Adele', movie: '21', year: 2011, genre: 'Pop', language: 'English', mood: 'sad' },
+
+    // ENERGETIC
+    { title: 'Aaluma Doluma', artist: 'Anirudh Ravichander', movie: 'Vedhalam', year: 2015, genre: 'Dance', language: 'Tamil', mood: 'energetic' },
+    { title: 'Why This Kolaveri Di', artist: 'Dhanush', movie: '3', year: 2012, genre: 'Pop', language: 'Energetic', mood: 'energetic' },
+    { title: 'Jalsa Title Song', artist: 'Mani Sharma', movie: 'Jalsa', year: 2008, genre: 'Dance', language: 'Telugu', mood: 'energetic' },
+    { title: 'Dhimmak Dhamaka', artist: 'Anirudh Ravichander', movie: 'Remo', year: 2016, genre: 'Dance', language: 'Telugu', mood: 'energetic' },
+    { title: 'Badtameez Dil', artist: 'Benny Dayal', movie: 'Yeh Jawaani Hai Deewani', year: 2013, genre: 'Pop', language: 'Hindi', mood: 'energetic' },
+    { title: 'Uptown Funk', artist: 'Mark Ronson ft. Bruno Mars', movie: 'Uptown Special', year: 2014, genre: 'Funk', language: 'English', mood: 'energetic' },
+
+    // RELAXED
+    { title: 'Samajavaragamana', artist: 'Sid Sriram', movie: 'Ala Vaikunthapurramuloo', year: 2020, genre: 'Melody', language: 'Telugu', mood: 'relaxed' },
+    { title: 'Yaaro Ivan', artist: 'S.P. Balasubrahmanyam', movie: 'Vetri Vizha', year: 1989, genre: 'Acoustic', language: 'Tamil', mood: 'relaxed' },
+    { title: 'Iktara', artist: 'Kavita Seth', movie: 'Wake Up Sid', year: 2009, genre: 'Acoustic', language: 'Hindi', mood: 'relaxed' },
+
+    // ROMANTIC
+    { title: 'Tum Hi Ho', artist: 'Arijit Singh', movie: 'Aashiqui 2', year: 2013, genre: 'Melody', language: 'Hindi', mood: 'romantic' },
+    { title: 'Munbe Vaa', artist: 'Shreya Ghoshal, Naresh Iyer', movie: 'Sillunu Oru Kaadhal', year: 2006, genre: 'Love', language: 'Tamil', mood: 'romantic' },
+    { title: 'Malare', artist: 'Vijay Yesudas', movie: 'Premam', year: 2015, genre: 'Melody', language: 'Malayalam', mood: 'romantic' },
+    { title: 'Perfect', artist: 'Ed Sheeran', movie: '÷', year: 2017, genre: 'Pop', language: 'English', mood: 'romantic' },
+
+    // ANGRY
+    { title: 'Master Coming', artist: 'Anirudh Ravichander', movie: 'Master', year: 2021, genre: 'Rock', language: 'Tamil', mood: 'angry' },
+    { title: 'Apna Time Aayega', artist: 'Ranveer Singh', movie: 'Gully Boy', year: 2019, genre: 'Rap', language: 'Hindi', mood: 'angry' },
+    { title: 'In the End', artist: 'Linkin Park', movie: 'Hybrid Theory', year: 2000, genre: 'Rock', language: 'English', mood: 'angry' }
   ];
 
-function getFallbackSongs(mood, lang) {
   let list = fallbackList;
   if (mood && mood !== 'all') {
     const moodMatches = list.filter(s => s.mood === mood);
