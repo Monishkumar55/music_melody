@@ -68,6 +68,7 @@ jobs:
             songstr/test-results/unit-integration.xml
           if-no-files-found: ignore
           retention-days: 14
+        continue-on-error: true
 
   # ═══════════════════════════════════════════════════════════════════════
   #  JOB 2 — Selenium Web UI E2E Tests (300 Test Cases)
@@ -116,6 +117,7 @@ jobs:
             songstr/test-results/selenium-e2e.xml
           if-no-files-found: ignore
           retention-days: 14
+        continue-on-error: true
 
   # ═══════════════════════════════════════════════════════════════════════
   #  JOB 3 — Mobile E2E Tests (300 Cases)
@@ -164,6 +166,7 @@ jobs:
             songstr/test-results/mobile-e2e.xml
           if-no-files-found: ignore
           retention-days: 14
+        continue-on-error: true
 
   # ═══════════════════════════════════════════════════════════════════════
   #  JOB 4 — Appium Mobile E2E Tests (300 Cases)
@@ -212,6 +215,7 @@ jobs:
             songstr/test-results/appium-e2e.xml
           if-no-files-found: ignore
           retention-days: 14
+        continue-on-error: true
 
   # ═══════════════════════════════════════════════════════════════════════
   #  JOB 5 — API Load Testing (300 Scenarios)
@@ -260,6 +264,7 @@ jobs:
             songstr/test-results/load-e2e.xml
           if-no-files-found: ignore
           retention-days: 14
+        continue-on-error: true
 
   # ═══════════════════════════════════════════════════════════════════════
   #  JOB 6 — Vulnerability & Security Scan (300 Cases)
@@ -308,6 +313,7 @@ jobs:
             songstr/test-results/security.xml
           if-no-files-found: ignore
           retention-days: 14
+        continue-on-error: true
 
   # ═══════════════════════════════════════════════════════════════════════
   #  JOB 7 — Songstr Comprehensive Test Case Results
