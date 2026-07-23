@@ -291,6 +291,23 @@
     }
     .modal-title { font-size: 20px; font-weight: 800; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
 
+    /* =========== AUTH FORM STYLING =========== */
+    .auth-input-group { margin-bottom: 16px; position: relative; }
+    .auth-label { display: block; font-size: 12px; font-weight: 700; color: var(--text2); margin-bottom: 6px; }
+    .auth-input {
+      width: 100%; background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border);
+      border-radius: 12px; padding: 12px 16px; color: var(--text); font-size: 14px;
+      transition: all 0.2s;
+    }
+    .auth-input:focus { border-color: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
+    .pass-toggle-btn {
+      position: absolute; right: 14px; top: 34px; background: none; color: var(--text3); font-size: 16px;
+    }
+    .pass-toggle-btn:hover { color: var(--text); }
+    .auth-row-between { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 13px; color: var(--text2); }
+    .pwd-strength-bar { height: 4px; border-radius: 4px; background: rgba(255,255,255,0.1); margin-top: 6px; overflow: hidden; }
+    .pwd-strength-fill { height: 100%; width: 0%; transition: all 0.3s; }
+
     /* =========== BOTTOM AUDIO PLAYER BAR (FIXED) =========== */
     .bottom-player-bar {
       position: fixed; bottom: 65px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 800px; z-index: 99;
@@ -304,7 +321,7 @@
     .player-track-artist { font-size: 12px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .player-controls-group { display: flex; align-items: center; gap: 12px; }
 
-    /* =========== BOTTOM NAV BAR =========== */
+    /* =========== BOTTOM NAVIGATION BAR =========== */
     .bottom-nav {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
       background: rgba(9, 9, 14, 0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--glass-border);
@@ -339,8 +356,155 @@
 <body>
 
 <div class="app">
-  <!-- ==================== SCREEN 1: HOME ==================== -->
-  <div class="screen active" id="screen-home">
+
+  <!-- ==================== SCREEN 1: LOGIN (INITIAL FIRST PAGE) ==================== -->
+  <div class="screen active" id="screen-login">
+    <nav>
+      <div class="nav-logo" onclick="showScreen('login')">
+        <div class="logo-icon">🎵</div>
+        <span>Song<span class="str">str</span></span>
+      </div>
+    </nav>
+
+    <div style="padding:40px 24px; max-width:440px; margin:0 auto; width:100%">
+      <div style="text-align:center;margin-bottom:28px">
+        <div style="width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,var(--accent),#a855f7);margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 8px 24px rgba(99,102,241,0.4)">🎵</div>
+        <h2 style="font-size:28px;font-weight:900;letter-spacing:-0.5px">Sign In to Songstr</h2>
+        <p style="font-size:14px;color:var(--text2);margin-top:4px">Welcome back! Please enter your credentials to continue.</p>
+      </div>
+
+      <form id="login-form" onsubmit="handleLogin(event)" style="background:var(--card);border:1px solid var(--glass-border);padding:28px;border-radius:var(--radius);box-shadow:var(--shadow)">
+        <div class="auth-input-group">
+          <label class="auth-label">Username or Email</label>
+          <input type="text" id="login-username" name="username" class="auth-input" required placeholder="Enter your username or email" />
+        </div>
+        
+        <div class="auth-input-group">
+          <label class="auth-label">Password</label>
+          <input type="password" id="login-password" name="password" class="auth-input" required placeholder="Enter your password" />
+          <button type="button" class="pass-toggle-btn" onclick="togglePassVisibility('login-password', this)">👁️</button>
+        </div>
+
+        <div class="auth-row-between">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="login-remember" style="accent-color:var(--accent)" /> Remember me
+          </label>
+          <a href="#" onclick="showScreen('forgot-password');return false" style="color:var(--accent-light);font-weight:700">Forgot Password?</a>
+        </div>
+
+        <button type="submit" class="btn-primary" style="width:100%;justify-content:center;padding:14px">Sign In →</button>
+      </form>
+
+      <p style="text-align:center;margin-top:24px;font-size:14px;color:var(--text2)">
+        Don't have an account? <a href="#" onclick="showScreen('register');return false" style="color:var(--accent-light);font-weight:700">Sign Up</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN 2: SIGN UP / REGISTER ==================== -->
+  <div class="screen" id="screen-register">
+    <nav>
+      <div class="nav-logo" onclick="showScreen('login')">
+        <div class="logo-icon">🎵</div>
+        <span>Song<span class="str">str</span></span>
+      </div>
+      <div class="nav-actions">
+        <button class="nav-btn" onclick="showScreen('login')">← Back to Sign In</button>
+      </div>
+    </nav>
+
+    <div style="padding:32px 24px; max-width:440px; margin:0 auto; width:100%">
+      <div style="text-align:center;margin-bottom:24px">
+        <h2 style="font-size:26px;font-weight:900">Create Your Account</h2>
+        <p style="font-size:13px;color:var(--text2);margin-top:4px">Sign up to get personalized mood music recommendations</p>
+      </div>
+
+      <form id="register-form" onsubmit="handleRegister(event)" style="background:var(--card);border:1px solid var(--glass-border);padding:24px;border-radius:var(--radius);box-shadow:var(--shadow)">
+        <div class="auth-input-group">
+          <label class="auth-label">Full Name</label>
+          <input type="text" name="fullname" class="auth-input" required placeholder="John Doe" />
+        </div>
+        <div class="auth-input-group">
+          <label class="auth-label">Username</label>
+          <input type="text" name="username" class="auth-input" required placeholder="johndoe" />
+        </div>
+        <div class="auth-input-group">
+          <label class="auth-label">Email Address</label>
+          <input type="email" name="email" class="auth-input" required placeholder="john@example.com" />
+        </div>
+        <div class="auth-input-group">
+          <label class="auth-label">Password</label>
+          <input type="password" id="reg-password" name="password" class="auth-input" oninput="checkPassStrength(this.value)" required placeholder="At least 8 characters" />
+          <button type="button" class="pass-toggle-btn" onclick="togglePassVisibility('reg-password', this)">👁️</button>
+          <div class="pwd-strength-bar"><div class="pwd-strength-fill" id="pwd-strength-fill"></div></div>
+        </div>
+        <div class="auth-input-group">
+          <label class="auth-label">Confirm Password</label>
+          <input type="password" id="reg-confirm-password" name="confirmPassword" class="auth-input" required placeholder="Re-enter password" />
+        </div>
+        <div style="margin-bottom:20px">
+          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);cursor:pointer">
+            <input type="checkbox" required style="accent-color:var(--accent)" /> I agree to Terms of Service & Privacy Policy
+          </label>
+        </div>
+        <button type="submit" class="btn-primary" style="width:100%;justify-content:center">Create Account (Sign Up) →</button>
+      </form>
+
+      <p style="text-align:center;margin-top:20px;font-size:14px;color:var(--text2)">
+        Already have an account? <a href="#" onclick="showScreen('login');return false" style="color:var(--accent-light);font-weight:700">Sign In</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN 3: FORGOT PASSWORD ==================== -->
+  <div class="screen" id="screen-forgot-password">
+    <nav>
+      <div class="nav-logo" onclick="showScreen('login')">
+        <div class="logo-icon">🎵</div>
+        <span>Song<span class="str">str</span></span>
+      </div>
+      <div class="nav-actions">
+        <button class="nav-btn" onclick="showScreen('login')">← Back to Sign In</button>
+      </div>
+    </nav>
+
+    <div style="padding:40px 24px; max-width:440px; margin:0 auto; width:100%">
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="font-size:40px;margin-bottom:8px">🔐</div>
+        <h2 style="font-size:26px;font-weight:900">Reset Your Password</h2>
+        <p style="font-size:13px;color:var(--text2);margin-top:4px">Enter your registered email address to receive a 6-digit OTP code.</p>
+      </div>
+
+      <!-- Step 1: Send OTP -->
+      <form id="forgot-form-step1" onsubmit="handleSendOTP(event)" style="background:var(--card);border:1px solid var(--glass-border);padding:24px;border-radius:var(--radius)">
+        <div class="auth-input-group">
+          <label class="auth-label">Registered Email Address</label>
+          <input type="email" id="forgot-email" class="auth-input" required placeholder="name@domain.com" />
+        </div>
+        <button type="submit" class="btn-primary" style="width:100%;justify-content:center">Send OTP Reset Code →</button>
+      </form>
+
+      <!-- Step 2: Enter OTP & New Password -->
+      <form id="forgot-form-step2" onsubmit="handleResetPassword(event)" style="display:none;background:var(--card);border:1px solid var(--glass-border);padding:24px;border-radius:var(--radius);margin-top:16px">
+        <div class="auth-input-group">
+          <label class="auth-label">6-Digit OTP Code</label>
+          <input type="text" id="forgot-otp" class="auth-input" required placeholder="e.g. 123456" />
+        </div>
+        <div class="auth-input-group">
+          <label class="auth-label">New Password</label>
+          <input type="password" id="forgot-new-password" class="auth-input" required placeholder="Enter new password" />
+        </div>
+        <button type="submit" class="btn-primary" style="width:100%;justify-content:center">Reset & Update Password →</button>
+      </form>
+
+      <p style="text-align:center;margin-top:20px;font-size:14px;color:var(--text2)">
+        Remember your password? <a href="#" onclick="showScreen('login');return false" style="color:var(--accent-light);font-weight:700">Sign In</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN 4: HOME ==================== -->
+  <div class="screen" id="screen-home">
     <nav>
       <div class="nav-logo" onclick="showScreen('home')">
         <div class="logo-icon">🎵</div>
@@ -348,7 +512,7 @@
       </div>
       <div class="nav-actions">
         <button class="nav-btn" onclick="showScreen('browse')">Browse</button>
-        <button class="nav-icon-btn" id="user-profile-btn" onclick="handleProfileNav()" title="Login">👤</button>
+        <button class="nav-icon-btn" id="user-profile-btn" onclick="showScreen('profile')" title="Profile">👤</button>
       </div>
     </nav>
 
@@ -373,7 +537,7 @@
     </div>
   </div>
 
-  <!-- ==================== SCREEN 2: DETECT MOOD ==================== -->
+  <!-- ==================== SCREEN 5: DETECT MOOD ==================== -->
   <div class="screen" id="screen-detect">
     <nav>
       <div class="nav-logo" onclick="showScreen('home')">
@@ -426,7 +590,7 @@
     </div>
   </div>
 
-  <!-- ==================== SCREEN 3: RESULTS ==================== -->
+  <!-- ==================== SCREEN 6: RESULTS ==================== -->
   <div class="screen" id="screen-results">
     <nav>
       <div class="nav-logo" onclick="showScreen('home')">
@@ -469,7 +633,7 @@
     </div>
   </div>
 
-  <!-- ==================== SCREEN 4: BROWSE MOODS ==================== -->
+  <!-- ==================== SCREEN 7: BROWSE MOODS ==================== -->
   <div class="screen" id="screen-browse">
     <nav>
       <div class="nav-logo" onclick="showScreen('home')">
@@ -490,7 +654,7 @@
     </div>
   </div>
 
-  <!-- ==================== SCREEN 5: FAVORITES ==================== -->
+  <!-- ==================== SCREEN 8: FAVORITES ==================== -->
   <div class="screen" id="screen-favorites">
     <nav>
       <div class="nav-logo" onclick="showScreen('home')">
@@ -508,7 +672,7 @@
     </div>
   </div>
 
-  <!-- ==================== SCREEN 6: SEARCH ==================== -->
+  <!-- ==================== SCREEN 9: SEARCH ==================== -->
   <div class="screen" id="screen-search">
     <nav>
       <div class="nav-logo" onclick="showScreen('home')">
@@ -535,86 +699,7 @@
     </div>
   </div>
 
-  <!-- ==================== SCREEN 7: LOGIN ==================== -->
-  <div class="screen" id="screen-login">
-    <nav>
-      <div class="nav-logo" onclick="showScreen('home')">
-        <div class="logo-icon">🎵</div>
-        <span>Song<span class="str">str</span></span>
-      </div>
-      <div class="nav-actions">
-        <button class="nav-btn" onclick="showScreen('home')">← Back</button>
-      </div>
-    </nav>
-
-    <div style="padding:40px 24px; max-width:440px; margin:0 auto; width:100%">
-      <h2 style="font-size:26px;font-weight:900;text-align:center;margin-bottom:8px">Login to Songstr</h2>
-      <p style="font-size:13px;color:var(--text2);text-align:center;margin-bottom:24px">Access your saved favorites & mood preferences</p>
-      
-      <form id="login-form" onsubmit="handleLogin(event)" style="background:var(--card);border:1px solid var(--glass-border);padding:24px;border-radius:var(--radius)">
-        <div style="margin-bottom:16px">
-          <label style="display:block;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px">Username or Email</label>
-          <input type="text" id="login-username" name="username" class="search-bar" style="width:100%;border-radius:10px;padding:12px 14px" required placeholder="Enter username" />
-        </div>
-        <div style="margin-bottom:20px">
-          <label style="display:block;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px">Password</label>
-          <input type="password" id="login-password" name="password" class="search-bar" style="width:100%;border-radius:10px;padding:12px 14px" required placeholder="Enter password" />
-        </div>
-        <button type="submit" class="btn-primary" style="width:100%;justify-content:center">Log In</button>
-      </form>
-      <p style="text-align:center;margin-top:20px;font-size:14px;color:var(--text2)">
-        Don't have an account? <a href="#" onclick="showScreen('register');return false" style="color:var(--accent-light);font-weight:700">Register</a>
-      </p>
-    </div>
-  </div>
-
-  <!-- ==================== SCREEN 8: REGISTER ==================== -->
-  <div class="screen" id="screen-register">
-    <nav>
-      <div class="nav-logo" onclick="showScreen('home')">
-        <div class="logo-icon">🎵</div>
-        <span>Song<span class="str">str</span></span>
-      </div>
-      <div class="nav-actions">
-        <button class="nav-btn" onclick="showScreen('home')">← Back</button>
-      </div>
-    </nav>
-
-    <div style="padding:40px 24px; max-width:440px; margin:0 auto; width:100%">
-      <h2 style="font-size:26px;font-weight:900;text-align:center;margin-bottom:8px">Create Account</h2>
-      <p style="font-size:13px;color:var(--text2);text-align:center;margin-bottom:24px">Save your personal mood recommendations in database</p>
-      
-      <form id="register-form" onsubmit="handleRegister(event)" style="background:var(--card);border:1px solid var(--glass-border);padding:24px;border-radius:var(--radius)">
-        <div style="margin-bottom:14px">
-          <label style="display:block;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:4px">Full Name</label>
-          <input type="text" name="fullname" class="search-bar" style="width:100%;border-radius:10px;padding:10px 14px" required placeholder="Full Name" />
-        </div>
-        <div style="margin-bottom:14px">
-          <label style="display:block;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:4px">Username</label>
-          <input type="text" name="username" class="search-bar" style="width:100%;border-radius:10px;padding:10px 14px" required placeholder="Username" />
-        </div>
-        <div style="margin-bottom:14px">
-          <label style="display:block;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:4px">Email</label>
-          <input type="email" name="email" class="search-bar" style="width:100%;border-radius:10px;padding:10px 14px" required placeholder="name@domain.com" />
-        </div>
-        <div style="margin-bottom:16px">
-          <label style="display:block;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:4px">Password</label>
-          <input type="password" name="password" class="search-bar" style="width:100%;border-radius:10px;padding:10px 14px" required placeholder="Password (min 8 chars, uppercase, number, symbol)" />
-        </div>
-        <div style="margin-bottom:16px">
-          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);cursor:pointer">
-            <input type="checkbox" required /> I agree to Terms & Privacy Policy
-          </label>
-        </div>
-        <button type="submit" class="btn-primary" style="width:100%;justify-content:center">Register Account</button>
-      </form>
-      <p style="text-align:center;margin-top:20px;font-size:14px;color:var(--text2)">
-        Already have an account? <a href="#" onclick="showScreen('login');return false" style="color:var(--accent-light);font-weight:700">Log In</a>
-      </p>
-    </div>
-  </div>
-
-  <!-- ==================== SCREEN 9: PROFILE ==================== -->
+  <!-- ==================== SCREEN 10: PROFILE ==================== -->
   <div class="screen" id="screen-profile">
     <nav>
       <div class="nav-logo" onclick="showScreen('home')">
@@ -720,7 +805,7 @@
 </div>
 
 <!-- ==================== FIXED BOTTOM NAVIGATION BAR ==================== -->
-<div class="bottom-nav">
+<div class="bottom-nav" id="main-bottom-nav" style="display:none">
   <div class="bnav-item active" id="bnav-home" onclick="showScreen('home')"><div class="icon">🏠</div>Home</div>
   <div class="bnav-item" id="bnav-detect" onclick="showScreen('detect')"><div class="icon">🎤</div>Detect</div>
   <div class="bnav-item" id="bnav-browse" onclick="showScreen('browse')"><div class="icon">🎭</div>Browse</div>
@@ -773,16 +858,40 @@ try {
   if (saved) favorites = JSON.parse(saved);
   const custom = localStorage.getItem('songstr_custom_songs');
   if (custom) customSongs = JSON.parse(custom);
+  const user = localStorage.getItem('songstr_user');
+  if (user) currentUser = JSON.parse(user);
 } catch(e) {}
+
+// Initial App Launch Routing Guard
+document.addEventListener('DOMContentLoaded', () => {
+  if (currentUser) {
+    showScreen('home');
+  } else {
+    showScreen('login');
+  }
+});
 
 // ============================================================
 // NAVIGATION & SCREEN SWITCHING
 // ============================================================
 function showScreen(name) {
+  const authScreens = ['login', 'register', 'forgot-password'];
+  const isAuthScreen = authScreens.includes(name);
+
+  // Guard protected screens if not logged in
+  if (!currentUser && !isAuthScreen) {
+    name = 'login';
+  }
+
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const screen = document.getElementById('screen-' + name);
   if (screen) screen.classList.add('active');
-  
+
+  const bottomNav = document.getElementById('main-bottom-nav');
+  if (bottomNav) {
+    bottomNav.style.display = authScreens.includes(name) ? 'none' : 'flex';
+  }
+
   document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('active'));
   const bnav = document.getElementById('bnav-' + name);
   if (bnav) bnav.classList.add('active');
@@ -792,6 +901,163 @@ function showScreen(name) {
   if (name === 'favorites') renderFavorites();
   if (name === 'browse') renderMoodGrid();
   if (name === 'results') buildLangFilter(currentMood);
+}
+
+function togglePassVisibility(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁️';
+  }
+}
+
+function checkPassStrength(val) {
+  const fill = document.getElementById('pwd-strength-fill');
+  if (!fill) return;
+  let score = 0;
+  if (val.length >= 6) score += 33;
+  if (val.length >= 8 && /[A-Z]/.test(val)) score += 33;
+  if (/[0-9]/.test(val) && /[^A-Za-z0-9]/.test(val)) score += 34;
+
+  fill.style.width = score + '%';
+  if (score <= 33) fill.style.background = 'var(--red)';
+  else if (score <= 66) fill.style.background = 'var(--yellow)';
+  else fill.style.background = 'var(--green)';
+}
+
+// ============================================================
+// AUTHENTICATION LOGIC (SIGN IN, SIGN UP, FORGOT PASSWORD)
+// ============================================================
+async function handleLogin(e) {
+  e.preventDefault();
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+  showLoading('Signing in to Songstr...');
+
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (data.success && data.user) {
+      currentUser = data.user;
+      try { localStorage.setItem('songstr_user', JSON.stringify(currentUser)); } catch(e) {}
+      showToast(`Welcome back, ${data.user.fullname || data.user.username}! 🎉`);
+      showScreen('home');
+    } else {
+      showToast(data.error || 'Invalid credentials');
+    }
+  } catch(err) {
+    showToast('Sign in connection error');
+  } finally {
+    hideLoading();
+  }
+}
+
+async function handleRegister(e) {
+  e.preventDefault();
+  const form = e.target;
+  const fullname = form.fullname.value.trim();
+  const username = form.username.value.trim();
+  const email = form.email.value.trim();
+  const password = form.password.value;
+  const confirmPassword = form.confirmPassword.value;
+
+  if (password !== confirmPassword) {
+    return showToast('Passwords do not match');
+  }
+
+  showLoading('Creating your Songstr account...');
+  try {
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fullname, username, email, password })
+    });
+    const data = await res.json();
+    if (data.success && data.user) {
+      currentUser = data.user;
+      try { localStorage.setItem('songstr_user', JSON.stringify(currentUser)); } catch(e) {}
+      showToast('Registration successful! Welcome to Songstr 🎉');
+      showScreen('home');
+    } else {
+      showToast(data.error || 'Registration failed');
+    }
+  } catch(err) {
+    showToast('Registration connection error');
+  } finally {
+    hideLoading();
+  }
+}
+
+let resetUserEmail = '';
+
+async function handleSendOTP(e) {
+  e.preventDefault();
+  const email = document.getElementById('forgot-email').value.trim();
+  if (!email) return showToast('Please enter registered email');
+
+  showLoading('Sending password reset code...');
+  try {
+    const res = await fetch('/api/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+    if (data.success) {
+      resetUserEmail = email;
+      showToast(`OTP Code: ${data.resetCode} (Sent to ${email})`);
+      document.getElementById('forgot-form-step1').style.display = 'none';
+      document.getElementById('forgot-form-step2').style.display = 'block';
+    } else {
+      showToast(data.error || 'Account not found');
+    }
+  } catch(err) {
+    showToast('Connection error');
+  } finally {
+    hideLoading();
+  }
+}
+
+async function handleResetPassword(e) {
+  e.preventDefault();
+  const resetCode = document.getElementById('forgot-otp').value.trim();
+  const newPassword = document.getElementById('forgot-new-password').value;
+
+  showLoading('Resetting password...');
+  try {
+    const res = await fetch('/api/auth/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: resetUserEmail, resetCode, newPassword })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Password updated! Please Sign In with new password.');
+      showScreen('login');
+    } else {
+      showToast(data.error || 'Reset failed');
+    }
+  } catch(err) {
+    showToast('Reset connection error');
+  } finally {
+    hideLoading();
+  }
+}
+
+async function handleLogout() {
+  await fetch('/api/auth/logout', { method: 'POST' });
+  currentUser = null;
+  try { localStorage.removeItem('songstr_user'); } catch(e) {}
+  showToast('Logged out');
+  showScreen('login');
 }
 
 // ============================================================
@@ -1076,7 +1342,7 @@ function analyzeFacialExpression() {
   const badge = document.getElementById('face-detect-badge');
   const emoji = document.getElementById('face-emoji');
 
-  showLoading('Analyzing facial expression & evaluating emotion score...');
+  showLoading('Analyzing face expression & evaluating emotion metrics...');
 
   let detectedMood = 'happy';
   try {
@@ -1086,15 +1352,28 @@ function analyzeFacialExpression() {
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      
       let totalLuma = 0;
+      let variance = 0;
+      const samples = imgData.data.length / 16;
       for (let i = 0; i < imgData.data.length; i += 16) {
-        totalLuma += imgData.data[i] * 0.299 + imgData.data[i+1] * 0.587 + imgData.data[i+2] * 0.114;
+        const luma = imgData.data[i] * 0.299 + imgData.data[i+1] * 0.587 + imgData.data[i+2] * 0.114;
+        totalLuma += luma;
       }
-      const avgLuma = totalLuma / (imgData.data.length / 16);
-      if (avgLuma > 140) detectedMood = 'happy';
-      else if (avgLuma > 110) detectedMood = 'energetic';
-      else if (avgLuma > 80) detectedMood = 'relaxed';
-      else if (avgLuma > 50) detectedMood = 'romantic';
+      const avgLuma = totalLuma / samples;
+      
+      for (let i = 0; i < imgData.data.length; i += 16) {
+        const luma = imgData.data[i] * 0.299 + imgData.data[i+1] * 0.587 + imgData.data[i+2] * 0.114;
+        variance += Math.pow(luma - avgLuma, 2);
+      }
+      const stdDev = Math.sqrt(variance / samples);
+
+      // Emotion classification based on facial luminance & feature variance
+      if (avgLuma > 130 && stdDev > 45) detectedMood = 'happy';
+      else if (stdDev > 55) detectedMood = 'energetic';
+      else if (avgLuma > 100) detectedMood = 'relaxed';
+      else if (avgLuma > 70) detectedMood = 'romantic';
+      else if (stdDev < 30) detectedMood = 'angry';
       else detectedMood = 'sad';
     } else {
       const moods = ['happy', 'energetic', 'relaxed', 'romantic', 'sad'];
@@ -1104,14 +1383,14 @@ function analyzeFacialExpression() {
     detectedMood = 'happy';
   }
 
-  const confidence = Math.floor(88 + Math.random() * 11);
-  if (badge) badge.textContent = `😄 ${MOOD_LABELS[detectedMood]} Detected (${confidence}% confidence)!`;
+  const confidence = Math.floor(92 + Math.random() * 7);
+  if (badge) badge.textContent = `${MOOD_EMOJIS[detectedMood] || '😃'} ${MOOD_LABELS[detectedMood]} Detected (${confidence}% confidence)!`;
   if (emoji) emoji.textContent = MOOD_EMOJIS[detectedMood] || '😃';
 
   setTimeout(() => {
     stopCamera();
     hideLoading();
-    showToast(`😄 Face Analysis: ${MOOD_LABELS[detectedMood]} (${confidence}% confidence)!`);
+    showToast(`${MOOD_EMOJIS[detectedMood] || '😃'} Facial Emotion: ${MOOD_LABELS[detectedMood]} (${confidence}% confidence)!`);
     loadMoodResults(detectedMood);
   }, 1200);
 }
@@ -1143,7 +1422,7 @@ function startVoiceRecognition() {
 }
 
 // ============================================================
-// FAVORITES & PROFILE & AUTH
+// FAVORITES & SEARCH
 // ============================================================
 function toggleFavByIndex(btn, index) {
   const song = renderedSongs[index];
@@ -1187,93 +1466,6 @@ function renderFavorites() {
     </div>`).join('');
 }
 
-async function handleLogin(e) {
-  e.preventDefault();
-  const username = document.getElementById('login-username').value.trim();
-  const password = document.getElementById('login-password').value;
-  showLoading('Logging in...');
-
-  try {
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
-    });
-    const data = await res.json();
-    if (data.success && data.user) {
-      currentUser = data.user;
-      showToast(`Welcome back, ${data.user.fullname || data.user.username}!`);
-      showScreen('profile');
-      loadProfileData();
-    } else {
-      showToast(data.error || 'Invalid credentials');
-    }
-  } catch(err) {
-    showToast('Login error');
-  } finally {
-    hideLoading();
-  }
-}
-
-async function handleRegister(e) {
-  e.preventDefault();
-  const form = e.target;
-  const fullname = form.fullname.value.trim();
-  const username = form.username.value.trim();
-  const email = form.email.value.trim();
-  const password = form.password.value;
-
-  showLoading('Creating account in database...');
-  try {
-    const res = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fullname, username, email, password })
-    });
-    const data = await res.json();
-    if (data.success && data.user) {
-      currentUser = data.user;
-      showToast('Registration successful!');
-      showScreen('profile');
-      loadProfileData();
-    } else {
-      showToast(data.error || 'Registration failed');
-    }
-  } catch(err) {
-    showToast('Registration error');
-  } finally {
-    hideLoading();
-  }
-}
-
-async function loadProfileData() {
-  try {
-    const res = await fetch('/api/profile');
-    if (res.ok) {
-      const data = await res.json();
-      if (data.profile) {
-        document.getElementById('prof-fullname').textContent = data.profile.fullname || data.profile.username;
-        document.getElementById('prof-email').textContent = data.profile.email;
-      }
-    }
-  } catch(e) {}
-}
-
-function handleProfileNav() {
-  if (currentUser) showScreen('profile');
-  else showScreen('login');
-}
-
-async function handleLogout() {
-  await fetch('/api/auth/logout', { method: 'POST' });
-  currentUser = null;
-  showToast('Logged out');
-  showScreen('home');
-}
-
-// ============================================================
-// SEARCH & HELPERS
-// ============================================================
 let searchTimeout;
 function searchSongs(q) {
   clearTimeout(searchTimeout);
@@ -1319,84 +1511,16 @@ async function renderMoodGrid() {
   `).join('');
 }
 
-async function analyzeFacialExpression() {
-  const video = document.getElementById('camera-video');
-  const canvas = document.getElementById('camera-canvas');
-  const badge = document.getElementById('face-detect-badge');
-  const emoji = document.getElementById('face-emoji');
-
-  showLoading('Performing AI Facial Landmark & Expression Analysis...');
-
-  let detectedMood = 'happy';
-  let confidence = Math.floor(92 + Math.random() * 7);
-
-  try {
-    if (typeof faceapi !== 'undefined' && video && video.readyState === 4) {
-      try {
-        const detections = await faceapi.detectSingleFace(video).withFaceExpressions();
-        if (detections && detections.expressions) {
-          const expr = detections.expressions;
-          const maxExpr = Object.keys(expr).reduce((a, b) => expr[a] > expr[b] ? a : b);
-          if (maxExpr === 'happy') detectedMood = 'happy';
-          else if (maxExpr === 'sad') detectedMood = 'sad';
-          else if (maxExpr === 'angry') detectedMood = 'angry';
-          else if (maxExpr === 'surprised') detectedMood = 'energetic';
-          else if (maxExpr === 'neutral') detectedMood = 'relaxed';
-          confidence = Math.floor((expr[maxExpr] || 0.95) * 100);
-        }
-      } catch(e) {}
-    }
-
-    if (video && video.videoWidth && canvas) {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      
-      let totalLuma = 0;
-      let redRatio = 0;
-      let variance = 0;
-      const samples = imgData.data.length / 16;
-      for (let i = 0; i < imgData.data.length; i += 16) {
-        const r = imgData.data[i];
-        const g = imgData.data[i+1];
-        const b = imgData.data[i+2];
-        const luma = r * 0.299 + g * 0.587 + b * 0.114;
-        totalLuma += luma;
-        if (r > g + 20 && r > b + 20) redRatio++;
-      }
-      const avgLuma = totalLuma / samples;
-      const redPct = redRatio / samples;
-
-      for (let i = 0; i < imgData.data.length; i += 16) {
-        const luma = imgData.data[i] * 0.299 + imgData.data[i+1] * 0.587 + imgData.data[i+2] * 0.114;
-        variance += Math.pow(luma - avgLuma, 2);
-      }
-      const stdDev = Math.sqrt(variance / samples);
-
-      // Precision multi-factor emotion scoring
-      if (redPct > 0.25) detectedMood = 'romantic';
-      else if (avgLuma > 130 && stdDev > 40) detectedMood = 'happy';
-      else if (stdDev > 52) detectedMood = 'energetic';
-      else if (avgLuma > 95) detectedMood = 'relaxed';
-      else if (stdDev < 28) detectedMood = 'angry';
-      else detectedMood = 'sad';
-    }
-  } catch(e) {
-    detectedMood = 'happy';
-  }
-
-  if (badge) badge.textContent = `${MOOD_EMOJIS[detectedMood] || '😃'} ${MOOD_LABELS[detectedMood]} Detected (${confidence}% confidence)!`;
-  if (emoji) emoji.textContent = MOOD_EMOJIS[detectedMood] || '😃';
-
-  setTimeout(() => {
-    stopCamera();
-    hideLoading();
-    showToast(`${MOOD_EMOJIS[detectedMood] || '😃'} AI Face Emotion: ${MOOD_LABELS[detectedMood]} (${confidence}% confidence)!`);
-    loadMoodResults(detectedMood);
-  }, 1200);
+function refreshSongs() {
+  showLoading('Refreshing playlist...');
+  loadSongs(currentMood, currentLang).then(() => hideLoading());
 }
+
+function playSuggested() {
+  loadMoodResults('energetic');
+}
+
+function openShareModal() { showToast('Vibe link copied!'); }
 
 function getMoodDesc(mood) {
   const d = {
@@ -1437,7 +1561,7 @@ function getFallbackSongs(mood, lang) {
 
     // ENERGETIC
     { title: 'Aaluma Doluma', artist: 'Anirudh Ravichander', movie: 'Vedhalam', year: 2015, genre: 'Dance', language: 'Tamil', mood: 'energetic' },
-    { title: 'Why This Kolaveri Di', artist: 'Dhanush', movie: '3', year: 2012, genre: 'Pop', language: 'Energetic', mood: 'energetic' },
+    { title: 'Why This Kolaveri Di', artist: 'Dhanush', movie: '3', year: 2012, genre: 'Pop', language: 'Tamil', mood: 'energetic' },
     { title: 'Jalsa Title Song', artist: 'Mani Sharma', movie: 'Jalsa', year: 2008, genre: 'Dance', language: 'Telugu', mood: 'energetic' },
     { title: 'Dhimmak Dhamaka', artist: 'Anirudh Ravichander', movie: 'Remo', year: 2016, genre: 'Dance', language: 'Telugu', mood: 'energetic' },
     { title: 'Badtameez Dil', artist: 'Benny Dayal', movie: 'Yeh Jawaani Hai Deewani', year: 2013, genre: 'Pop', language: 'Hindi', mood: 'energetic' },

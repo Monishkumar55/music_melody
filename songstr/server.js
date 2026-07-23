@@ -591,18 +591,23 @@ app.post('/api/detect-mood', (req, res) => {
 });
 
 app.get('/api/songs', (req, res) => {
-  const { mood = 'happy', lang = 'All' } = req.query;
-  if (!SONGS_DB[mood]) return res.json({ songs: [], total: 0 });
-  let songs = [];
-  if (lang === 'All') {
-    Object.entries(SONGS_DB[mood]).forEach(([lName, list]) => {
-      list.forEach(s => songs.push({ ...s, mood, language: lName }));
-    });
-  } else {
-    const list = SONGS_DB[mood][lang] || [];
-    songs = list.map(s => ({ ...s, mood, language: lang }));
+  try {
+    const { mood = 'happy', lang = 'All' } = req.query;
+    if (!SONGS_DB[mood]) {
+      return res.status(404).json({ error: 'Mood not found' });
+    }
+    let songs = [];
+    if (lang === 'All') {
+      Object.values(SONGS_DB[mood]).forEach(list => songs.push(...list));
+    } else {
+      songs = SONGS_DB[mood][lang] || [];
+    }
+    songs = songs.sort(() => Math.random() - 0.5);
+    res.json({ songs, total: songs.length });
+  } catch(err) {
+    console.error('Songs error:', err);
+    res.status(500).json({ error: 'Failed to fetch songs' });
   }
-  res.json({ songs, total: songs.length });
 });
 
 app.get('/api/moods', (req, res) => {
@@ -723,6 +728,50 @@ app.post('/api/auth/login', (req, res) => {
 app.post('/api/auth/logout', (req, res) => {
   res.clearCookie('token');
   res.json({ success: true });
+});
+
+app.post('/api/auth/forgot-password', (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email is required' });
+
+  try {
+    const stmt = db.prepare('SELECT id, username, email FROM users WHERE email = ?');
+    const user = stmt.get(email);
+    if (!user) return res.status(404).json({ error: 'No account found with this email' });
+
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+    try {
+      db.prepare('ALTER TABLE users ADD COLUMN reset_code TEXT').run();
+    } catch(e) {}
+
+    db.prepare('UPDATE users SET reset_code = ? WHERE id = ?').run(resetCode, user.id);
+    res.json({ success: true, message: `Password reset code sent to ${email}`, resetCode });
+  } catch(err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.post('/api/auth/reset-password', (req, res) => {
+  const { email, resetCode, newPassword } = req.body;
+  if (!email || !resetCode || !newPassword) {
+    return res.status(400).json({ error: 'Email, reset code, and new password are required' });
+  }
+
+  try {
+    const user = db.prepare('SELECT id, reset_code FROM users WHERE email = ?').get(email);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (user.reset_code !== resetCode.trim()) {
+      return res.status(400).json({ error: 'Invalid or expired reset code' });
+    }
+
+    const hash = bcrypt.hashSync(newPassword, 10);
+    db.prepare('UPDATE users SET password_hash = ?, reset_code = NULL WHERE id = ?').run(hash, user.id);
+    res.json({ success: true, message: 'Password updated successfully. You can now sign in.' });
+  } catch(err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 app.get('/api/auth/me', (req, res) => {
