@@ -599,8 +599,24 @@
 
       <!-- Text Panel -->
       <div class="detect-panel" id="panel-text">
-        <textarea class="detect-textarea" id="mood-text" placeholder="Type how you're feeling right now... (e.g. 'I had a super happy day and feel energetic!')"></textarea>
-        <button class="btn-primary" style="width:100%" onclick="analyzeMoodFromText()">✨ Analyze My Mood</button>
+        <textarea class="detect-textarea" id="mood-text" placeholder="Type how you're feeling right now... (e.g. 'I had a super happy day and feel energetic!')" onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); analyzeMoodFromText();}"></textarea>
+        
+        <!-- QUICK MOOD KEYWORD CHIPS -->
+        <div style="margin-bottom:16px;text-align:left">
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px">Tap quick mood keyword:</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="action-chip" onclick="selectTextMoodKeyword('I feel super happy and joyful today!')">😄 Happy</button>
+            <button class="action-chip" onclick="selectTextMoodKeyword('Need high energy dance workout beats!')">⚡ Energetic</button>
+            <button class="action-chip" onclick="selectTextMoodKeyword('Feeling calm, peaceful, and relaxed')">😌 Calm</button>
+            <button class="action-chip" onclick="selectTextMoodKeyword('Feeling romantic love and warmth')">💖 Romantic</button>
+            <button class="action-chip" onclick="selectTextMoodKeyword('I am feeling so sad and heartbroken')">😢 Sad</button>
+            <button class="action-chip" onclick="selectTextMoodKeyword('Feeling furious and angry right now')">😡 Angry</button>
+            <button class="action-chip" onclick="selectTextMoodKeyword('So stressed and tired need relief')">😫 Stress Relief</button>
+            <button class="action-chip" onclick="selectTextMoodKeyword('Just normal everyday neutral mood')">🎧 Neutral</button>
+          </div>
+        </div>
+
+        <button class="btn-primary" style="width:100%" onclick="analyzeMoodFromText()">✨ Analyze My Mood →</button>
       </div>
 
       <!-- Voice Panel -->
@@ -1427,12 +1443,28 @@ function handleInsertSong(e) {
 // ============================================================
 // MOOD DETECTION ENGINE (TEXT, VOICE, LIVE FACE CAMERA ANALYSIS)
 // ============================================================
+function selectTextMoodKeyword(text) {
+  const el = document.getElementById('mood-text');
+  if (el) el.value = text;
+  analyzeMoodFromText();
+}
+
 function switchTab(name) {
   const tabs = ['text', 'voice', 'face'];
   tabs.forEach(t => {
-    document.getElementById('tab-' + t).classList.toggle('active', t === name);
-    document.getElementById('panel-' + t).style.display = t === name ? 'block' : 'none';
+    const tabBtn = document.getElementById('tab-' + t);
+    const panel = document.getElementById('panel-' + t);
+    if (tabBtn) tabBtn.classList.toggle('active', t === name);
+    if (panel) panel.style.display = t === name ? 'block' : 'none';
   });
+
+  // Stop active speech recognition when leaving voice tab
+  if (name !== 'voice' && recognition) {
+    try { recognition.stop(); } catch(e) {}
+    recognition = null;
+    const waveBox = document.getElementById('voice-wave-box');
+    if (waveBox) waveBox.style.display = 'none';
+  }
 
   if (name === 'face') {
     startCamera();
