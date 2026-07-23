@@ -50,6 +50,7 @@ jobs:
           if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
           cd $TARGET_DIR
           mkdir -p ../test-results test-results reports demo_reports
+          touch test-results/unit-integration.xml
           npx mocha --require test/globalHooks.js test/api.test.js test/get.test.js test/profile.test.js \
             --retries 2 \
             --timeout 15000 \
@@ -65,6 +66,7 @@ jobs:
           path: |
             test-results/unit-integration.xml
             songstr/test-results/unit-integration.xml
+          if-no-files-found: ignore
           retention-days: 14
 
   # ═══════════════════════════════════════════════════════════════════════
@@ -101,6 +103,7 @@ jobs:
           if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
           cd $TARGET_DIR
           mkdir -p ../test-results test-results reports demo_reports
+          touch test-results/selenium-e2e.xml
           npx mocha --require test/globalHooks.js test/selenium.e2e.js \
             --retries 2 \
             --timeout 60000 \
@@ -116,6 +119,7 @@ jobs:
           path: |
             test-results/selenium-e2e.xml
             songstr/test-results/selenium-e2e.xml
+          if-no-files-found: ignore
           retention-days: 14
 
   # ═══════════════════════════════════════════════════════════════════════
@@ -152,6 +156,7 @@ jobs:
           if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
           cd $TARGET_DIR
           mkdir -p ../test-results test-results reports demo_reports
+          touch test-results/mobile-e2e.xml
           npx mocha --require test/globalHooks.js test/mobile.e2e.js \
             --retries 2 \
             --timeout 60000 \
@@ -167,6 +172,7 @@ jobs:
           path: |
             test-results/mobile-e2e.xml
             songstr/test-results/mobile-e2e.xml
+          if-no-files-found: ignore
           retention-days: 14
 
   # ═══════════════════════════════════════════════════════════════════════
@@ -198,6 +204,7 @@ jobs:
           if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
           cd $TARGET_DIR
           mkdir -p ../test-results test-results reports demo_reports
+          touch test-results/load-e2e.xml
           npx mocha --require test/globalHooks.js test/load.test.js \
             --retries 2 \
             --timeout 15000 \
@@ -213,6 +220,7 @@ jobs:
           path: |
             test-results/load-e2e.xml
             songstr/test-results/load-e2e.xml
+          if-no-files-found: ignore
           retention-days: 14
 
   # ═══════════════════════════════════════════════════════════════════════
@@ -244,6 +252,7 @@ jobs:
           if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
           cd $TARGET_DIR
           mkdir -p ../test-results test-results reports demo_reports
+          touch test-results/security.xml
           npx mocha --require test/globalHooks.js test/security.test.js \
             --retries 2 \
             --timeout 15000 \
@@ -259,6 +268,7 @@ jobs:
           path: |
             test-results/security.xml
             songstr/test-results/security.xml
+          if-no-files-found: ignore
           retention-days: 14
 
   # ═══════════════════════════════════════════════════════════════════════
@@ -278,6 +288,7 @@ jobs:
           pattern: junit-*
           path: all-reports
           merge-multiple: true
+        continue-on-error: true
 
       - name: Publish Test Cases to GitHub Actions UI
         uses: mikepenz/action-junit-report@v4
@@ -287,6 +298,7 @@ jobs:
           include_passed: true
           fail_on_failure: false
           check_name: 'Songstr Comprehensive Test Case Results'
+        continue-on-error: true
 
       - name: Generate GitHub Actions Step Summary
         if: always()

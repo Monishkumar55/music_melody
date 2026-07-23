@@ -46,6 +46,7 @@ jobs:
           if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
           cd $TARGET_DIR
           mkdir -p ../test-results test-results reports demo_reports
+          touch test-results/unit-integration.xml
           npx mocha --require test/globalHooks.js test/api.test.js test/get.test.js test/profile.test.js test/security.test.js \
             --retries 3 \
             --timeout 15000 \
@@ -61,6 +62,7 @@ jobs:
           path: |
             test-results/unit-integration.xml
             songstr/test-results/unit-integration.xml
+          if-no-files-found: ignore
           retention-days: 14
 
   selenium-e2e:
@@ -89,6 +91,7 @@ jobs:
           if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
           cd $TARGET_DIR
           mkdir -p ../test-results test-results reports demo_reports
+          touch test-results/selenium-e2e.xml
           npx mocha --require test/globalHooks.js test/selenium.e2e.js \
             --retries 3 \
             --timeout 60000 \
@@ -104,4 +107,5 @@ jobs:
           path: |
             test-results/selenium-e2e.xml
             songstr/test-results/selenium-e2e.xml
+          if-no-files-found: ignore
           retention-days: 14
