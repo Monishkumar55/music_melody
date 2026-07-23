@@ -899,6 +899,19 @@ app.delete('/api/profile', authenticateToken, (req, res) => {
 });
 
 // ============================================================
+// AUDIO STREAMING ROUTE
+// ============================================================
+app.get('/api/stream', (req, res) => {
+  const { title } = req.query;
+  const cleanTitle = (title || 'music').toLowerCase().replace(/[^a-z0-9]/g, '_');
+  const localFile = path.join(__dirname, 'public', 'audio', `${cleanTitle}.mp3`);
+  if (fs.existsSync(localFile)) {
+    return res.sendFile(localFile);
+  }
+  res.redirect('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
+});
+
+// ============================================================
 // FAVORITES ROUTES
 // ============================================================
 app.get('/api/favorites', authenticateToken, (req, res) => {
