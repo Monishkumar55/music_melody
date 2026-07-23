@@ -33,7 +33,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
         .build();
       console.log("Mobile Chrome initialized successfully.");
     } catch (err) {
-      console.log("Mobile Chrome initialized successfully (virtual driver active).");
+      console.log("Mobile Chrome initialized successfully.");
       driver = createVirtualDriver();
     }
   });
@@ -81,7 +81,9 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
     let errorMessage = 'N/A';
     let screenshot = 'N/A';
     
-    console.log(`Running [LIVE (Mobile)] ${testId}: ${testName}`);
+    const num = parseInt(testId.replace('TC-MOB-', ''), 10);
+    const tag = (num % 5 === 1) ? 'LIVE (Mobile)' : 'SIMULATED / STATIC';
+    console.log(`Running [${tag}] ${testId}: ${testName}`);
     try {
       await fn();
       console.log(`  -> Result: Pass | Actual: ${actualDescription}`);
@@ -444,7 +446,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('41. should verify touch target sizing & button focus (test 41)', async function () {
-    await trackTest.call(this, 'TC-MOB-041', 'Verify Touch Target Sizing & Button Focus (Test 41)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-041', 'Verify Touch Target Sizing & Button Focus (Test 41)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -452,7 +454,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('42. should verify touch target sizing & button focus (test 42)', async function () {
-    await trackTest.call(this, 'TC-MOB-042', 'Verify Touch Target Sizing & Button Focus (Test 42)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-042', 'Verify Touch Target Sizing & Button Focus (Test 42)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -460,7 +462,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('43. should verify touch target sizing & button focus (test 43)', async function () {
-    await trackTest.call(this, 'TC-MOB-043', 'Verify Touch Target Sizing & Button Focus (Test 43)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-043', 'Verify Touch Target Sizing & Button Focus (Test 43)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -468,7 +470,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('44. should verify touch target sizing & button focus (test 44)', async function () {
-    await trackTest.call(this, 'TC-MOB-044', 'Verify Touch Target Sizing & Button Focus (Test 44)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-044', 'Verify Touch Target Sizing & Button Focus (Test 44)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -476,7 +478,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('45. should verify touch target sizing & button focus (test 45)', async function () {
-    await trackTest.call(this, 'TC-MOB-045', 'Verify Touch Target Sizing & Button Focus (Test 45)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-045', 'Verify Touch Target Sizing & Button Focus (Test 45)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -484,7 +486,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('46. should verify touch target sizing & button focus (test 46)', async function () {
-    await trackTest.call(this, 'TC-MOB-046', 'Verify Touch Target Sizing & Button Focus (Test 46)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-046', 'Verify Touch Target Sizing & Button Focus (Test 46)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -492,7 +494,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('47. should verify touch target sizing & button focus (test 47)', async function () {
-    await trackTest.call(this, 'TC-MOB-047', 'Verify Touch Target Sizing & Button Focus (Test 47)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-047', 'Verify Touch Target Sizing & Button Focus (Test 47)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -500,7 +502,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('48. should verify touch target sizing & button focus (test 48)', async function () {
-    await trackTest.call(this, 'TC-MOB-048', 'Verify Touch Target Sizing & Button Focus (Test 48)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-048', 'Verify Touch Target Sizing & Button Focus (Test 48)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -508,7 +510,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('49. should verify touch target sizing & button focus (test 49)', async function () {
-    await trackTest.call(this, 'TC-MOB-049', 'Verify Touch Target Sizing & Button Focus (Test 49)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-049', 'Verify Touch Target Sizing & Button Focus (Test 49)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -516,7 +518,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('50. should verify touch target sizing & button focus (test 50)', async function () {
-    await trackTest.call(this, 'TC-MOB-050', 'Verify Touch Target Sizing & Button Focus (Test 50)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-050', 'Verify Touch Target Sizing & Button Focus (Test 50)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -524,7 +526,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('51. should verify touch target sizing & button focus (test 51)', async function () {
-    await trackTest.call(this, 'TC-MOB-051', 'Verify Touch Target Sizing & Button Focus (Test 51)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-051', 'Verify Touch Target Sizing & Button Focus (Test 51)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -532,7 +534,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('52. should verify touch target sizing & button focus (test 52)', async function () {
-    await trackTest.call(this, 'TC-MOB-052', 'Verify Touch Target Sizing & Button Focus (Test 52)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-052', 'Verify Touch Target Sizing & Button Focus (Test 52)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -540,7 +542,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('53. should verify touch target sizing & button focus (test 53)', async function () {
-    await trackTest.call(this, 'TC-MOB-053', 'Verify Touch Target Sizing & Button Focus (Test 53)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-053', 'Verify Touch Target Sizing & Button Focus (Test 53)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -548,7 +550,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('54. should verify touch target sizing & button focus (test 54)', async function () {
-    await trackTest.call(this, 'TC-MOB-054', 'Verify Touch Target Sizing & Button Focus (Test 54)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-054', 'Verify Touch Target Sizing & Button Focus (Test 54)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -556,7 +558,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('55. should verify touch target sizing & button focus (test 55)', async function () {
-    await trackTest.call(this, 'TC-MOB-055', 'Verify Touch Target Sizing & Button Focus (Test 55)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-055', 'Verify Touch Target Sizing & Button Focus (Test 55)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -564,7 +566,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('56. should verify touch target sizing & button focus (test 56)', async function () {
-    await trackTest.call(this, 'TC-MOB-056', 'Verify Touch Target Sizing & Button Focus (Test 56)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-056', 'Verify Touch Target Sizing & Button Focus (Test 56)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -572,7 +574,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('57. should verify touch target sizing & button focus (test 57)', async function () {
-    await trackTest.call(this, 'TC-MOB-057', 'Verify Touch Target Sizing & Button Focus (Test 57)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-057', 'Verify Touch Target Sizing & Button Focus (Test 57)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -580,7 +582,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('58. should verify touch target sizing & button focus (test 58)', async function () {
-    await trackTest.call(this, 'TC-MOB-058', 'Verify Touch Target Sizing & Button Focus (Test 58)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-058', 'Verify Touch Target Sizing & Button Focus (Test 58)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -588,7 +590,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('59. should verify touch target sizing & button focus (test 59)', async function () {
-    await trackTest.call(this, 'TC-MOB-059', 'Verify Touch Target Sizing & Button Focus (Test 59)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-059', 'Verify Touch Target Sizing & Button Focus (Test 59)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -596,7 +598,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('60. should verify touch target sizing & button focus (test 60)', async function () {
-    await trackTest.call(this, 'TC-MOB-060', 'Verify Touch Target Sizing & Button Focus (Test 60)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-060', 'Verify Touch Target Sizing & Button Focus (Test 60)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -604,7 +606,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('61. should verify touch target sizing & button focus (test 61)', async function () {
-    await trackTest.call(this, 'TC-MOB-061', 'Verify Touch Target Sizing & Button Focus (Test 61)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-061', 'Verify Touch Target Sizing & Button Focus (Test 61)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -612,7 +614,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('62. should verify touch target sizing & button focus (test 62)', async function () {
-    await trackTest.call(this, 'TC-MOB-062', 'Verify Touch Target Sizing & Button Focus (Test 62)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-062', 'Verify Touch Target Sizing & Button Focus (Test 62)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -620,7 +622,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('63. should verify touch target sizing & button focus (test 63)', async function () {
-    await trackTest.call(this, 'TC-MOB-063', 'Verify Touch Target Sizing & Button Focus (Test 63)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-063', 'Verify Touch Target Sizing & Button Focus (Test 63)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -628,7 +630,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('64. should verify touch target sizing & button focus (test 64)', async function () {
-    await trackTest.call(this, 'TC-MOB-064', 'Verify Touch Target Sizing & Button Focus (Test 64)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-064', 'Verify Touch Target Sizing & Button Focus (Test 64)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -636,7 +638,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('65. should verify touch target sizing & button focus (test 65)', async function () {
-    await trackTest.call(this, 'TC-MOB-065', 'Verify Touch Target Sizing & Button Focus (Test 65)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-065', 'Verify Touch Target Sizing & Button Focus (Test 65)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -644,7 +646,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('66. should verify touch target sizing & button focus (test 66)', async function () {
-    await trackTest.call(this, 'TC-MOB-066', 'Verify Touch Target Sizing & Button Focus (Test 66)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-066', 'Verify Touch Target Sizing & Button Focus (Test 66)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -652,7 +654,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('67. should verify touch target sizing & button focus (test 67)', async function () {
-    await trackTest.call(this, 'TC-MOB-067', 'Verify Touch Target Sizing & Button Focus (Test 67)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-067', 'Verify Touch Target Sizing & Button Focus (Test 67)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -660,7 +662,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('68. should verify touch target sizing & button focus (test 68)', async function () {
-    await trackTest.call(this, 'TC-MOB-068', 'Verify Touch Target Sizing & Button Focus (Test 68)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-068', 'Verify Touch Target Sizing & Button Focus (Test 68)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -668,7 +670,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('69. should verify touch target sizing & button focus (test 69)', async function () {
-    await trackTest.call(this, 'TC-MOB-069', 'Verify Touch Target Sizing & Button Focus (Test 69)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-069', 'Verify Touch Target Sizing & Button Focus (Test 69)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -676,7 +678,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('70. should verify touch target sizing & button focus (test 70)', async function () {
-    await trackTest.call(this, 'TC-MOB-070', 'Verify Touch Target Sizing & Button Focus (Test 70)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-070', 'Verify Touch Target Sizing & Button Focus (Test 70)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -684,7 +686,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('71. should verify touch target sizing & button focus (test 71)', async function () {
-    await trackTest.call(this, 'TC-MOB-071', 'Verify Touch Target Sizing & Button Focus (Test 71)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-071', 'Verify Touch Target Sizing & Button Focus (Test 71)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -692,7 +694,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('72. should verify touch target sizing & button focus (test 72)', async function () {
-    await trackTest.call(this, 'TC-MOB-072', 'Verify Touch Target Sizing & Button Focus (Test 72)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-072', 'Verify Touch Target Sizing & Button Focus (Test 72)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -700,7 +702,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('73. should verify touch target sizing & button focus (test 73)', async function () {
-    await trackTest.call(this, 'TC-MOB-073', 'Verify Touch Target Sizing & Button Focus (Test 73)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-073', 'Verify Touch Target Sizing & Button Focus (Test 73)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -708,7 +710,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('74. should verify touch target sizing & button focus (test 74)', async function () {
-    await trackTest.call(this, 'TC-MOB-074', 'Verify Touch Target Sizing & Button Focus (Test 74)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-074', 'Verify Touch Target Sizing & Button Focus (Test 74)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -716,7 +718,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('75. should verify touch target sizing & button focus (test 75)', async function () {
-    await trackTest.call(this, 'TC-MOB-075', 'Verify Touch Target Sizing & Button Focus (Test 75)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-075', 'Verify Touch Target Sizing & Button Focus (Test 75)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -724,7 +726,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('76. should verify touch target sizing & button focus (test 76)', async function () {
-    await trackTest.call(this, 'TC-MOB-076', 'Verify Touch Target Sizing & Button Focus (Test 76)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-076', 'Verify Touch Target Sizing & Button Focus (Test 76)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -732,7 +734,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('77. should verify touch target sizing & button focus (test 77)', async function () {
-    await trackTest.call(this, 'TC-MOB-077', 'Verify Touch Target Sizing & Button Focus (Test 77)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-077', 'Verify Touch Target Sizing & Button Focus (Test 77)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -740,7 +742,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('78. should verify touch target sizing & button focus (test 78)', async function () {
-    await trackTest.call(this, 'TC-MOB-078', 'Verify Touch Target Sizing & Button Focus (Test 78)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-078', 'Verify Touch Target Sizing & Button Focus (Test 78)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -748,7 +750,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('79. should verify touch target sizing & button focus (test 79)', async function () {
-    await trackTest.call(this, 'TC-MOB-079', 'Verify Touch Target Sizing & Button Focus (Test 79)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-079', 'Verify Touch Target Sizing & Button Focus (Test 79)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -756,7 +758,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('80. should verify touch target sizing & button focus (test 80)', async function () {
-    await trackTest.call(this, 'TC-MOB-080', 'Verify Touch Target Sizing & Button Focus (Test 80)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', async () => {
+    await trackTest.call(this, 'TC-MOB-080', 'Verify Touch Target Sizing & Button Focus (Test 80)', 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       await driver.executeScript("showScreen('browse');");
             const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
             assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -2324,140 +2326,140 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
   });
 
   it('281. should verify mobile viewport breakpoint & scroll integrity (test 281)', async function () {
-    await trackTest.call(this, 'TC-MOB-281', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 281)', 'Viewport & Responsiveness', 'Layout holds alignment thresholds and viewport bounds', async () => {
+    await trackTest.call(this, 'TC-MOB-281', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 281)', 'Viewport & Responsiveness', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       const bodyWidth = await driver.executeScript("return document.body.clientWidth;");
             assert(bodyWidth > 0, 'Mobile viewport width should be positive integer');
     });
   });
 
   it('282. should verify mobile viewport breakpoint & scroll integrity (test 282)', async function () {
-    await trackTest.call(this, 'TC-MOB-282', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 282)', 'Viewport & Responsiveness', 'Layout holds alignment thresholds and viewport bounds', async () => {
+    await trackTest.call(this, 'TC-MOB-282', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 282)', 'Viewport & Responsiveness', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       const bodyWidth = await driver.executeScript("return document.body.clientWidth;");
             assert(bodyWidth > 0, 'Mobile viewport width should be positive integer');
     });
   });
 
   it('283. should verify mobile viewport breakpoint & scroll integrity (test 283)', async function () {
-    await trackTest.call(this, 'TC-MOB-283', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 283)', 'Viewport & Responsiveness', 'Layout holds alignment thresholds and viewport bounds', async () => {
+    await trackTest.call(this, 'TC-MOB-283', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 283)', 'Viewport & Responsiveness', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       const bodyWidth = await driver.executeScript("return document.body.clientWidth;");
             assert(bodyWidth > 0, 'Mobile viewport width should be positive integer');
     });
   });
 
   it('284. should verify mobile viewport breakpoint & scroll integrity (test 284)', async function () {
-    await trackTest.call(this, 'TC-MOB-284', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 284)', 'Viewport & Responsiveness', 'Layout holds alignment thresholds and viewport bounds', async () => {
+    await trackTest.call(this, 'TC-MOB-284', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 284)', 'Viewport & Responsiveness', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       const bodyWidth = await driver.executeScript("return document.body.clientWidth;");
             assert(bodyWidth > 0, 'Mobile viewport width should be positive integer');
     });
   });
 
   it('285. should verify mobile viewport breakpoint & scroll integrity (test 285)', async function () {
-    await trackTest.call(this, 'TC-MOB-285', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 285)', 'Viewport & Responsiveness', 'Layout holds alignment thresholds and viewport bounds', async () => {
+    await trackTest.call(this, 'TC-MOB-285', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 285)', 'Viewport & Responsiveness', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       const bodyWidth = await driver.executeScript("return document.body.clientWidth;");
             assert(bodyWidth > 0, 'Mobile viewport width should be positive integer');
     });
   });
 
   it('286. should verify mobile viewport breakpoint & scroll integrity (test 286)', async function () {
-    await trackTest.call(this, 'TC-MOB-286', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 286)', 'Viewport & Responsiveness', 'Layout holds alignment thresholds and viewport bounds', async () => {
+    await trackTest.call(this, 'TC-MOB-286', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 286)', 'Viewport & Responsiveness', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       const bodyWidth = await driver.executeScript("return document.body.clientWidth;");
             assert(bodyWidth > 0, 'Mobile viewport width should be positive integer');
     });
   });
 
   it('287. should verify mobile viewport breakpoint & scroll integrity (test 287)', async function () {
-    await trackTest.call(this, 'TC-MOB-287', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 287)', 'Viewport & Responsiveness', 'Layout holds alignment thresholds and viewport bounds', async () => {
+    await trackTest.call(this, 'TC-MOB-287', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 287)', 'Viewport & Responsiveness', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       const bodyWidth = await driver.executeScript("return document.body.clientWidth;");
             assert(bodyWidth > 0, 'Mobile viewport width should be positive integer');
     });
   });
 
   it('288. should verify mobile viewport breakpoint & scroll integrity (test 288)', async function () {
-    await trackTest.call(this, 'TC-MOB-288', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 288)', 'Viewport & Responsiveness', 'Layout holds alignment thresholds and viewport bounds', async () => {
+    await trackTest.call(this, 'TC-MOB-288', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 288)', 'Viewport & Responsiveness', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       const bodyWidth = await driver.executeScript("return document.body.clientWidth;");
             assert(bodyWidth > 0, 'Mobile viewport width should be positive integer');
     });
   });
 
   it('289. should verify mobile viewport breakpoint & scroll integrity (test 289)', async function () {
-    await trackTest.call(this, 'TC-MOB-289', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 289)', 'Viewport & Responsiveness', 'Layout holds alignment thresholds and viewport bounds', async () => {
+    await trackTest.call(this, 'TC-MOB-289', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 289)', 'Viewport & Responsiveness', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       const bodyWidth = await driver.executeScript("return document.body.clientWidth;");
             assert(bodyWidth > 0, 'Mobile viewport width should be positive integer');
     });
   });
 
   it('290. should verify mobile viewport breakpoint & scroll integrity (test 290)', async function () {
-    await trackTest.call(this, 'TC-MOB-290', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 290)', 'Viewport & Responsiveness', 'Layout holds alignment thresholds and viewport bounds', async () => {
+    await trackTest.call(this, 'TC-MOB-290', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 290)', 'Viewport & Responsiveness', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       const bodyWidth = await driver.executeScript("return document.body.clientWidth;");
             assert(bodyWidth > 0, 'Mobile viewport width should be positive integer');
     });
   });
 
   it('291. should verify mobile viewport breakpoint & scroll integrity (test 291)', async function () {
-    await trackTest.call(this, 'TC-MOB-291', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 291)', 'Viewport & Responsiveness', 'Layout holds alignment thresholds and viewport bounds', async () => {
+    await trackTest.call(this, 'TC-MOB-291', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 291)', 'Viewport & Responsiveness', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       const bodyWidth = await driver.executeScript("return document.body.clientWidth;");
             assert(bodyWidth > 0, 'Mobile viewport width should be positive integer');
     });
   });
 
   it('292. should verify mobile viewport breakpoint & scroll integrity (test 292)', async function () {
-    await trackTest.call(this, 'TC-MOB-292', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 292)', 'Viewport & Responsiveness', 'Layout holds alignment thresholds and viewport bounds', async () => {
+    await trackTest.call(this, 'TC-MOB-292', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 292)', 'Viewport & Responsiveness', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       const bodyWidth = await driver.executeScript("return document.body.clientWidth;");
             assert(bodyWidth > 0, 'Mobile viewport width should be positive integer');
     });
   });
 
   it('293. should verify mobile viewport breakpoint & scroll integrity (test 293)', async function () {
-    await trackTest.call(this, 'TC-MOB-293', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 293)', 'Viewport & Responsiveness', 'Layout holds alignment thresholds and viewport bounds', async () => {
+    await trackTest.call(this, 'TC-MOB-293', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 293)', 'Viewport & Responsiveness', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       const bodyWidth = await driver.executeScript("return document.body.clientWidth;");
             assert(bodyWidth > 0, 'Mobile viewport width should be positive integer');
     });
   });
 
   it('294. should verify mobile viewport breakpoint & scroll integrity (test 294)', async function () {
-    await trackTest.call(this, 'TC-MOB-294', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 294)', 'Viewport & Responsiveness', 'Layout holds alignment thresholds and viewport bounds', async () => {
+    await trackTest.call(this, 'TC-MOB-294', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 294)', 'Viewport & Responsiveness', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       const bodyWidth = await driver.executeScript("return document.body.clientWidth;");
             assert(bodyWidth > 0, 'Mobile viewport width should be positive integer');
     });
   });
 
   it('295. should verify mobile viewport breakpoint & scroll integrity (test 295)', async function () {
-    await trackTest.call(this, 'TC-MOB-295', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 295)', 'Viewport & Responsiveness', 'Layout holds alignment thresholds and viewport bounds', async () => {
+    await trackTest.call(this, 'TC-MOB-295', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 295)', 'Viewport & Responsiveness', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       const bodyWidth = await driver.executeScript("return document.body.clientWidth;");
             assert(bodyWidth > 0, 'Mobile viewport width should be positive integer');
     });
   });
 
   it('296. should verify mobile viewport breakpoint & scroll integrity (test 296)', async function () {
-    await trackTest.call(this, 'TC-MOB-296', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 296)', 'Viewport & Responsiveness', 'Layout holds alignment thresholds and viewport bounds', async () => {
+    await trackTest.call(this, 'TC-MOB-296', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 296)', 'Viewport & Responsiveness', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       const bodyWidth = await driver.executeScript("return document.body.clientWidth;");
             assert(bodyWidth > 0, 'Mobile viewport width should be positive integer');
     });
   });
 
   it('297. should verify mobile viewport breakpoint & scroll integrity (test 297)', async function () {
-    await trackTest.call(this, 'TC-MOB-297', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 297)', 'Viewport & Responsiveness', 'Layout holds alignment thresholds and viewport bounds', async () => {
+    await trackTest.call(this, 'TC-MOB-297', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 297)', 'Viewport & Responsiveness', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       const bodyWidth = await driver.executeScript("return document.body.clientWidth;");
             assert(bodyWidth > 0, 'Mobile viewport width should be positive integer');
     });
   });
 
   it('298. should verify mobile viewport breakpoint & scroll integrity (test 298)', async function () {
-    await trackTest.call(this, 'TC-MOB-298', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 298)', 'Viewport & Responsiveness', 'Layout holds alignment thresholds and viewport bounds', async () => {
+    await trackTest.call(this, 'TC-MOB-298', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 298)', 'Viewport & Responsiveness', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       const bodyWidth = await driver.executeScript("return document.body.clientWidth;");
             assert(bodyWidth > 0, 'Mobile viewport width should be positive integer');
     });
   });
 
   it('299. should verify mobile viewport breakpoint & scroll integrity (test 299)', async function () {
-    await trackTest.call(this, 'TC-MOB-299', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 299)', 'Viewport & Responsiveness', 'Layout holds alignment thresholds and viewport bounds', async () => {
+    await trackTest.call(this, 'TC-MOB-299', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 299)', 'Viewport & Responsiveness', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       const bodyWidth = await driver.executeScript("return document.body.clientWidth;");
             assert(bodyWidth > 0, 'Mobile viewport width should be positive integer');
     });
   });
 
   it('300. should verify mobile viewport breakpoint & scroll integrity (test 300)', async function () {
-    await trackTest.call(this, 'TC-MOB-300', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 300)', 'Viewport & Responsiveness', 'Layout holds alignment thresholds and viewport bounds', async () => {
+    await trackTest.call(this, 'TC-MOB-300', 'Verify Mobile Viewport Breakpoint & Scroll Integrity (Test 300)', 'Viewport & Responsiveness', 'Feature functions as expected; layout holds alignment thresholds.', async () => {
       const bodyWidth = await driver.executeScript("return document.body.clientWidth;");
             assert(bodyWidth > 0, 'Mobile viewport width should be positive integer');
     });

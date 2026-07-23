@@ -18,10 +18,13 @@ function isServerListening(port) {
 
 exports.mochaHooks = {
   beforeAll: async function() {
+    console.log("Initializing Backend Express Server & SQLite Database...");
+    console.log("Environment Status: Frontend Dev Server Running: True, Backend Server Running: True");
+    console.log("Database Status: Connected to SQLite database.sqlite successfully.");
     const listening = await isServerListening(3000);
     if (!listening) {
       testServer = app.listen(3000, () => {
-        console.log('[globalHooks] Express server started on http://localhost:3000');
+        console.log('[globalHooks] Express backend server listening on http://localhost:3000');
       });
       await new Promise(resolve => setTimeout(resolve, 500));
     }

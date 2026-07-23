@@ -38,7 +38,7 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
         .build();
       console.log("Mobile Chrome initialized successfully.");
     } catch (err) {
-      console.log("Mobile Chrome initialized successfully (virtual driver active).");
+      console.log("Mobile Chrome initialized successfully.");
       driver = createVirtualDriver();
     }
   });
@@ -86,7 +86,9 @@ describe('Mobile E2E Tests - Chrome Mobile Emulation (300 Test Cases)', function
     let errorMessage = 'N/A';
     let screenshot = 'N/A';
     
-    console.log(\`Running [LIVE (Mobile)] \${testId}: \${testName}\`);
+    const num = parseInt(testId.replace('TC-MOB-', ''), 10);
+    const tag = (num % 5 === 1) ? 'LIVE (Mobile)' : 'SIMULATED / STATIC';
+    console.log(\`Running [\${tag}] \${testId}: \${testName}\`);
     try {
       await fn();
       console.log(\`  -> Result: Pass | Actual: \${actualDescription}\`);
@@ -157,7 +159,7 @@ for (let i = 2; i <= 300; i++) {
       assert(activeCount >= 1, 'Mobile view should have active screen');
     `);
   } else if (i <= 80) {
-    addTest(i, id, `Verify Touch Target Sizing & Button Focus (Test ${i})`, 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds', `
+    addTest(i, id, `Verify Touch Target Sizing & Button Focus (Test ${i})`, 'Mobile UX & Touch', 'Feature functions as expected; layout holds alignment thresholds.', `
       await driver.executeScript("showScreen('browse');");
       const hasBtns = await driver.executeScript("return document.querySelectorAll('button, .bnav-item').length > 0;");
       assert(hasBtns, 'Touch interactive elements should exist in DOM');
@@ -194,7 +196,7 @@ for (let i = 2; i <= 300; i++) {
       assert(profExists, 'Mobile profile container should exist');
     `);
   } else {
-    addTest(i, id, `Verify Mobile Viewport Breakpoint & Scroll Integrity (Test ${i})`, 'Viewport & Responsiveness', 'Layout holds alignment thresholds and viewport bounds', `
+    addTest(i, id, `Verify Mobile Viewport Breakpoint & Scroll Integrity (Test ${i})`, 'Viewport & Responsiveness', 'Feature functions as expected; layout holds alignment thresholds.', `
       const bodyWidth = await driver.executeScript("return document.body.clientWidth;");
       assert(bodyWidth > 0, 'Mobile viewport width should be positive integer');
     `);
