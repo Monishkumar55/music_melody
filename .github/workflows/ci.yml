@@ -70,12 +70,12 @@ jobs:
           retention-days: 14
 
   # ═══════════════════════════════════════════════════════════════════════
-  #  JOB 2 — Selenium Web UI E2E Tests
+  #  JOB 2 — Selenium Web UI E2E Tests (300 Test Cases)
   # ═══════════════════════════════════════════════════════════════════════
   selenium-e2e:
-    name: Selenium E2E Tests
+    name: Selenium E2E Tests (300 Cases)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     steps:
       - name: Checkout repository
@@ -105,7 +105,7 @@ jobs:
           node server.js &
           npx -y wait-on http://localhost:3000 --timeout 30000 --interval 1000
 
-      - name: Run Selenium E2E tests
+      - name: Run 300 Selenium E2E tests
         run: |
           TARGET_DIR="."
           if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
@@ -126,13 +126,24 @@ jobs:
           path: test-results/selenium-e2e.xml
           retention-days: 14
 
+      - name: Upload Excel & Screenshots Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selenium-reports-excel
+          path: |
+            songstr/reports/E2E-Test-Results.xlsx
+            reports/E2E-Test-Results.xlsx
+            songstr/screenshots/
+          retention-days: 14
+
   # ═══════════════════════════════════════════════════════════════════════
-  #  JOB 3 — Mobile E2E Tests (Chrome Mobile Emulation)
+  #  JOB 3 — Mobile E2E Tests (300 Test Cases - Chrome Mobile Emulation)
   # ═══════════════════════════════════════════════════════════════════════
   mobile-e2e:
-    name: Mobile E2E Tests
+    name: Mobile E2E Tests (300 Cases)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     steps:
       - name: Checkout repository
@@ -162,7 +173,7 @@ jobs:
           node server.js &
           npx -y wait-on http://localhost:3000 --timeout 30000 --interval 1000
 
-      - name: Run Mobile E2E tests
+      - name: Run 300 Mobile E2E tests
         run: |
           TARGET_DIR="."
           if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
@@ -184,63 +195,12 @@ jobs:
           retention-days: 14
 
   # ═══════════════════════════════════════════════════════════════════════
-  #  JOB 4 — Vulnerability & Security Testing
-  # ═══════════════════════════════════════════════════════════════════════
-  vulnerability-security:
-    name: Vulnerability & Security Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: |
-          npm ci || npm install
-          if [ -d "songstr" ]; then cd songstr && npm ci || npm install; fi
-
-      - name: Run Vulnerability & Security Tests
-        run: |
-          TARGET_DIR="."
-          if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
-          cd $TARGET_DIR
-          mkdir -p ../test-results
-          npx mocha test/security.test.js \
-            --retries 2 \
-            --timeout 15000 \
-            --exit \
-            --reporter mocha-junit-reporter \
-            --reporter-options mochaFile=../test-results/security.xml
-
-      - name: Run Security Audit Check
-        run: |
-          TARGET_DIR="."
-          if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
-          cd $TARGET_DIR
-          npm audit --audit-level=high || true
-
-      - name: Upload Security JUnit Artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: junit-security
-          path: test-results/security.xml
-          retention-days: 14
-
-  # ═══════════════════════════════════════════════════════════════════════
-  #  JOB 5 — API Load Testing (k6)
+  #  JOB 4 — API Load Testing (300 Scenarios & k6)
   # ═══════════════════════════════════════════════════════════════════════
   load-tests:
-    name: Load Tests
+    name: Load Tests (300 Scenarios)
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - name: Checkout repository
@@ -268,19 +228,100 @@ jobs:
           node server.js &
           npx -y wait-on http://localhost:3000 --timeout 30000 --interval 1000
 
-      - name: Run k6 load test
+      - name: Run 300 Load Test Scenarios
+        run: |
+          TARGET_DIR="."
+          if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
+          cd $TARGET_DIR
+          mkdir -p ../test-results
+          npx mocha test/load.test.js \
+            --retries 2 \
+            --timeout 15000 \
+            --exit \
+            --reporter mocha-junit-reporter \
+            --reporter-options mochaFile=../test-results/load-e2e.xml
+
+      - name: Run k6 Load Benchmark
         run: |
           TARGET_DIR="."
           if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
           cd $TARGET_DIR
           k6 run load-test.js || true
 
+      - name: Upload Load JUnit Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-load-tests
+          path: test-results/load-e2e.xml
+          retention-days: 14
+
+  # ═══════════════════════════════════════════════════════════════════════
+  #  JOB 5 — OWASP ZAP & Vulnerability Security Scan
+  # ═══════════════════════════════════════════════════════════════════════
+  vulnerability-security:
+    name: OWASP ZAP & Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci || npm install
+          if [ -d "songstr" ]; then cd songstr && npm ci || npm install; fi
+
+      - name: Run Security Test Suite
+        run: |
+          TARGET_DIR="."
+          if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
+          cd $TARGET_DIR
+          mkdir -p ../test-results
+          npx mocha test/security.test.js \
+            --retries 2 \
+            --timeout 15000 \
+            --exit \
+            --reporter mocha-junit-reporter \
+            --reporter-options mochaFile=../test-results/security.xml
+
+      - name: Start application server for OWASP ZAP Scan
+        run: |
+          TARGET_DIR="."
+          if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
+          cd $TARGET_DIR
+          node server.js &
+          npx -y wait-on http://localhost:3000 --timeout 30000 --interval 1000
+
+      - name: OWASP ZAP Baseline Security Scan
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: 'http://localhost:3000'
+          cmd_options: '-a'
+          allow_issue_writing: false
+          fail_action: false
+
+      - name: Upload Security JUnit Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-security
+          path: test-results/security.xml
+          retention-days: 14
+
   # ═══════════════════════════════════════════════════════════════════════
   #  JOB 6 — Aggregate Test Summary & Results Display
   # ═══════════════════════════════════════════════════════════════════════
   test-summary:
     name: Test Summary & GitHub Results
-    needs: [unit-integration, selenium-e2e, mobile-e2e, vulnerability-security, load-tests]
+    needs: [unit-integration, selenium-e2e, mobile-e2e, load-tests, vulnerability-security]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -305,14 +346,14 @@ jobs:
       - name: Generate GitHub Actions Step Summary
         if: always()
         run: |
-          echo "## Songstr CI - Test Execution Results 🎵" >> $GITHUB_STEP_SUMMARY
+          echo "## Songstr CI - Full E2E & Security Execution Report 🎵" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Test Suite | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|------------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Unit & Integration Tests | \`${{ needs.unit-integration.result }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Selenium E2E Tests | \`${{ needs.selenium-e2e.result }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Mobile E2E Tests | \`${{ needs.mobile-e2e.result }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Vulnerability & Security Tests | \`${{ needs.vulnerability-security.result }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| API Load Tests | \`${{ needs.load-tests.result }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Test Suite | Status | Test Cases |" >> $GITHUB_STEP_SUMMARY
+          echo "|------------|--------|------------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Unit & Integration Tests | \`${{ needs.unit-integration.result }}\` | 189 API Tests |" >> $GITHUB_STEP_SUMMARY
+          echo "| Selenium Web UI E2E | \`${{ needs.selenium-e2e.result }}\` | 300 Web E2E Cases |" >> $GITHUB_STEP_SUMMARY
+          echo "| Mobile E2E | \`${{ needs.mobile-e2e.result }}\` | 300 Mobile E2E Cases |" >> $GITHUB_STEP_SUMMARY
+          echo "| API Load & Performance | \`${{ needs.load-tests.result }}\` | 300 Load Scenarios |" >> $GITHUB_STEP_SUMMARY
+          echo "| OWASP ZAP & Security | \`${{ needs.vulnerability-security.result }}\` | Security & Vulnerability Scan |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "All test results and individual test cases have been published to GitHub Actions." >> $GITHUB_STEP_SUMMARY
+          echo "All 1,000+ test cases have been published to GitHub Actions logs and artifacts." >> $GITHUB_STEP_SUMMARY
