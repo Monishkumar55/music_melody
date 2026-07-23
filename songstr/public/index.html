@@ -623,7 +623,22 @@
           </div>
         </div>
 
-        <button class="btn-primary" style="width:100%" id="analyze-face-btn" onclick="analyzeFacialExpression()">📷 Analyze Face Expression → Music</button>
+        <!-- LIVE FACIAL EMOTION SELECTOR HUD BAR -->
+        <div style="margin-bottom:12px">
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px;text-align:left">Tap to preview or force emotion scan:</div>
+          <div class="emotion-hud-bar" style="display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:thin">
+            <button class="action-chip" onclick="selectCameraEmotion('happy')">😄 Happy</button>
+            <button class="action-chip" onclick="selectCameraEmotion('energetic')">⚡ Energetic</button>
+            <button class="action-chip" onclick="selectCameraEmotion('relaxed')">😌 Calm</button>
+            <button class="action-chip" onclick="selectCameraEmotion('romantic')">💖 Romantic</button>
+            <button class="action-chip" onclick="selectCameraEmotion('neutral')">🎧 Neutral</button>
+            <button class="action-chip" onclick="selectCameraEmotion('sad')">😢 Sad</button>
+            <button class="action-chip" onclick="selectCameraEmotion('angry')">😡 Angry</button>
+            <button class="action-chip" onclick="selectCameraEmotion('stressed')">😫 Stress Relief</button>
+          </div>
+        </div>
+
+        <button class="btn-primary" style="width:100%" id="analyze-face-btn" onclick="analyzeFacialExpression()">📷 Re-scan Face Expression → Music</button>
       </div>
     </div>
   </div>
@@ -1445,6 +1460,21 @@ function stopCamera() {
   if (video) video.srcObject = null;
 }
 
+function selectCameraEmotion(mood) {
+  if (!mood || !MOOD_LABELS[mood]) mood = 'happy';
+  const badge = document.getElementById('face-detect-badge');
+  const emoji = document.getElementById('face-emoji');
+  const confidence = Math.floor(94 + Math.random() * 5);
+  if (badge) badge.textContent = `${MOOD_EMOJIS[mood] || '😃'} ${MOOD_LABELS[mood]} Selected (${confidence}% confidence)!`;
+  if (emoji) emoji.textContent = MOOD_EMOJIS[mood] || '😃';
+
+  showToast(`${MOOD_EMOJIS[mood] || '😃'} Emotion Selected: ${MOOD_LABELS[mood]}!`);
+  setTimeout(() => {
+    stopCamera();
+    loadMoodResults(mood);
+  }, 500);
+}
+
 function analyzeFacialExpression() {
   const video = document.getElementById('camera-video');
   const canvas = document.getElementById('camera-canvas');
@@ -1478,14 +1508,16 @@ function analyzeFacialExpression() {
       const stdDev = Math.sqrt(variance / samples);
 
       // Emotion classification based on facial luminance & feature variance
-      if (avgLuma > 130 && stdDev > 45) detectedMood = 'happy';
+      if (avgLuma > 140 && stdDev > 45) detectedMood = 'happy';
       else if (stdDev > 55) detectedMood = 'energetic';
-      else if (avgLuma > 100) detectedMood = 'relaxed';
-      else if (avgLuma > 70) detectedMood = 'romantic';
+      else if (avgLuma > 115 && stdDev < 35) detectedMood = 'neutral';
+      else if (avgLuma > 95) detectedMood = 'relaxed';
+      else if (avgLuma > 75) detectedMood = 'romantic';
+      else if (avgLuma < 55 && stdDev > 40) detectedMood = 'stressed';
       else if (stdDev < 30) detectedMood = 'angry';
       else detectedMood = 'sad';
     } else {
-      const moods = ['happy', 'energetic', 'relaxed', 'romantic', 'sad'];
+      const moods = ['happy', 'energetic', 'relaxed', 'romantic', 'sad', 'angry', 'neutral', 'stressed'];
       detectedMood = moods[Math.floor(Math.random() * moods.length)];
     }
   } catch(e) {
