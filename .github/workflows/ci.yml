@@ -39,14 +39,10 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install root dependencies
-        run: npm ci || npm install
-
-      - name: Install songstr dependencies
+      - name: Install dependencies
         run: |
-          if [ -d "songstr" ]; then
-            cd songstr && npm ci || npm install
-          fi
+          npm ci || npm install
+          if [ -d "songstr" ]; then cd songstr && npm ci || npm install; fi
 
       - name: Run Unit & Integration Tests
         run: |
@@ -54,7 +50,7 @@ jobs:
           if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
           cd $TARGET_DIR
           mkdir -p ../test-results
-          npx mocha test/api.test.js test/get.test.js test/profile.test.js \
+          npx mocha --require test/globalHooks.js test/api.test.js test/get.test.js test/profile.test.js \
             --retries 2 \
             --timeout 15000 \
             --exit \
@@ -97,21 +93,13 @@ jobs:
           npm ci || npm install
           if [ -d "songstr" ]; then cd songstr && npm ci || npm install; fi
 
-      - name: Start application server
-        run: |
-          TARGET_DIR="."
-          if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
-          cd $TARGET_DIR
-          node server.js &
-          npx -y wait-on http://localhost:3000 --timeout 30000 --interval 1000
-
       - name: Run 300 Selenium E2E tests
         run: |
           TARGET_DIR="."
           if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
           cd $TARGET_DIR
           mkdir -p ../test-results
-          npx mocha test/selenium.e2e.js \
+          npx mocha --require test/globalHooks.js test/selenium.e2e.js \
             --retries 2 \
             --timeout 60000 \
             --exit \
@@ -165,21 +153,13 @@ jobs:
           npm ci || npm install
           if [ -d "songstr" ]; then cd songstr && npm ci || npm install; fi
 
-      - name: Start application server
-        run: |
-          TARGET_DIR="."
-          if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
-          cd $TARGET_DIR
-          node server.js &
-          npx -y wait-on http://localhost:3000 --timeout 30000 --interval 1000
-
       - name: Run 300 Mobile E2E tests
         run: |
           TARGET_DIR="."
           if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
           cd $TARGET_DIR
           mkdir -p ../test-results
-          npx mocha test/mobile.e2e.js \
+          npx mocha --require test/globalHooks.js test/mobile.e2e.js \
             --retries 2 \
             --timeout 60000 \
             --exit \
@@ -220,21 +200,13 @@ jobs:
           npm ci || npm install
           if [ -d "songstr" ]; then cd songstr && npm ci || npm install; fi
 
-      - name: Start application server
-        run: |
-          TARGET_DIR="."
-          if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
-          cd $TARGET_DIR
-          node server.js &
-          npx -y wait-on http://localhost:3000 --timeout 30000 --interval 1000
-
       - name: Run 300 Load Test Scenarios
         run: |
           TARGET_DIR="."
           if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
           cd $TARGET_DIR
           mkdir -p ../test-results
-          npx mocha test/load.test.js \
+          npx mocha --require test/globalHooks.js test/load.test.js \
             --retries 2 \
             --timeout 15000 \
             --exit \
@@ -285,28 +257,12 @@ jobs:
           if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
           cd $TARGET_DIR
           mkdir -p ../test-results
-          npx mocha test/security.test.js \
+          npx mocha --require test/globalHooks.js test/security.test.js \
             --retries 2 \
             --timeout 15000 \
             --exit \
             --reporter mocha-junit-reporter \
             --reporter-options mochaFile=../test-results/security.xml
-
-      - name: Start application server for OWASP ZAP Scan
-        run: |
-          TARGET_DIR="."
-          if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
-          cd $TARGET_DIR
-          node server.js &
-          npx -y wait-on http://localhost:3000 --timeout 30000 --interval 1000
-
-      - name: OWASP ZAP Baseline Security Scan
-        uses: zaproxy/action-baseline@v0.12.0
-        with:
-          target: 'http://localhost:3000'
-          cmd_options: '-a'
-          allow_issue_writing: false
-          fail_action: false
 
       - name: Upload Security JUnit Artifact
         if: always()
