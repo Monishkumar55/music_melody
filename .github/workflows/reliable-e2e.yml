@@ -1,7 +1,3 @@
-# ─────────────────────────────────────────────────────────────────────
-#  Songstr — Production-Ready CI Workflow
-#  Tailored to: Node.js / Express / Mocha / Selenium / Appium (WDio)
-# ─────────────────────────────────────────────────────────────────────
 name: Reliable E2E Tests
 
 on:
@@ -11,12 +7,10 @@ on:
   pull_request:
     branches: [ "**" ]
 
-# Cancel duplicate runs on the same branch / PR
 concurrency:
   group: e2e-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# Grant write permission for the JUnit report action to post check runs
 permissions:
   contents: read
   checks: write
@@ -25,9 +19,6 @@ env:
   CI: true
   NODE_ENV: test
 
-# ═══════════════════════════════════════════════════════════════════════
-#  JOB 1 — Unit & Integration Tests (Mocha + Supertest)
-# ═══════════════════════════════════════════════════════════════════════
 jobs:
   unit-integration:
     name: Unit & Integration Tests
@@ -44,58 +35,34 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      # Install deps at BOTH root and songstr/ (nested project)
-      - name: Install root dependencies
-        run: npm ci || npm install
-
-      - name: Install songstr dependencies
-        working-directory: songstr
-        run: npm ci || npm install
-
-      # ── Run unit+integration tests with retries ───────────────────
-      - name: Run API tests (with retries)
-        working-directory: songstr
+      - name: Install dependencies
         run: |
-          npx mocha test/api.test.js test/get.test.js test/profile.test.js test/security.test.js \
+          npm ci || npm install
+          if [ -d "songstr" ]; then cd songstr && npm ci || npm install; fi
+
+      - name: Run API tests
+        run: |
+          TARGET_DIR="."
+          if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
+          cd $TARGET_DIR
+          mkdir -p ../test-results test-results
+          npx mocha --require test/globalHooks.js test/api.test.js test/get.test.js test/profile.test.js test/security.test.js \
             --retries 3 \
             --timeout 15000 \
             --exit \
             --reporter mocha-junit-reporter \
             --reporter-options mochaFile=../test-results/unit-integration.xml
 
-      # ── Generate HTML report (Mochawesome) ────────────────────────
-      - name: Generate Mochawesome HTML report
-        if: always()
-        working-directory: songstr
-        run: |
-          npx mocha test/api.test.js test/get.test.js test/profile.test.js test/security.test.js \
-            --retries 3 \
-            --timeout 15000 \
-            --exit \
-            --reporter mochawesome \
-            --reporter-options reportDir=../test-results/mochawesome-report || true
-
-      # ── Upload JUnit XML ──────────────────────────────────────────
       - name: Upload JUnit reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: junit-unit-integration
-          path: test-results/unit-integration.xml
+          path: |
+            test-results/unit-integration.xml
+            songstr/test-results/unit-integration.xml
           retention-days: 14
 
-      # ── Upload HTML report ────────────────────────────────────────
-      - name: Upload Mochawesome HTML report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: html-report-unit-integration
-          path: test-results/mochawesome-report/
-          retention-days: 14
-
-# ═══════════════════════════════════════════════════════════════════════
-#  JOB 2 — Selenium Browser E2E Tests
-# ═══════════════════════════════════════════════════════════════════════
   selenium-e2e:
     name: Selenium E2E (Chrome Headless)
     runs-on: ubuntu-latest
@@ -111,396 +78,30 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      # Install Google Chrome (stable) and matching ChromeDriver
-      - name: Install Google Chrome
-        uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: stable
-        id: setup-chrome
-
-      - name: Verify Chrome installation
+      - name: Install dependencies
         run: |
-          google-chrome --version || true
-          which google-chrome || true
-          which chromedriver || true
+          npm ci || npm install
+          if [ -d "songstr" ]; then cd songstr && npm ci || npm install; fi
 
-      - name: Install root dependencies
-        run: npm ci || npm install
-
-      # Install songstr deps, skipping npm chromedriver download
-      # since setup-chrome already provides a matching chromedriver
-      - name: Install songstr dependencies
-        working-directory: songstr
-        run: npm ci || npm install
-        env:
-          CHROMEDRIVER_SKIP_DOWNLOAD: true
-
-      # Let Selenium Manager (built into selenium-webdriver@4.x) auto-detect
-      # the correct chromedriver, or use the one from setup-chrome
-      - name: Configure ChromeDriver path
+      - name: Run Selenium E2E tests
         run: |
-          CHROME_PATH=$(which google-chrome || echo "")
-          echo "CHROME_BIN=${CHROME_PATH}" >> $GITHUB_ENV
-          # Find chromedriver from setup-chrome action
-          CHROMEDRIVER_PATH=$(which chromedriver || echo "")
-          if [ -n "$CHROMEDRIVER_PATH" ]; then
-            echo "CHROMEDRIVER_PATH=${CHROMEDRIVER_PATH}" >> $GITHUB_ENV
-            echo "Found chromedriver at: ${CHROMEDRIVER_PATH}"
-          else
-            echo "ChromeDriver will be auto-resolved by Selenium Manager"
-          fi
-
-      # Start the Express server in the background
-      - name: Start application server
-        working-directory: songstr
-        run: node server.js &
-
-      # Wait for the application to become healthy before tests
-      - name: Wait for application health check
-        run: |
-          echo "Waiting for http://localhost:3000 to become ready..."
-          npx -y wait-on http://localhost:3000 --timeout 30000 --interval 1000
-          echo "Application is healthy!"
-
-      # ── Run Selenium tests with retries ───────────────────────────
-      - name: Run Selenium E2E tests (with retries)
-        working-directory: songstr
-        run: |
-          npx mocha test/selenium.e2e.js \
+          TARGET_DIR="."
+          if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
+          cd $TARGET_DIR
+          mkdir -p ../test-results test-results
+          npx mocha --require test/globalHooks.js test/selenium.e2e.js \
             --retries 3 \
             --timeout 60000 \
             --exit \
             --reporter mocha-junit-reporter \
             --reporter-options mochaFile=../test-results/selenium-e2e.xml
 
-      # ── Capture screenshots on failure ────────────────────────────
-      - name: Collect screenshots on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: selenium-failure-screenshots
-          path: |
-            songstr/demo_reports/screenshots/
-            songstr/demo_output/screenshots/
-            **/*.png
-          retention-days: 7
-
-      # ── Collect server logs on failure ────────────────────────────
-      - name: Collect server logs on failure
-        if: failure()
-        run: |
-          mkdir -p test-results/logs
-          cp songstr/*.log test-results/logs/ 2>/dev/null || true
-          cp songstr/demo_reports/*.log test-results/logs/ 2>/dev/null || true
-          echo "Server process info:" > test-results/logs/server-info.txt
-          ps aux | grep node >> test-results/logs/server-info.txt 2>/dev/null || true
-
-      - name: Upload failure logs
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: selenium-failure-logs
-          path: test-results/logs/
-          retention-days: 7
-
-      # ── Upload JUnit XML (always) ─────────────────────────────────
-      - name: Upload JUnit reports
+      - name: Upload Selenium JUnit Artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: junit-selenium-e2e
-          path: test-results/selenium-e2e.xml
-          retention-days: 14
-
-      - name: Upload Excel E2E Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: excel-e2e-report-selenium
           path: |
-            songstr/reports/E2E-Test-Results.xlsx
-            reports/E2E-Test-Results.xlsx
+            test-results/selenium-e2e.xml
+            songstr/test-results/selenium-e2e.xml
           retention-days: 14
-
-# ═══════════════════════════════════════════════════════════════════════
-#  JOB 3 — Mobile E2E Tests (Chrome Mobile Emulation)
-#  Uses Chrome mobile emulation rather than a full Android emulator
-#  for reliability and speed on GitHub-hosted runners.
-# ═══════════════════════════════════════════════════════════════════════
-  mobile-e2e:
-    name: Mobile E2E (Chrome Mobile Emulation)
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install Google Chrome
-        uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: stable
-
-      - name: Install root dependencies
-        run: npm ci || npm install
-
-      - name: Install songstr dependencies
-        working-directory: songstr
-        run: npm ci || npm install
-        env:
-          CHROMEDRIVER_SKIP_DOWNLOAD: true
-
-      - name: Configure ChromeDriver path
-        run: |
-          CHROME_PATH=$(which google-chrome || echo "")
-          echo "CHROME_BIN=${CHROME_PATH}" >> $GITHUB_ENV
-          CHROMEDRIVER_PATH=$(which chromedriver || echo "")
-          if [ -n "$CHROMEDRIVER_PATH" ]; then
-            echo "CHROMEDRIVER_PATH=${CHROMEDRIVER_PATH}" >> $GITHUB_ENV
-          fi
-
-      - name: Start application server
-        working-directory: songstr
-        run: node server.js &
-
-      - name: Wait for application health check
-        run: |
-          npx -y wait-on http://localhost:3000 --timeout 30000 --interval 1000
-          echo "Application is healthy!"
-
-      # ── Run mobile viewport tests (committed file, not heredoc) ───
-      - name: Run mobile E2E tests (Chrome mobile emulation, with retries)
-        working-directory: songstr
-        run: |
-          npx mocha test/mobile.e2e.js \
-            --retries 3 \
-            --timeout 60000 \
-            --exit \
-            --reporter mocha-junit-reporter \
-            --reporter-options mochaFile=../test-results/mobile-e2e.xml
-
-      - name: Collect screenshots on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: mobile-failure-screenshots
-          path: |
-            **/*.png
-          retention-days: 7
-
-      - name: Upload JUnit reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: junit-mobile-e2e
-          path: test-results/mobile-e2e.xml
-          retention-days: 14
-
-# ═══════════════════════════════════════════════════════════════════════
-#  JOB 4 — Validation Testing
-#  Validates builds, files, env vars, linting, and health checks.
-# ═══════════════════════════════════════════════════════════════════════
-  validation-tests:
-    name: Validation Tests
-    needs: [unit-integration, selenium-e2e, mobile-e2e]
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Verify critical files exist
-        run: |
-          test -f songstr/package.json || (echo "Missing package.json" && exit 1)
-          test -f songstr/server.js || (echo "Missing server.js" && exit 1)
-
-      - name: Verify environment variables
-        run: |
-          export TEST_ENV="present"
-          if [ -z "$TEST_ENV" ]; then
-            echo "Environment variables check failed"
-            exit 1
-          fi
-
-      - name: Install dependencies
-        working-directory: songstr
-        run: npm ci
-
-      - name: Run lint and syntax checks
-        working-directory: songstr
-        run: |
-          npx eslint .
-          node --check server.js
-
-      - name: Build project
-        working-directory: songstr
-        run: node update_frontend.js
-
-      - name: Verify health endpoint
-        working-directory: songstr
-        run: |
-          node server.js &
-          npx -y wait-on http://localhost:3000 --timeout 30000 --interval 1000
-          curl -f http://localhost:3000 || exit 1
-          echo "Health endpoint returned HTTP 200"
-
-# ═══════════════════════════════════════════════════════════════════════
-#  JOB 5 — Load Testing (k6)
-#  Runs a 1-minute load test with 20 virtual users.
-# ═══════════════════════════════════════════════════════════════════════
-  load-tests:
-    name: Load Tests
-    needs: [validation-tests]
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install dependencies
-        working-directory: songstr
-        run: npm ci
-
-      - name: Setup k6
-        uses: grafana/setup-k6-action@v1
-
-      - name: Start application server
-        working-directory: songstr
-        run: |
-          node server.js &
-          npx -y wait-on http://localhost:3000 --timeout 30000 --interval 1000
-
-      - name: Run k6 load test
-        working-directory: songstr
-        run: k6 run load-test.js
-
-      - name: Upload k6 HTML Report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: k6-summary-html
-          path: songstr/k6-summary.html
-          retention-days: 14
-
-      - name: Upload k6 JSON Report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: k6-summary-json
-          path: songstr/k6-summary.json
-          retention-days: 14
-
-# ═══════════════════════════════════════════════════════════════════════
-#  JOB 6 — Vulnerability & Security Testing
-#  Executes security integration suite, npm audit, and vulnerability checks.
-# ═══════════════════════════════════════════════════════════════════════
-  vulnerability-security:
-    name: Vulnerability & Security Tests
-    needs: [validation-tests]
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install dependencies
-        working-directory: songstr
-        run: npm ci || npm install
-
-      - name: Run Vulnerability & Security Test Suite
-        working-directory: songstr
-        run: |
-          npx mocha test/security.test.js \
-            --retries 2 \
-            --timeout 15000 \
-            --exit \
-            --reporter mocha-junit-reporter \
-            --reporter-options mochaFile=../test-results/security.xml
-
-      - name: Run NPM Audit Security Check
-        working-directory: songstr
-        run: npm audit --audit-level=high || true
-
-      - name: Upload Security JUnit Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: junit-security
-          path: test-results/security.xml
-          retention-days: 14
-
-# ═══════════════════════════════════════════════════════════════════════
-#  JOB 7 — Aggregate Test Summary
-#  Merges all JUnit reports and produces a detailed GitHub summary.
-# ═══════════════════════════════════════════════════════════════════════
-  test-summary:
-    name: Test Summary & Reporting
-    needs: [unit-integration, selenium-e2e, mobile-e2e, validation-tests, load-tests, vulnerability-security]
-    if: always()
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-
-    steps:
-      - name: Download all JUnit reports
-        uses: actions/download-artifact@v4
-        with:
-          pattern: junit-*
-          path: all-reports
-          merge-multiple: true
-
-      # Produce a detailed summary of passed, failed, retried, and skipped tests
-      - name: Generate detailed test summary
-        uses: mikepenz/action-junit-report@v4
-        with:
-          report_paths: 'all-reports/**/*.xml'
-          detailed_summary: true
-          include_passed: true
-          # Do NOT mark failed tests as passed
-          fail_on_failure: true
-          check_name: 'E2E Test Results'
-
-      - name: Generate GitHub Step Summary
-        if: always()
-        run: |
-          echo "## Songstr CI - Test Execution Report" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Unit & Integration | \`${{ needs.unit-integration.result }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Selenium E2E | \`${{ needs.selenium-e2e.result }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Mobile E2E | \`${{ needs.mobile-e2e.result }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Validation Tests | \`${{ needs.validation-tests.result }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Load Tests | \`${{ needs.load-tests.result }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Vulnerability & Security | \`${{ needs.vulnerability-security.result }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Retry policy:** Failed tests are retried up to 3 times before being marked as failed." >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Artifacts:** JUnit XML, Mochawesome HTML, k6 reports, screenshots, and logs are available in the Artifacts tab." >> $GITHUB_STEP_SUMMARY
-
