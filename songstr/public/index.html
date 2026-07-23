@@ -1024,7 +1024,10 @@ function switchTab(name) {
   }
 }
 
+let cameraTimer = null;
+
 async function startCamera() {
+  stopCamera();
   const video = document.getElementById('camera-video');
   const status = document.getElementById('camera-status-text');
   const badge = document.getElementById('face-detect-badge');
@@ -1039,17 +1042,26 @@ async function startCamera() {
         video.srcObject = mediaStream;
         await video.play();
       }
-      if (status) status.textContent = '📷 Live Camera Active! Tap analyze to evaluate your facial expression.';
+      if (status) status.textContent = '📷 Live Camera Active! Automatically analyzing your face expression...';
     } else {
       throw new Error('Webcam API not supported');
     }
   } catch(err) {
     console.warn('Camera stream warning:', err);
-    if (status) status.textContent = '📷 Camera preview active (Interactive Facial Scan Mode).';
+    if (status) status.textContent = '📷 Camera preview active (Automatic Facial Scan Mode).';
   }
+
+  // AUTOMATIC FACIAL ANALYSIS TRIGGER
+  cameraTimer = setTimeout(() => {
+    analyzeFacialExpression();
+  }, 1500);
 }
 
 function stopCamera() {
+  if (cameraTimer) {
+    clearTimeout(cameraTimer);
+    cameraTimer = null;
+  }
   if (mediaStream) {
     mediaStream.getTracks().forEach(t => t.stop());
     mediaStream = null;
