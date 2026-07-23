@@ -654,8 +654,23 @@
 
       <!-- Face Panel with Live Camera & Automatic Expression Analysis -->
       <div class="detect-panel" id="panel-face" style="display:none">
-        <p style="font-size:14px;color:var(--text2);margin-bottom:16px" id="camera-status-text">Align your face in camera to analyze expression</p>
+        <p style="font-size:14px;color:var(--text2);margin-bottom:12px" id="camera-status-text">Align your face in camera to analyze expression</p>
         
+        <!-- EMOTION CALIBRATOR SELECTOR -->
+        <div style="margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px">
+          <label style="font-size:12px;font-weight:700;color:var(--text2)">Target Emotion Calibrator:</label>
+          <select id="camera-emotion-select" class="search-bar" style="border-radius:10px;padding:6px 12px;background:rgba(0,0,0,0.6);color:#fff;font-size:13px" onchange="selectCameraEmotion(this.value)">
+            <option value="happy">😄 Happy Vibes</option>
+            <option value="energetic">⚡ Energetic Beats</option>
+            <option value="relaxed">😌 Calm & Relaxed</option>
+            <option value="romantic">💖 Romantic Romance</option>
+            <option value="neutral">🎧 Everyday Neutral</option>
+            <option value="sad">😢 Soulful Sad</option>
+            <option value="angry">😡 High Energy Angry</option>
+            <option value="stressed">😫 Stress Relief</option>
+          </select>
+        </div>
+
         <div class="camera-container" id="camera-box">
           <video id="camera-video" class="camera-video" autoplay muted playsinline></video>
           <canvas id="camera-canvas" style="display:none"></canvas>
@@ -668,7 +683,7 @@
 
         <!-- LIVE FACIAL EMOTION SELECTOR HUD BAR -->
         <div style="margin-bottom:12px">
-          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px;text-align:left">Tap to preview or force emotion scan:</div>
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px;text-align:left">Tap to lock face emotion:</div>
           <div class="emotion-hud-bar" style="display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:thin">
             <button class="action-chip" onclick="selectCameraEmotion('happy')">😄 Happy</button>
             <button class="action-chip" onclick="selectCameraEmotion('energetic')">⚡ Energetic</button>
