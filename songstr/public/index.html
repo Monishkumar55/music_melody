@@ -55,7 +55,7 @@
     .screen { display: none; flex-direction: column; min-height: 100vh; width: 100%; max-width: 1200px; margin: 0 auto; }
     .screen.active { display: flex; }
 
-    /* =========== NAVBAR =========== */
+    /* =========== NAVBAR & USER PROFILE HEADER =========== */
     nav {
       position: sticky; top: 0; z-index: 100;
       background: rgba(9, 9, 14, 0.9);
@@ -84,13 +84,23 @@
     }
     .nav-btn:hover { background: rgba(255,255,255,0.12); color: var(--text); }
     .nav-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .nav-icon-btn {
-      background: var(--glass); color: var(--text2); font-size: 16px;
-      width: 38px; height: 38px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      transition: all 0.2s; border: 1px solid var(--glass-border);
+    .nav-btn.logout-btn {
+      background: rgba(248, 113, 113, 0.15); border-color: rgba(248, 113, 113, 0.3);
+      color: var(--red); font-weight: 700;
     }
-    .nav-icon-btn:hover { color: var(--text); background: rgba(255,255,255,0.12); }
+    .nav-btn.logout-btn:hover { background: rgba(248, 113, 113, 0.25); color: #fff; }
+
+    .user-nav-badge {
+      display: flex; align-items: center; gap: 8px; background: var(--card);
+      border: 1px solid var(--glass-border); padding: 6px 14px; border-radius: 30px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .user-nav-badge:hover { background: var(--card-hover); border-color: var(--accent); }
+    .user-nav-badge .u-avatar {
+      width: 26px; height: 26px; border-radius: 50%; background: var(--accent);
+      display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700;
+    }
+    .user-nav-badge .u-name { font-size: 13px; font-weight: 700; color: var(--text); max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     /* =========== HERO & HOME =========== */
     .hero { padding: 40px 24px; text-align: center; }
@@ -308,6 +318,25 @@
     .pwd-strength-bar { height: 4px; border-radius: 4px; background: rgba(255,255,255,0.1); margin-top: 6px; overflow: hidden; }
     .pwd-strength-fill { height: 100%; width: 0%; transition: all 0.3s; }
 
+    /* =========== PROFILE DETAILS STYLING =========== */
+    .profile-card-header {
+      background: var(--card); border: 1px solid var(--glass-border); border-radius: var(--radius);
+      padding: 28px; text-align: center; margin-bottom: 20px; box-shadow: var(--shadow);
+    }
+    .profile-avatar-big {
+      width: 84px; height: 84px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #a855f7);
+      margin: 0 auto 14px; display: flex; align-items: center; justify-content: center; font-size: 40px;
+      box-shadow: 0 8px 24px rgba(99,102,241,0.4); border: 3px solid rgba(255,255,255,0.1);
+    }
+    .profile-info-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px;
+    }
+    .profile-info-item {
+      background: var(--card); border: 1px solid var(--glass-border); padding: 16px; border-radius: var(--radius-sm);
+    }
+    .profile-info-item .lbl { font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; margin-bottom: 4px; }
+    .profile-info-item .val { font-size: 15px; font-weight: 700; color: var(--text); }
+
     /* =========== BOTTOM AUDIO PLAYER BAR (FIXED) =========== */
     .bottom-player-bar {
       position: fixed; bottom: 65px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 800px; z-index: 99;
@@ -370,24 +399,24 @@
       <div style="text-align:center;margin-bottom:28px">
         <div style="width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,var(--accent),#a855f7);margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 8px 24px rgba(99,102,241,0.4)">🎵</div>
         <h2 style="font-size:28px;font-weight:900;letter-spacing:-0.5px">Sign In to Songstr</h2>
-        <p style="font-size:14px;color:var(--text2);margin-top:4px">Welcome back! Please enter your credentials to continue.</p>
+        <p style="font-size:14px;color:var(--text2);margin-top:4px">Welcome back! Enter your username or email address.</p>
       </div>
 
       <form id="login-form" onsubmit="handleLogin(event)" style="background:var(--card);border:1px solid var(--glass-border);padding:28px;border-radius:var(--radius);box-shadow:var(--shadow)">
         <div class="auth-input-group">
-          <label class="auth-label">Username or Email</label>
-          <input type="text" id="login-username" name="username" class="auth-input" required placeholder="Enter your username or email" />
+          <label class="auth-label">Username or Email Address</label>
+          <input type="text" id="login-username" name="username" class="auth-input" required placeholder="Enter username or email" />
         </div>
         
         <div class="auth-input-group">
           <label class="auth-label">Password</label>
-          <input type="password" id="login-password" name="password" class="auth-input" required placeholder="Enter your password" />
+          <input type="password" id="login-password" name="password" class="auth-input" required placeholder="Enter password" />
           <button type="button" class="pass-toggle-btn" onclick="togglePassVisibility('login-password', this)">👁️</button>
         </div>
 
         <div class="auth-row-between">
           <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-            <input type="checkbox" id="login-remember" style="accent-color:var(--accent)" /> Remember me
+            <input type="checkbox" id="login-remember" style="accent-color:var(--accent)" checked /> Remember me
           </label>
           <a href="#" onclick="showScreen('forgot-password');return false" style="color:var(--accent-light);font-weight:700">Forgot Password?</a>
         </div>
@@ -422,19 +451,19 @@
       <form id="register-form" onsubmit="handleRegister(event)" style="background:var(--card);border:1px solid var(--glass-border);padding:24px;border-radius:var(--radius);box-shadow:var(--shadow)">
         <div class="auth-input-group">
           <label class="auth-label">Full Name</label>
-          <input type="text" name="fullname" class="auth-input" required placeholder="John Doe" />
+          <input type="text" name="fullname" class="auth-input" required placeholder="Full Name (e.g. Dilli Lokesh)" />
         </div>
         <div class="auth-input-group">
           <label class="auth-label">Username</label>
-          <input type="text" name="username" class="auth-input" required placeholder="johndoe" />
+          <input type="text" name="username" class="auth-input" required placeholder="Choose a username" />
         </div>
         <div class="auth-input-group">
           <label class="auth-label">Email Address</label>
-          <input type="email" name="email" class="auth-input" required placeholder="john@example.com" />
+          <input type="email" name="email" class="auth-input" required placeholder="name@domain.com" />
         </div>
         <div class="auth-input-group">
           <label class="auth-label">Password</label>
-          <input type="password" id="reg-password" name="password" class="auth-input" oninput="checkPassStrength(this.value)" required placeholder="At least 8 characters" />
+          <input type="password" id="reg-password" name="password" class="auth-input" oninput="checkPassStrength(this.value)" required placeholder="Enter password (min 4 chars)" />
           <button type="button" class="pass-toggle-btn" onclick="togglePassVisibility('reg-password', this)">👁️</button>
           <div class="pwd-strength-bar"><div class="pwd-strength-fill" id="pwd-strength-fill"></div></div>
         </div>
@@ -444,7 +473,7 @@
         </div>
         <div style="margin-bottom:20px">
           <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);cursor:pointer">
-            <input type="checkbox" required style="accent-color:var(--accent)" /> I agree to Terms of Service & Privacy Policy
+            <input type="checkbox" required style="accent-color:var(--accent)" checked /> I agree to Terms of Service & Privacy Policy
           </label>
         </div>
         <button type="submit" class="btn-primary" style="width:100%;justify-content:center">Create Account (Sign Up) →</button>
@@ -472,7 +501,7 @@
       <div style="text-align:center;margin-bottom:24px">
         <div style="font-size:40px;margin-bottom:8px">🔐</div>
         <h2 style="font-size:26px;font-weight:900">Reset Your Password</h2>
-        <p style="font-size:13px;color:var(--text2);margin-top:4px">Enter your registered email address to receive a 6-digit OTP code.</p>
+        <p style="font-size:13px;color:var(--text2);margin-top:4px">Enter your registered email address to receive an OTP code.</p>
       </div>
 
       <!-- Step 1: Send OTP -->
@@ -510,9 +539,13 @@
         <div class="logo-icon">🎵</div>
         <span>Song<span class="str">str</span></span>
       </div>
-      <div class="nav-actions">
+      <div class="nav-actions" id="nav-actions-home">
         <button class="nav-btn" onclick="showScreen('browse')">Browse</button>
-        <button class="nav-icon-btn" id="user-profile-btn" onclick="showScreen('profile')" title="Profile">👤</button>
+        <div class="user-nav-badge" onclick="showScreen('profile')" title="View Profile">
+          <span class="u-avatar">👤</span>
+          <span class="u-name" id="user-badge-name">User</span>
+        </div>
+        <button class="nav-btn logout-btn" onclick="handleLogout()" title="Logout">🚪 Logout</button>
       </div>
     </nav>
 
@@ -545,6 +578,11 @@
         <span>Song<span class="str">str</span></span>
       </div>
       <div class="nav-actions">
+        <div class="user-nav-badge" onclick="showScreen('profile')">
+          <span class="u-avatar">👤</span>
+          <span class="u-name" id="user-badge-name-detect">User</span>
+        </div>
+        <button class="nav-btn logout-btn" onclick="handleLogout()">🚪 Logout</button>
         <button class="nav-btn" onclick="showScreen('home')">← Back</button>
       </div>
     </nav>
@@ -598,6 +636,11 @@
         <span>Song<span class="str">str</span></span>
       </div>
       <div class="nav-actions">
+        <div class="user-nav-badge" onclick="showScreen('profile')">
+          <span class="u-avatar">👤</span>
+          <span class="u-name" id="user-badge-name-results">User</span>
+        </div>
+        <button class="nav-btn logout-btn" onclick="handleLogout()">🚪 Logout</button>
         <button class="nav-btn" onclick="showScreen('detect')">← Back</button>
       </div>
     </nav>
@@ -641,6 +684,11 @@
         <span>Song<span class="str">str</span></span>
       </div>
       <div class="nav-actions">
+        <div class="user-nav-badge" onclick="showScreen('profile')">
+          <span class="u-avatar">👤</span>
+          <span class="u-name" id="user-badge-name-browse">User</span>
+        </div>
+        <button class="nav-btn logout-btn" onclick="handleLogout()">🚪 Logout</button>
         <button class="nav-btn" onclick="showScreen('search')">🔍 Search</button>
       </div>
     </nav>
@@ -661,6 +709,13 @@
         <div class="logo-icon">🎵</div>
         <span>Song<span class="str">str</span></span>
       </div>
+      <div class="nav-actions">
+        <div class="user-nav-badge" onclick="showScreen('profile')">
+          <span class="u-avatar">👤</span>
+          <span class="u-name" id="user-badge-name-fav">User</span>
+        </div>
+        <button class="nav-btn logout-btn" onclick="handleLogout()">🚪 Logout</button>
+      </div>
     </nav>
 
     <div style="padding:24px">
@@ -680,6 +735,11 @@
         <span>Song<span class="str">str</span></span>
       </div>
       <div class="nav-actions">
+        <div class="user-nav-badge" onclick="showScreen('profile')">
+          <span class="u-avatar">👤</span>
+          <span class="u-name" id="user-badge-name-search">User</span>
+        </div>
+        <button class="nav-btn logout-btn" onclick="handleLogout()">🚪 Logout</button>
         <button class="nav-btn" onclick="showScreen('home')">✕ Close</button>
       </div>
     </nav>
@@ -699,7 +759,7 @@
     </div>
   </div>
 
-  <!-- ==================== SCREEN 10: PROFILE ==================== -->
+  <!-- ==================== SCREEN 10: USER PROFILE & DETAILS ==================== -->
   <div class="screen" id="screen-profile">
     <nav>
       <div class="nav-logo" onclick="showScreen('home')">
@@ -707,18 +767,40 @@
         <span>Song<span class="str">str</span></span>
       </div>
       <div class="nav-actions">
-        <button class="nav-btn" onclick="handleLogout()">Logout</button>
+        <button class="nav-btn logout-btn" onclick="handleLogout()">🚪 Logout</button>
+        <button class="nav-btn" onclick="showScreen('home')">← Back to App</button>
       </div>
     </nav>
 
-    <div style="padding:24px; max-width:600px; margin:0 auto; width:100%">
-      <div style="text-align:center;margin-bottom:24px">
-        <div style="width:80px;height:80px;border-radius:50%;background:var(--accent);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:36px">👤</div>
-        <h2 style="font-size:22px;font-weight:800" id="prof-fullname">User Profile</h2>
-        <p style="font-size:13px;color:var(--text2)" id="prof-email">user@songstr.app</p>
+    <div style="padding:24px; max-width:640px; margin:0 auto; width:100%">
+      <div class="profile-card-header">
+        <div class="profile-avatar-big" id="prof-avatar">👤</div>
+        <h2 style="font-size:24px;font-weight:900;margin-bottom:4px" id="prof-fullname">Logged In User</h2>
+        <p style="font-size:14px;color:var(--accent-light);font-weight:700" id="prof-username">@username</p>
+        <p style="font-size:13px;color:var(--text2);margin-top:2px" id="prof-email">user@domain.com</p>
       </div>
 
-      <form id="form-edit-profile" style="background:var(--card);border:1px solid var(--glass-border);padding:24px;border-radius:var(--radius)">
+      <div class="profile-info-grid">
+        <div class="profile-info-item">
+          <div class="lbl">Full Name</div>
+          <div class="val" id="prof-val-fullname">Dilli Lokesh</div>
+        </div>
+        <div class="profile-info-item">
+          <div class="lbl">Username</div>
+          <div class="val" id="prof-val-username">dillilokesh</div>
+        </div>
+        <div class="profile-info-item">
+          <div class="lbl">Account Email</div>
+          <div class="val" id="prof-val-email">dillilokeshlokesh14@gmail.com</div>
+        </div>
+        <div class="profile-info-item">
+          <div class="lbl">Saved Favorites</div>
+          <div class="val" id="prof-val-favs">0 Songs</div>
+        </div>
+      </div>
+
+      <form id="form-edit-profile" style="background:var(--card);border:1px solid var(--glass-border);padding:24px;border-radius:var(--radius);margin-bottom:20px">
+        <h3 style="font-size:16px;font-weight:800;margin-bottom:14px">App Preferences</h3>
         <div style="margin-bottom:14px">
           <label style="display:block;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:4px">Language Preference</label>
           <select id="settings-lang" class="search-bar" style="width:100%;border-radius:10px;padding:10px 14px;background:rgba(0,0,0,0.5);color:var(--text)">
@@ -729,16 +811,10 @@
             <option value="ml">Malayalam</option>
           </select>
         </div>
-        <div style="margin-bottom:14px">
-          <label style="display:block;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:4px">Theme Mode</label>
-          <select id="settings-theme" class="search-bar" style="width:100%;border-radius:10px;padding:10px 14px;background:rgba(0,0,0,0.5);color:var(--text)">
-            <option value="dark">Dark Mode</option>
-            <option value="light">Light Mode</option>
-            <option value="system">System Default</option>
-          </select>
-        </div>
         <button type="button" class="btn-primary" style="width:100%;justify-content:center" onclick="showToast('Profile preferences saved!')">Save Preferences</button>
       </form>
+
+      <button class="btn-primary" style="width:100%;justify-content:center;background:linear-gradient(135deg,#ef4444,#dc2626);padding:14px;box-shadow:0 4px 20px rgba(239,68,68,0.4)" onclick="handleLogout()">🚪 Log Out of Songstr Account</button>
     </div>
   </div>
 
@@ -865,6 +941,7 @@ try {
 // Initial App Launch Routing Guard
 document.addEventListener('DOMContentLoaded', () => {
   if (currentUser) {
+    updateNavUserUI();
     showScreen('home');
   } else {
     showScreen('login');
@@ -872,8 +949,37 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================================
-// NAVIGATION & SCREEN SWITCHING
+// NAVIGATION & USER UI UPDATES
 // ============================================================
+function updateNavUserUI() {
+  if (!currentUser) return;
+  const name = currentUser.fullname || currentUser.username || 'User';
+  const uname = currentUser.username ? `@${currentUser.username}` : '';
+  const email = currentUser.email || '';
+
+  const ids = ['user-badge-name', 'user-badge-name-detect', 'user-badge-name-results', 'user-badge-name-browse', 'user-badge-name-fav', 'user-badge-name-search'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = name;
+  });
+
+  const pName = document.getElementById('prof-fullname');
+  if (pName) pName.textContent = name;
+  const pUname = document.getElementById('prof-username');
+  if (pUname) pUname.textContent = uname;
+  const pEmail = document.getElementById('prof-email');
+  if (pEmail) pEmail.textContent = email;
+
+  const vName = document.getElementById('prof-val-fullname');
+  if (vName) vName.textContent = name;
+  const vUname = document.getElementById('prof-val-username');
+  if (vUname) vUname.textContent = currentUser.username || 'user';
+  const vEmail = document.getElementById('prof-val-email');
+  if (vEmail) vEmail.textContent = email;
+  const vFavs = document.getElementById('prof-val-favs');
+  if (vFavs) vFavs.textContent = `${favorites.length} Saved Songs`;
+}
+
 function showScreen(name) {
   const authScreens = ['login', 'register', 'forgot-password'];
   const isAuthScreen = authScreens.includes(name);
@@ -901,6 +1007,7 @@ function showScreen(name) {
   if (name === 'favorites') renderFavorites();
   if (name === 'browse') renderMoodGrid();
   if (name === 'results') buildLangFilter(currentMood);
+  if (name === 'profile') updateNavUserUI();
 }
 
 function togglePassVisibility(inputId, btn) {
@@ -919,9 +1026,9 @@ function checkPassStrength(val) {
   const fill = document.getElementById('pwd-strength-fill');
   if (!fill) return;
   let score = 0;
+  if (val.length >= 4) score += 33;
   if (val.length >= 6) score += 33;
-  if (val.length >= 8 && /[A-Z]/.test(val)) score += 33;
-  if (/[0-9]/.test(val) && /[^A-Za-z0-9]/.test(val)) score += 34;
+  if (val.length >= 8) score += 34;
 
   fill.style.width = score + '%';
   if (score <= 33) fill.style.background = 'var(--red)';
@@ -948,6 +1055,7 @@ async function handleLogin(e) {
     if (data.success && data.user) {
       currentUser = data.user;
       try { localStorage.setItem('songstr_user', JSON.stringify(currentUser)); } catch(e) {}
+      updateNavUserUI();
       showToast(`Welcome back, ${data.user.fullname || data.user.username}! 🎉`);
       showScreen('home');
     } else {
@@ -984,6 +1092,7 @@ async function handleRegister(e) {
     if (data.success && data.user) {
       currentUser = data.user;
       try { localStorage.setItem('songstr_user', JSON.stringify(currentUser)); } catch(e) {}
+      updateNavUserUI();
       showToast('Registration successful! Welcome to Songstr 🎉');
       showScreen('home');
     } else {
@@ -1056,7 +1165,7 @@ async function handleLogout() {
   await fetch('/api/auth/logout', { method: 'POST' });
   currentUser = null;
   try { localStorage.removeItem('songstr_user'); } catch(e) {}
-  showToast('Logged out');
+  showToast('Logged out of Songstr');
   showScreen('login');
 }
 

@@ -670,24 +670,15 @@ app.get('/api/search', (req, res) => {
 // ============================================================
 app.post('/api/auth/register', (req, res) => {
   const { username, email, fullname, phone, password } = req.body;
-  if (!username || !email || !fullname || !password || username.length < 3 || password.length < 8) {
-    return res.status(400).json({ error: 'All required fields must be filled and meet length requirements' });
-  }
-
-  // Password complexity check
-  const hasUpperCase = /[A-Z]/.test(password);
-  const hasLowerCase = /[a-z]/.test(password);
-  const hasNumbers = /\d/.test(password);
-  const hasNonalphas = /\W/.test(password);
-  if (!(hasUpperCase && hasLowerCase && hasNumbers && hasNonalphas)) {
-    return res.status(400).json({ error: 'Password must contain uppercase, lowercase, number, and special character' });
+  if (!username || !email || !fullname || !password || username.length < 3 || password.length < 4) {
+    return res.status(400).json({ error: 'Please fill out all required fields (password min 4 chars)' });
   }
 
   try {
     const stmt = db.prepare('SELECT id FROM users WHERE username = ? OR email = ?');
     const existing = stmt.get(username, email);
     if (existing) {
-      return res.status(400).json({ error: 'Username or email already exists' });
+      return res.status(400).json({ error: 'Username or email already registered' });
     }
 
     const salt = bcrypt.genSaltSync(10);
@@ -695,9 +686,10 @@ app.post('/api/auth/register', (req, res) => {
     const insert = db.prepare('INSERT INTO users (username, email, fullname, phone, password_hash) VALUES (?, ?, ?, ?, ?)');
     const info = insert.run(username, email, fullname, phone || null, hash);
 
-    const token = jwt.sign({ id: info.lastInsertRowid, username, email, fullname, role: 'user' }, JWT_SECRET, { expiresIn: '7d' });
+    const userObj = { id: info.lastInsertRowid, username, email, fullname, role: 'user' };
+    const token = jwt.sign(userObj, JWT_SECRET, { expiresIn: '7d' });
     res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
-    res.json({ success: true, user: { id: info.lastInsertRowid, username, email, fullname, role: 'user' } });
+    res.json({ success: true, user: userObj });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
@@ -706,19 +698,25 @@ app.post('/api/auth/register', (req, res) => {
 
 app.post('/api/auth/login', (req, res) => {
   const { username, password } = req.body;
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Please enter username/email and password' });
+  }
+
   try {
-    const stmt = db.prepare('SELECT id, username, email, fullname, role, password_hash FROM users WHERE username = ?');
-    const user = stmt.get(username);
-    if (!user) return res.status(400).json({ error: 'Invalid username or password.' });
+    // Support login by EITHER username OR email
+    const stmt = db.prepare('SELECT id, username, email, fullname, role, password_hash FROM users WHERE username = ? OR email = ?');
+    const user = stmt.get(username.trim(), username.trim());
+    if (!user) return res.status(400).json({ error: 'Account not found. Please check username/email or Sign Up.' });
 
     const match = bcrypt.compareSync(password, user.password_hash);
-    if (!match) return res.status(400).json({ error: 'Invalid username or password.' });
+    if (!match) return res.status(400).json({ error: 'Incorrect password. Please try again or click Forgot Password.' });
 
     db.prepare('UPDATE users SET lastLogin = CURRENT_TIMESTAMP WHERE id = ?').run(user.id);
 
-    const token = jwt.sign({ id: user.id, username: user.username, email: user.email, fullname: user.fullname, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+    const userObj = { id: user.id, username: user.username, email: user.email, fullname: user.fullname, role: user.role };
+    const token = jwt.sign(userObj, JWT_SECRET, { expiresIn: '7d' });
     res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
-    res.json({ success: true, user: { id: user.id, username: user.username, email: user.email, fullname: user.fullname, role: user.role } });
+    res.json({ success: true, user: userObj });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
