@@ -210,6 +210,7 @@
       padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; transition: all 0.2s;
     }
     .action-chip:hover { background: rgba(255,255,255,0.12); }
+    .action-chip.add-btn { background: var(--accent); border-color: var(--accent); color: #fff; }
 
     /* LANGUAGE FILTER PILLS - SCROLLABLE & ALWAYS SHOW ALL */
     .lang-filter {
@@ -278,6 +279,18 @@
     }
     .search-bar input { background: none; color: var(--text); font-size: 15px; width: 100%; }
 
+    /* =========== MODAL =========== */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+      z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+      background: var(--bg2); border: 1px solid var(--glass-border); border-radius: var(--radius);
+      padding: 24px; width: 100%; max-width: 480px; box-shadow: var(--shadow);
+    }
+    .modal-title { font-size: 20px; font-weight: 800; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+
     /* =========== BOTTOM AUDIO PLAYER BAR (FIXED) =========== */
     .bottom-player-bar {
       position: fixed; bottom: 65px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 800px; z-index: 99;
@@ -305,7 +318,7 @@
     .toast {
       position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
       background: var(--card-solid); border: 1px solid var(--glass-border); color: var(--text);
-      padding: 12px 24px; border-radius: 50px; font-size: 14px; font-weight: 600; z-index: 2000;
+      padding: 12px 24px; border-radius: 50px; font-size: 14px; font-weight: 600; z-index: 2500;
       box-shadow: var(--shadow); transition: transform 0.3s ease; opacity: 0; pointer-events: none;
     }
     .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
@@ -439,6 +452,7 @@
       <div class="playlist-header">
         <h3 style="font-size:18px;font-weight:800">Recommended Tracks</h3>
         <div style="display:flex;gap:8px">
+          <button class="action-chip add-btn" onclick="openAddSongModal()">➕ Add / Insert Song</button>
           <button class="action-chip" onclick="openShareModal()">🔗 Share Vibe</button>
           <button class="action-chip" onclick="refreshSongs()">↻ Refresh</button>
         </div>
@@ -645,6 +659,53 @@
 
 </div>
 
+<!-- ==================== ADD / UPLOAD SONG MODAL ==================== -->
+<div class="modal-overlay" id="add-song-modal">
+  <div class="modal-box">
+    <div class="modal-title">
+      <span>➕ Insert New Song</span>
+      <button onclick="closeAddSongModal()" style="background:none;color:var(--text2);font-size:20px">✕</button>
+    </div>
+    <form onsubmit="handleInsertSong(event)">
+      <div style="margin-bottom:12px">
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:4px">Song Title</label>
+        <input type="text" id="add-title" class="search-bar" style="width:100%;border-radius:8px;padding:10px" required placeholder="e.g. Master Anbae" />
+      </div>
+      <div style="margin-bottom:12px">
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:4px">Artist</label>
+        <input type="text" id="add-artist" class="search-bar" style="width:100%;border-radius:8px;padding:10px" required placeholder="e.g. Anirudh Ravichander" />
+      </div>
+      <div style="margin-bottom:12px">
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:4px">Language</label>
+        <select id="add-language" class="search-bar" style="width:100%;border-radius:8px;padding:10px;background:#000;color:#fff">
+          <option value="Tamil">Tamil</option>
+          <option value="Telugu">Telugu</option>
+          <option value="Malayalam">Malayalam</option>
+          <option value="Hindi">Hindi</option>
+          <option value="English">English</option>
+          <option value="Kannada">Kannada</option>
+          <option value="Bengali">Bengali</option>
+          <option value="Punjabi">Punjabi</option>
+          <option value="Korean">Korean</option>
+          <option value="Japanese">Japanese</option>
+        </select>
+      </div>
+      <div style="margin-bottom:12px">
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:4px">Mood</label>
+        <select id="add-mood" class="search-bar" style="width:100%;border-radius:8px;padding:10px;background:#000;color:#fff">
+          <option value="happy">Happy</option>
+          <option value="sad">Sad</option>
+          <option value="energetic">Energetic</option>
+          <option value="relaxed">Relaxed</option>
+          <option value="romantic">Romantic</option>
+          <option value="angry">Angry</option>
+        </select>
+      </div>
+      <button type="submit" class="btn-primary" style="width:100%;justify-content:center;margin-top:12px">Save & Insert Song</button>
+    </form>
+  </div>
+</div>
+
 <!-- ==================== FIXED BOTTOM AUDIO PLAYER BAR ==================== -->
 <div class="bottom-player-bar" id="player-bar">
   <div class="player-track-art" id="p-art">🎵</div>
@@ -683,6 +744,7 @@ let currentSongs = [];
 let renderedSongs = [];
 let favorites = [];
 let searchResults = [];
+let customSongs = [];
 let mediaStream = null;
 
 const ALL_LANGUAGES = ['All', 'Tamil', 'Telugu', 'Malayalam', 'Hindi', 'English', 'Kannada', 'Bengali', 'Punjabi', 'Korean', 'Japanese'];
@@ -705,10 +767,12 @@ const MOOD_GENRES = {
 };
 const SONG_ART_COLORS = ['#6366f1', '#a855f7', '#ec4899', '#3b82f6', '#10b981', '#f59e0b'];
 
-// Load saved favorites
+// Load saved favorites & custom uploaded songs
 try {
   const saved = localStorage.getItem('songstr_fav');
   if (saved) favorites = JSON.parse(saved);
+  const custom = localStorage.getItem('songstr_custom_songs');
+  if (custom) customSongs = JSON.parse(custom);
 } catch(e) {}
 
 // ============================================================
@@ -780,10 +844,21 @@ async function loadSongs(mood, lang) {
       songs = d.songs || [];
     }
     if (songs.length === 0) songs = getFallbackSongs(mood, lang);
-    currentSongs = songs;
+
+    // Merge custom uploaded songs
+    const userUploaded = customSongs.filter(s => {
+      const matchMood = !mood || mood === 'all' || s.mood === mood;
+      const matchLang = !lang || lang === 'All' || s.language === lang;
+      return matchMood && matchLang;
+    });
+
+    currentSongs = [...userUploaded, ...songs];
     renderSongs(currentSongs, 'songs-list');
   } catch(e) {
-    renderSongs(getFallbackSongs(mood, lang), 'songs-list');
+    const fallback = getFallbackSongs(mood, lang);
+    const userUploaded = customSongs.filter(s => (!mood || s.mood === mood) && (!lang || lang === 'All' || s.language === lang));
+    currentSongs = [...userUploaded, ...fallback];
+    renderSongs(currentSongs, 'songs-list');
   }
 }
 
@@ -791,7 +866,7 @@ function renderSongs(songs, containerId) {
   const el = document.getElementById(containerId);
   const color = MOOD_COLORS[currentMood] || '#6366f1';
   if (!songs || songs.length === 0) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-icon">🎵</div><div class="empty-title">No songs found</div><div class="empty-sub">Try selecting 'All' languages</div></div>`;
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">🎵</div><div class="empty-title">No songs found</div><div class="empty-sub">Try selecting 'All' languages or click ➕ Add Song</div></div>`;
     return;
   }
   renderedSongs = songs.slice(0, 30);
@@ -822,7 +897,7 @@ function renderSongs(songs, containerId) {
   }).join('');
 }
 
-// 100% TRACK-MATCHED PLAYBACK
+// 100% TITLE-MATCHED PLAYBACK
 function playSongByIndex(index) {
   const song = renderedSongs[index];
   if (song) playSong(song);
@@ -895,6 +970,44 @@ function closePlayer() {
 }
 
 // ============================================================
+// ADD / INSERT CUSTOM SONGS
+// ============================================================
+function openAddSongModal() {
+  document.getElementById('add-song-modal').classList.add('active');
+}
+function closeAddSongModal() {
+  document.getElementById('add-song-modal').classList.remove('active');
+}
+
+function handleInsertSong(e) {
+  e.preventDefault();
+  const title = document.getElementById('add-title').value.trim();
+  const artist = document.getElementById('add-artist').value.trim();
+  const language = document.getElementById('add-language').value;
+  const mood = document.getElementById('add-mood').value;
+
+  if (!title || !artist) return showToast('Please enter song title and artist');
+
+  const newSong = {
+    title,
+    artist,
+    movie: 'Single Upload',
+    year: new Date().getFullYear(),
+    genre: 'Pop',
+    language,
+    mood,
+    file_url: `/api/stream?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}`
+  };
+
+  customSongs.unshift(newSong);
+  try { localStorage.setItem('songstr_custom_songs', JSON.stringify(customSongs)); } catch(err) {}
+
+  closeAddSongModal();
+  showToast(`🎵 Uploaded: ${title} (${language})`);
+  loadSongs(currentMood, currentLang);
+}
+
+// ============================================================
 // MOOD DETECTION ENGINE (TEXT, VOICE, LIVE FACE CAMERA ANALYSIS)
 // ============================================================
 function switchTab(name) {
@@ -953,7 +1066,6 @@ function analyzeFacialExpression() {
 
   showLoading('Analyzing facial expression & evaluating emotion score...');
 
-  // Compute live expression score from video frame or luminance variance
   let detectedMood = 'happy';
   try {
     if (video && video.videoWidth && canvas) {
@@ -1217,13 +1329,47 @@ function getMoodDesc(mood) {
 
 function getFallbackSongs(mood, lang) {
   const fallbackList = [
-    { title: 'Vaadi Pulla Vaadi', artist: 'Anirudh Ravichander', movie: 'Maari', year: 2015, genre: 'Pop', language: 'Tamil' },
-    { title: 'Rowdy Baby', artist: 'Dhanush, Dhee', movie: 'Maari 2', year: 2018, genre: 'Dance', language: 'Tamil' },
-    { title: 'Happy', artist: 'Pharrell Williams', movie: 'Despicable Me 2', year: 2013, genre: 'Pop', language: 'English' },
-    { title: 'Tum Hi Ho', artist: 'Arijit Singh', movie: 'Aashiqui 2', year: 2013, genre: 'Melody', language: 'Hindi' },
-    { title: 'Butta Bomma', artist: 'Armaan Malik', movie: 'Ala Vaikunthapurramuloo', year: 2020, genre: 'Pop', language: 'Telugu' },
-    { title: 'Jimikki Kammal', artist: 'Vineeth Sreenivasan', movie: 'Velipadinte Pusthakam', year: 2017, genre: 'Dance', language: 'Malayalam' },
+    // Tamil
+    { title: 'Vaadi Pulla Vaadi', artist: 'Anirudh Ravichander', movie: 'Maari', year: 2015, genre: 'Pop', language: 'Tamil', mood: 'happy' },
+    { title: 'Rowdy Baby', artist: 'Dhanush, Dhee', movie: 'Maari 2', year: 2018, genre: 'Dance', language: 'Tamil', mood: 'happy' },
+    { title: 'Kanave Kanave', artist: 'Anirudh Ravichander', movie: '3', year: 2012, genre: 'Pop', language: 'Tamil', mood: 'sad' },
+    { title: 'Aaluma Doluma', artist: 'Anirudh Ravichander', movie: 'Vedhalam', year: 2015, genre: 'Dance', language: 'Tamil', mood: 'energetic' },
+    { title: 'Kutti Story', artist: 'Anirudh Ravichander', movie: 'Master', year: 2021, genre: 'Pop', language: 'Tamil', mood: 'happy' },
+
+    // Telugu
+    { title: 'Butta Bomma', artist: 'Armaan Malik', movie: 'Ala Vaikunthapurramuloo', year: 2020, genre: 'Pop', language: 'Telugu', mood: 'happy' },
+    { title: 'Samajavaragamana', artist: 'Sid Sriram', movie: 'Ala Vaikunthapurramuloo', year: 2020, genre: 'Melody', language: 'Telugu', mood: 'relaxed' },
+    { title: 'Jalsa Title Song', artist: 'Mani Sharma', movie: 'Jalsa', year: 2008, genre: 'Dance', language: 'Telugu', mood: 'energetic' },
+
+    // Malayalam
+    { title: 'Jimikki Kammal', artist: 'Vineeth Sreenivasan', movie: 'Velipadinte Pusthakam', year: 2017, genre: 'Dance', language: 'Malayalam', mood: 'happy' },
+    { title: 'Malare', artist: 'Vijay Yesudas', movie: 'Premam', year: 2015, genre: 'Melody', language: 'Malayalam', mood: 'romantic' },
+
+    // Hindi
+    { title: 'Tum Hi Ho', artist: 'Arijit Singh', movie: 'Aashiqui 2', year: 2013, genre: 'Melody', language: 'Hindi', mood: 'romantic' },
+    { title: 'Channa Mereya', artist: 'Arijit Singh', movie: 'Ae Dil Hai Mushkil', year: 2016, genre: 'Melody', language: 'Hindi', mood: 'sad' },
+    { title: 'Badtameez Dil', artist: 'Benny Dayal', movie: 'Yeh Jawaani Hai Deewani', year: 2013, genre: 'Pop', language: 'Hindi', mood: 'energetic' },
+
+    // English
+    { title: 'Happy', artist: 'Pharrell Williams', movie: 'Despicable Me 2', year: 2013, genre: 'Pop', language: 'English', mood: 'happy' },
+    { title: 'Uptown Funk', artist: 'Mark Ronson ft. Bruno Mars', movie: 'Uptown Special', year: 2014, genre: 'Funk', language: 'English', mood: 'energetic' },
+
+    // Kannada
+    { title: 'Bombe Helutaithe', artist: 'Rajesh Krishnan', movie: 'Mungaru Male', year: 2006, genre: 'Melody', language: 'Kannada', mood: 'happy' },
+
+    // Bengali
+    { title: 'Mon Majhi Re', artist: 'Anupam Roy', movie: 'Boss', year: 2013, genre: 'Pop', language: 'Bengali', mood: 'happy' },
+
+    // Punjabi
+    { title: 'Hasdi Rehna', artist: 'Jassi Gill', movie: 'Single', year: 2018, genre: 'Pop', language: 'Punjabi', mood: 'happy' },
+
+    // Korean
+    { title: 'Dynamite', artist: 'BTS', movie: 'Single', year: 2020, genre: 'Pop', language: 'Korean', mood: 'happy' },
+
+    // Japanese
+    { title: 'Your Name Theme', artist: 'RADWIMPS', movie: 'Your Name', year: 2016, genre: 'Anime OST', language: 'Japanese', mood: 'happy' }
   ];
+
   if (lang && lang !== 'All') return fallbackList.filter(s => s.language === lang);
   return fallbackList;
 }
