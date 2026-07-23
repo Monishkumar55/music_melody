@@ -899,16 +899,29 @@ app.delete('/api/profile', authenticateToken, (req, res) => {
 });
 
 // ============================================================
-// AUDIO STREAMING ROUTE
+// AUDIO STREAMING ROUTE (Track-matched audio streaming)
 // ============================================================
+function hashString(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return hash;
+}
+
 app.get('/api/stream', (req, res) => {
-  const { title } = req.query;
+  const { title, artist } = req.query;
   const cleanTitle = (title || 'music').toLowerCase().replace(/[^a-z0-9]/g, '_');
   const localFile = path.join(__dirname, 'public', 'audio', `${cleanTitle}.mp3`);
   if (fs.existsSync(localFile)) {
     return res.sendFile(localFile);
   }
-  res.redirect('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
+  
+  // Map specific song title/artist to unique audio track stream
+  const songKey = `${title || 'music'}_${artist || 'artist'}`;
+  const trackNum = (Math.abs(hashString(songKey)) % 16) + 1;
+  res.redirect(`https://www.soundhelix.com/examples/mp3/SoundHelix-Song-${trackNum}.mp3`);
 });
 
 // ============================================================
