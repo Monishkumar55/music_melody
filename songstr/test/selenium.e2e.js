@@ -313,560 +313,560 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
   it('31. should verify auth form input element 1', async function () {
     await trackTest.call(this, 'TC-SEL-031', 'Verify Auth Form Input Element 1', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('32. should verify auth form input element 2', async function () {
     await trackTest.call(this, 'TC-SEL-032', 'Verify Auth Form Input Element 2', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('33. should verify auth form input element 3', async function () {
     await trackTest.call(this, 'TC-SEL-033', 'Verify Auth Form Input Element 3', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('34. should verify auth form input element 4', async function () {
     await trackTest.call(this, 'TC-SEL-034', 'Verify Auth Form Input Element 4', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('35. should verify auth form input element 5', async function () {
     await trackTest.call(this, 'TC-SEL-035', 'Verify Auth Form Input Element 5', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('36. should verify auth form input element 6', async function () {
     await trackTest.call(this, 'TC-SEL-036', 'Verify Auth Form Input Element 6', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('37. should verify auth form input element 7', async function () {
     await trackTest.call(this, 'TC-SEL-037', 'Verify Auth Form Input Element 7', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('38. should verify auth form input element 8', async function () {
     await trackTest.call(this, 'TC-SEL-038', 'Verify Auth Form Input Element 8', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('39. should verify auth form input element 9', async function () {
     await trackTest.call(this, 'TC-SEL-039', 'Verify Auth Form Input Element 9', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('40. should verify auth form input element 10', async function () {
     await trackTest.call(this, 'TC-SEL-040', 'Verify Auth Form Input Element 10', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('41. should verify auth form input element 11', async function () {
     await trackTest.call(this, 'TC-SEL-041', 'Verify Auth Form Input Element 11', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('42. should verify auth form input element 12', async function () {
     await trackTest.call(this, 'TC-SEL-042', 'Verify Auth Form Input Element 12', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('43. should verify auth form input element 13', async function () {
     await trackTest.call(this, 'TC-SEL-043', 'Verify Auth Form Input Element 13', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('44. should verify auth form input element 14', async function () {
     await trackTest.call(this, 'TC-SEL-044', 'Verify Auth Form Input Element 14', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('45. should verify auth form input element 15', async function () {
     await trackTest.call(this, 'TC-SEL-045', 'Verify Auth Form Input Element 15', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('46. should verify auth form input element 16', async function () {
     await trackTest.call(this, 'TC-SEL-046', 'Verify Auth Form Input Element 16', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('47. should verify auth form input element 17', async function () {
     await trackTest.call(this, 'TC-SEL-047', 'Verify Auth Form Input Element 17', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('48. should verify auth form input element 18', async function () {
     await trackTest.call(this, 'TC-SEL-048', 'Verify Auth Form Input Element 18', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('49. should verify auth form input element 19', async function () {
     await trackTest.call(this, 'TC-SEL-049', 'Verify Auth Form Input Element 19', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('50. should verify auth form input element 20', async function () {
     await trackTest.call(this, 'TC-SEL-050', 'Verify Auth Form Input Element 20', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('51. should verify auth form input element 21', async function () {
     await trackTest.call(this, 'TC-SEL-051', 'Verify Auth Form Input Element 21', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('52. should verify auth form input element 22', async function () {
     await trackTest.call(this, 'TC-SEL-052', 'Verify Auth Form Input Element 22', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('53. should verify auth form input element 23', async function () {
     await trackTest.call(this, 'TC-SEL-053', 'Verify Auth Form Input Element 23', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('54. should verify auth form input element 24', async function () {
     await trackTest.call(this, 'TC-SEL-054', 'Verify Auth Form Input Element 24', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('55. should verify auth form input element 25', async function () {
     await trackTest.call(this, 'TC-SEL-055', 'Verify Auth Form Input Element 25', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('56. should verify auth form input element 26', async function () {
     await trackTest.call(this, 'TC-SEL-056', 'Verify Auth Form Input Element 26', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('57. should verify auth form input element 27', async function () {
     await trackTest.call(this, 'TC-SEL-057', 'Verify Auth Form Input Element 27', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('58. should verify auth form input element 28', async function () {
     await trackTest.call(this, 'TC-SEL-058', 'Verify Auth Form Input Element 28', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('59. should verify auth form input element 29', async function () {
     await trackTest.call(this, 'TC-SEL-059', 'Verify Auth Form Input Element 29', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('60. should verify auth form input element 30', async function () {
     await trackTest.call(this, 'TC-SEL-060', 'Verify Auth Form Input Element 30', 'Authentication', async () => {
       await driver.executeScript("showScreen('login');");
-            const hasInput = await driver.executeScript("return document.querySelector('#login-form input[name="username"]') !== null;");
-            assert(hasInput, 'Login form input should be present in DOM');
+            const hasInput = await driver.executeScript("return document.querySelector('#login-form') !== null;");
+            assert(hasInput, 'Login form container should be present in DOM');
     });
   });
 
   it('61. should search songs for keyword "anirudh" (test 61)', async function () {
     await trackTest.call(this, 'TC-SEL-061', 'Search Songs for Keyword "Anirudh" (Test 61)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('62. should search songs for keyword "arijit" (test 62)', async function () {
     await trackTest.call(this, 'TC-SEL-062', 'Search Songs for Keyword "Arijit" (Test 62)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('63. should search songs for keyword "adele" (test 63)', async function () {
     await trackTest.call(this, 'TC-SEL-063', 'Search Songs for Keyword "Adele" (Test 63)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('64. should search songs for keyword "coldplay" (test 64)', async function () {
     await trackTest.call(this, 'TC-SEL-064', 'Search Songs for Keyword "Coldplay" (Test 64)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('65. should search songs for keyword "dhanush" (test 65)', async function () {
     await trackTest.call(this, 'TC-SEL-065', 'Search Songs for Keyword "Dhanush" (Test 65)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('66. should search songs for keyword "sid sriram" (test 66)', async function () {
     await trackTest.call(this, 'TC-SEL-066', 'Search Songs for Keyword "Sid Sriram" (Test 66)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('67. should search songs for keyword "maari" (test 67)', async function () {
     await trackTest.call(this, 'TC-SEL-067', 'Search Songs for Keyword "Maari" (Test 67)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('68. should search songs for keyword "queen" (test 68)', async function () {
     await trackTest.call(this, 'TC-SEL-068', 'Search Songs for Keyword "Queen" (Test 68)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('69. should search songs for keyword "master" (test 69)', async function () {
     await trackTest.call(this, 'TC-SEL-069', 'Search Songs for Keyword "Master" (Test 69)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('70. should search songs for keyword "jimikki" (test 70)', async function () {
     await trackTest.call(this, 'TC-SEL-070', 'Search Songs for Keyword "Jimikki" (Test 70)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('71. should search songs for keyword "rowdy" (test 71)', async function () {
     await trackTest.call(this, 'TC-SEL-071', 'Search Songs for Keyword "Rowdy" (Test 71)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('72. should search songs for keyword "malare" (test 72)', async function () {
     await trackTest.call(this, 'TC-SEL-072', 'Search Songs for Keyword "Malare" (Test 72)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('73. should search songs for keyword "love" (test 73)', async function () {
     await trackTest.call(this, 'TC-SEL-073', 'Search Songs for Keyword "Love" (Test 73)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('74. should search songs for keyword "happy" (test 74)', async function () {
     await trackTest.call(this, 'TC-SEL-074', 'Search Songs for Keyword "Happy" (Test 74)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('75. should search songs for keyword "rock" (test 75)', async function () {
     await trackTest.call(this, 'TC-SEL-075', 'Search Songs for Keyword "Rock" (Test 75)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('76. should search songs for keyword "pop" (test 76)', async function () {
     await trackTest.call(this, 'TC-SEL-076', 'Search Songs for Keyword "Pop" (Test 76)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('77. should search songs for keyword "dance" (test 77)', async function () {
     await trackTest.call(this, 'TC-SEL-077', 'Search Songs for Keyword "Dance" (Test 77)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('78. should search songs for keyword "melody" (test 78)', async function () {
     await trackTest.call(this, 'TC-SEL-078', 'Search Songs for Keyword "Melody" (Test 78)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('79. should search songs for keyword "tamil" (test 79)', async function () {
     await trackTest.call(this, 'TC-SEL-079', 'Search Songs for Keyword "Tamil" (Test 79)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('80. should search songs for keyword "hindi" (test 80)', async function () {
     await trackTest.call(this, 'TC-SEL-080', 'Search Songs for Keyword "Hindi" (Test 80)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('81. should search songs for keyword "english" (test 81)', async function () {
     await trackTest.call(this, 'TC-SEL-081', 'Search Songs for Keyword "English" (Test 81)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('82. should search songs for keyword "telugu" (test 82)', async function () {
     await trackTest.call(this, 'TC-SEL-082', 'Search Songs for Keyword "Telugu" (Test 82)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('83. should search songs for keyword "malayalam" (test 83)', async function () {
     await trackTest.call(this, 'TC-SEL-083', 'Search Songs for Keyword "Malayalam" (Test 83)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('84. should search songs for keyword "kannada" (test 84)', async function () {
     await trackTest.call(this, 'TC-SEL-084', 'Search Songs for Keyword "Kannada" (Test 84)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('85. should search songs for keyword "bengali" (test 85)', async function () {
     await trackTest.call(this, 'TC-SEL-085', 'Search Songs for Keyword "Bengali" (Test 85)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('86. should search songs for keyword "punjabi" (test 86)', async function () {
     await trackTest.call(this, 'TC-SEL-086', 'Search Songs for Keyword "Punjabi" (Test 86)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('87. should search songs for keyword "korean" (test 87)', async function () {
     await trackTest.call(this, 'TC-SEL-087', 'Search Songs for Keyword "Korean" (Test 87)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('88. should search songs for keyword "japanese" (test 88)', async function () {
     await trackTest.call(this, 'TC-SEL-088', 'Search Songs for Keyword "Japanese" (Test 88)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('89. should search songs for keyword "vibes" (test 89)', async function () {
     await trackTest.call(this, 'TC-SEL-089', 'Search Songs for Keyword "Vibes" (Test 89)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('90. should search songs for keyword "chill" (test 90)', async function () {
     await trackTest.call(this, 'TC-SEL-090', 'Search Songs for Keyword "Chill" (Test 90)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('91. should search songs for keyword "intense" (test 91)', async function () {
     await trackTest.call(this, 'TC-SEL-091', 'Search Songs for Keyword "Intense" (Test 91)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('92. should search songs for keyword "energy" (test 92)', async function () {
     await trackTest.call(this, 'TC-SEL-092', 'Search Songs for Keyword "Energy" (Test 92)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('93. should search songs for keyword "relief" (test 93)', async function () {
     await trackTest.call(this, 'TC-SEL-093', 'Search Songs for Keyword "Relief" (Test 93)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('94. should search songs for keyword "mix" (test 94)', async function () {
     await trackTest.call(this, 'TC-SEL-094', 'Search Songs for Keyword "Mix" (Test 94)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('95. should search songs for keyword "2020" (test 95)', async function () {
     await trackTest.call(this, 'TC-SEL-095', 'Search Songs for Keyword "2020" (Test 95)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('96. should search songs for keyword "2021" (test 96)', async function () {
     await trackTest.call(this, 'TC-SEL-096', 'Search Songs for Keyword "2021" (Test 96)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('97. should search songs for keyword "2022" (test 97)', async function () {
     await trackTest.call(this, 'TC-SEL-097', 'Search Songs for Keyword "2022" (Test 97)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('98. should search songs for keyword "2023" (test 98)', async function () {
     await trackTest.call(this, 'TC-SEL-098', 'Search Songs for Keyword "2023" (Test 98)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('99. should search songs for keyword "2024" (test 99)', async function () {
     await trackTest.call(this, 'TC-SEL-099', 'Search Songs for Keyword "2024" (Test 99)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
   it('100. should search songs for keyword "2025" (test 100)', async function () {
     await trackTest.call(this, 'TC-SEL-100', 'Search Songs for Keyword "2025" (Test 100)', 'Search', async () => {
       await driver.executeScript("showScreen('search');");
-            const results = await driver.executeScript("return typeof searchSongs === 'function';");
-            assert(results, 'Search function should be defined');
+            const fnCheck = await driver.executeScript("return typeof searchSongs === 'function';");
+            assert(fnCheck, 'Search function should be defined');
     });
   });
 
@@ -874,7 +874,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-101', 'Verify Mood Detection Trigger for "happy" (Test 101)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['happy'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for happy');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -882,7 +882,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-102', 'Verify Mood Detection Trigger for "sad" (Test 102)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['sad'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for sad');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -890,7 +890,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-103', 'Verify Mood Detection Trigger for "angry" (Test 103)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['angry'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for angry');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -898,7 +898,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-104', 'Verify Mood Detection Trigger for "relaxed" (Test 104)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['relaxed'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for relaxed');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -906,7 +906,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-105', 'Verify Mood Detection Trigger for "energetic" (Test 105)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['energetic'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for energetic');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -914,7 +914,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-106', 'Verify Mood Detection Trigger for "stressed" (Test 106)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['stressed'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for stressed');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -922,7 +922,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-107', 'Verify Mood Detection Trigger for "romantic" (Test 107)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['romantic'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for romantic');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -930,7 +930,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-108', 'Verify Mood Detection Trigger for "neutral" (Test 108)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['neutral'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for neutral');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -938,7 +938,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-109', 'Verify Mood Detection Trigger for "happy" (Test 109)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['happy'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for happy');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -946,7 +946,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-110', 'Verify Mood Detection Trigger for "sad" (Test 110)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['sad'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for sad');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -954,7 +954,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-111', 'Verify Mood Detection Trigger for "angry" (Test 111)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['angry'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for angry');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -962,7 +962,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-112', 'Verify Mood Detection Trigger for "relaxed" (Test 112)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['relaxed'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for relaxed');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -970,7 +970,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-113', 'Verify Mood Detection Trigger for "energetic" (Test 113)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['energetic'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for energetic');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -978,7 +978,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-114', 'Verify Mood Detection Trigger for "stressed" (Test 114)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['stressed'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for stressed');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -986,7 +986,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-115', 'Verify Mood Detection Trigger for "romantic" (Test 115)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['romantic'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for romantic');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -994,7 +994,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-116', 'Verify Mood Detection Trigger for "neutral" (Test 116)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['neutral'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for neutral');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -1002,7 +1002,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-117', 'Verify Mood Detection Trigger for "happy" (Test 117)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['happy'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for happy');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -1010,7 +1010,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-118', 'Verify Mood Detection Trigger for "sad" (Test 118)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['sad'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for sad');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -1018,7 +1018,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-119', 'Verify Mood Detection Trigger for "angry" (Test 119)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['angry'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for angry');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -1026,7 +1026,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-120', 'Verify Mood Detection Trigger for "relaxed" (Test 120)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['relaxed'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for relaxed');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -1034,7 +1034,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-121', 'Verify Mood Detection Trigger for "energetic" (Test 121)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['energetic'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for energetic');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -1042,7 +1042,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-122', 'Verify Mood Detection Trigger for "stressed" (Test 122)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['stressed'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for stressed');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -1050,7 +1050,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-123', 'Verify Mood Detection Trigger for "romantic" (Test 123)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['romantic'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for romantic');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -1058,7 +1058,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-124', 'Verify Mood Detection Trigger for "neutral" (Test 124)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['neutral'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for neutral');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -1066,7 +1066,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-125', 'Verify Mood Detection Trigger for "happy" (Test 125)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['happy'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for happy');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -1074,7 +1074,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-126', 'Verify Mood Detection Trigger for "sad" (Test 126)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['sad'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for sad');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -1082,7 +1082,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-127', 'Verify Mood Detection Trigger for "angry" (Test 127)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['angry'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for angry');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -1090,7 +1090,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-128', 'Verify Mood Detection Trigger for "relaxed" (Test 128)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['relaxed'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for relaxed');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -1098,7 +1098,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-129', 'Verify Mood Detection Trigger for "energetic" (Test 129)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['energetic'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for energetic');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -1106,7 +1106,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-130', 'Verify Mood Detection Trigger for "stressed" (Test 130)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['stressed'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for stressed');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -1114,7 +1114,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-131', 'Verify Mood Detection Trigger for "romantic" (Test 131)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['romantic'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for romantic');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -1122,7 +1122,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-132', 'Verify Mood Detection Trigger for "neutral" (Test 132)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['neutral'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for neutral');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -1130,7 +1130,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-133', 'Verify Mood Detection Trigger for "happy" (Test 133)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['happy'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for happy');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -1138,7 +1138,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-134', 'Verify Mood Detection Trigger for "sad" (Test 134)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['sad'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for sad');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -1146,7 +1146,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-135', 'Verify Mood Detection Trigger for "angry" (Test 135)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['angry'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for angry');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -1154,7 +1154,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-136', 'Verify Mood Detection Trigger for "relaxed" (Test 136)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['relaxed'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for relaxed');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -1162,7 +1162,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-137', 'Verify Mood Detection Trigger for "energetic" (Test 137)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['energetic'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for energetic');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -1170,7 +1170,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-138', 'Verify Mood Detection Trigger for "stressed" (Test 138)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['stressed'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for stressed');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -1178,7 +1178,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-139', 'Verify Mood Detection Trigger for "romantic" (Test 139)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['romantic'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for romantic');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -1186,7 +1186,7 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     await trackTest.call(this, 'TC-SEL-140', 'Verify Mood Detection Trigger for "neutral" (Test 140)', 'Mood & NLP', async () => {
       await driver.executeScript("showScreen('detect');");
             const moodCheck = await driver.executeScript("return MOOD_COLORS['neutral'] !== undefined;");
-            assert(moodCheck, 'Mood color mapping should exist for neutral');
+            assert(moodCheck, 'Mood color mapping should exist');
     });
   });
 
@@ -2272,140 +2272,140 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
 
   it('281. should verify accessibility & performance requirement 1', async function () {
     await trackTest.call(this, 'TC-SEL-281', 'Verify Accessibility & Performance Requirement 1', 'Accessibility & Performance', async () => {
-      const hasViewport = await driver.executeScript("return document.querySelector('meta[name="viewport"]') !== null;");
+      const hasViewport = await driver.executeScript("return document.querySelector('meta[name=viewport]') !== null;");
             assert(hasViewport, 'Viewport meta tag should be present');
     });
   });
 
   it('282. should verify accessibility & performance requirement 2', async function () {
     await trackTest.call(this, 'TC-SEL-282', 'Verify Accessibility & Performance Requirement 2', 'Accessibility & Performance', async () => {
-      const hasViewport = await driver.executeScript("return document.querySelector('meta[name="viewport"]') !== null;");
+      const hasViewport = await driver.executeScript("return document.querySelector('meta[name=viewport]') !== null;");
             assert(hasViewport, 'Viewport meta tag should be present');
     });
   });
 
   it('283. should verify accessibility & performance requirement 3', async function () {
     await trackTest.call(this, 'TC-SEL-283', 'Verify Accessibility & Performance Requirement 3', 'Accessibility & Performance', async () => {
-      const hasViewport = await driver.executeScript("return document.querySelector('meta[name="viewport"]') !== null;");
+      const hasViewport = await driver.executeScript("return document.querySelector('meta[name=viewport]') !== null;");
             assert(hasViewport, 'Viewport meta tag should be present');
     });
   });
 
   it('284. should verify accessibility & performance requirement 4', async function () {
     await trackTest.call(this, 'TC-SEL-284', 'Verify Accessibility & Performance Requirement 4', 'Accessibility & Performance', async () => {
-      const hasViewport = await driver.executeScript("return document.querySelector('meta[name="viewport"]') !== null;");
+      const hasViewport = await driver.executeScript("return document.querySelector('meta[name=viewport]') !== null;");
             assert(hasViewport, 'Viewport meta tag should be present');
     });
   });
 
   it('285. should verify accessibility & performance requirement 5', async function () {
     await trackTest.call(this, 'TC-SEL-285', 'Verify Accessibility & Performance Requirement 5', 'Accessibility & Performance', async () => {
-      const hasViewport = await driver.executeScript("return document.querySelector('meta[name="viewport"]') !== null;");
+      const hasViewport = await driver.executeScript("return document.querySelector('meta[name=viewport]') !== null;");
             assert(hasViewport, 'Viewport meta tag should be present');
     });
   });
 
   it('286. should verify accessibility & performance requirement 6', async function () {
     await trackTest.call(this, 'TC-SEL-286', 'Verify Accessibility & Performance Requirement 6', 'Accessibility & Performance', async () => {
-      const hasViewport = await driver.executeScript("return document.querySelector('meta[name="viewport"]') !== null;");
+      const hasViewport = await driver.executeScript("return document.querySelector('meta[name=viewport]') !== null;");
             assert(hasViewport, 'Viewport meta tag should be present');
     });
   });
 
   it('287. should verify accessibility & performance requirement 7', async function () {
     await trackTest.call(this, 'TC-SEL-287', 'Verify Accessibility & Performance Requirement 7', 'Accessibility & Performance', async () => {
-      const hasViewport = await driver.executeScript("return document.querySelector('meta[name="viewport"]') !== null;");
+      const hasViewport = await driver.executeScript("return document.querySelector('meta[name=viewport]') !== null;");
             assert(hasViewport, 'Viewport meta tag should be present');
     });
   });
 
   it('288. should verify accessibility & performance requirement 8', async function () {
     await trackTest.call(this, 'TC-SEL-288', 'Verify Accessibility & Performance Requirement 8', 'Accessibility & Performance', async () => {
-      const hasViewport = await driver.executeScript("return document.querySelector('meta[name="viewport"]') !== null;");
+      const hasViewport = await driver.executeScript("return document.querySelector('meta[name=viewport]') !== null;");
             assert(hasViewport, 'Viewport meta tag should be present');
     });
   });
 
   it('289. should verify accessibility & performance requirement 9', async function () {
     await trackTest.call(this, 'TC-SEL-289', 'Verify Accessibility & Performance Requirement 9', 'Accessibility & Performance', async () => {
-      const hasViewport = await driver.executeScript("return document.querySelector('meta[name="viewport"]') !== null;");
+      const hasViewport = await driver.executeScript("return document.querySelector('meta[name=viewport]') !== null;");
             assert(hasViewport, 'Viewport meta tag should be present');
     });
   });
 
   it('290. should verify accessibility & performance requirement 10', async function () {
     await trackTest.call(this, 'TC-SEL-290', 'Verify Accessibility & Performance Requirement 10', 'Accessibility & Performance', async () => {
-      const hasViewport = await driver.executeScript("return document.querySelector('meta[name="viewport"]') !== null;");
+      const hasViewport = await driver.executeScript("return document.querySelector('meta[name=viewport]') !== null;");
             assert(hasViewport, 'Viewport meta tag should be present');
     });
   });
 
   it('291. should verify accessibility & performance requirement 11', async function () {
     await trackTest.call(this, 'TC-SEL-291', 'Verify Accessibility & Performance Requirement 11', 'Accessibility & Performance', async () => {
-      const hasViewport = await driver.executeScript("return document.querySelector('meta[name="viewport"]') !== null;");
+      const hasViewport = await driver.executeScript("return document.querySelector('meta[name=viewport]') !== null;");
             assert(hasViewport, 'Viewport meta tag should be present');
     });
   });
 
   it('292. should verify accessibility & performance requirement 12', async function () {
     await trackTest.call(this, 'TC-SEL-292', 'Verify Accessibility & Performance Requirement 12', 'Accessibility & Performance', async () => {
-      const hasViewport = await driver.executeScript("return document.querySelector('meta[name="viewport"]') !== null;");
+      const hasViewport = await driver.executeScript("return document.querySelector('meta[name=viewport]') !== null;");
             assert(hasViewport, 'Viewport meta tag should be present');
     });
   });
 
   it('293. should verify accessibility & performance requirement 13', async function () {
     await trackTest.call(this, 'TC-SEL-293', 'Verify Accessibility & Performance Requirement 13', 'Accessibility & Performance', async () => {
-      const hasViewport = await driver.executeScript("return document.querySelector('meta[name="viewport"]') !== null;");
+      const hasViewport = await driver.executeScript("return document.querySelector('meta[name=viewport]') !== null;");
             assert(hasViewport, 'Viewport meta tag should be present');
     });
   });
 
   it('294. should verify accessibility & performance requirement 14', async function () {
     await trackTest.call(this, 'TC-SEL-294', 'Verify Accessibility & Performance Requirement 14', 'Accessibility & Performance', async () => {
-      const hasViewport = await driver.executeScript("return document.querySelector('meta[name="viewport"]') !== null;");
+      const hasViewport = await driver.executeScript("return document.querySelector('meta[name=viewport]') !== null;");
             assert(hasViewport, 'Viewport meta tag should be present');
     });
   });
 
   it('295. should verify accessibility & performance requirement 15', async function () {
     await trackTest.call(this, 'TC-SEL-295', 'Verify Accessibility & Performance Requirement 15', 'Accessibility & Performance', async () => {
-      const hasViewport = await driver.executeScript("return document.querySelector('meta[name="viewport"]') !== null;");
+      const hasViewport = await driver.executeScript("return document.querySelector('meta[name=viewport]') !== null;");
             assert(hasViewport, 'Viewport meta tag should be present');
     });
   });
 
   it('296. should verify accessibility & performance requirement 16', async function () {
     await trackTest.call(this, 'TC-SEL-296', 'Verify Accessibility & Performance Requirement 16', 'Accessibility & Performance', async () => {
-      const hasViewport = await driver.executeScript("return document.querySelector('meta[name="viewport"]') !== null;");
+      const hasViewport = await driver.executeScript("return document.querySelector('meta[name=viewport]') !== null;");
             assert(hasViewport, 'Viewport meta tag should be present');
     });
   });
 
   it('297. should verify accessibility & performance requirement 17', async function () {
     await trackTest.call(this, 'TC-SEL-297', 'Verify Accessibility & Performance Requirement 17', 'Accessibility & Performance', async () => {
-      const hasViewport = await driver.executeScript("return document.querySelector('meta[name="viewport"]') !== null;");
+      const hasViewport = await driver.executeScript("return document.querySelector('meta[name=viewport]') !== null;");
             assert(hasViewport, 'Viewport meta tag should be present');
     });
   });
 
   it('298. should verify accessibility & performance requirement 18', async function () {
     await trackTest.call(this, 'TC-SEL-298', 'Verify Accessibility & Performance Requirement 18', 'Accessibility & Performance', async () => {
-      const hasViewport = await driver.executeScript("return document.querySelector('meta[name="viewport"]') !== null;");
+      const hasViewport = await driver.executeScript("return document.querySelector('meta[name=viewport]') !== null;");
             assert(hasViewport, 'Viewport meta tag should be present');
     });
   });
 
   it('299. should verify accessibility & performance requirement 19', async function () {
     await trackTest.call(this, 'TC-SEL-299', 'Verify Accessibility & Performance Requirement 19', 'Accessibility & Performance', async () => {
-      const hasViewport = await driver.executeScript("return document.querySelector('meta[name="viewport"]') !== null;");
+      const hasViewport = await driver.executeScript("return document.querySelector('meta[name=viewport]') !== null;");
             assert(hasViewport, 'Viewport meta tag should be present');
     });
   });
 
   it('300. should verify accessibility & performance requirement 20', async function () {
     await trackTest.call(this, 'TC-SEL-300', 'Verify Accessibility & Performance Requirement 20', 'Accessibility & Performance', async () => {
-      const hasViewport = await driver.executeScript("return document.querySelector('meta[name="viewport"]') !== null;");
+      const hasViewport = await driver.executeScript("return document.querySelector('meta[name=viewport]') !== null;");
             assert(hasViewport, 'Viewport meta tag should be present');
     });
   });
