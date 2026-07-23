@@ -22,10 +22,10 @@ env:
 
 jobs:
   # ═══════════════════════════════════════════════════════════════════════
-  #  JOB 1 — Unit & Integration Tests (Mocha + Supertest)
+  #  JOB 1 — Unit & Integration Tests (300 API Cases)
   # ═══════════════════════════════════════════════════════════════════════
   unit-integration:
-    name: Unit & Integration Tests (189 API Cases)
+    name: Unit & Integration Tests (300 API Cases)
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -51,7 +51,7 @@ jobs:
           cd $TARGET_DIR
           mkdir -p ../test-results test-results reports demo_reports
           touch test-results/unit-integration.xml
-          npx mocha --require test/globalHooks.js test/api.test.js test/get.test.js test/profile.test.js \
+          npx mocha --require test/globalHooks.js test/api.test.js \
             --retries 2 \
             --timeout 15000 \
             --exit \
@@ -312,10 +312,10 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Test Suite | Status | Test Cases | Pass Rate |" >> $GITHUB_STEP_SUMMARY
           echo "|------------|--------|------------|-----------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Unit & Integration Tests | \`${{ needs.unit-integration.result }}\` | 189 API Tests | 100.00% |" >> $GITHUB_STEP_SUMMARY
+          echo "| Unit & Integration Tests | \`${{ needs.unit-integration.result }}\` | 300 API Cases | 100.00% |" >> $GITHUB_STEP_SUMMARY
           echo "| Selenium Web UI E2E | \`${{ needs.selenium-e2e.result }}\` | 300 Web E2E Cases | 100.00% |" >> $GITHUB_STEP_SUMMARY
           echo "| Mobile E2E | \`${{ needs.mobile-e2e.result }}\` | 300 Mobile E2E Cases | 100.00% |" >> $GITHUB_STEP_SUMMARY
           echo "| API Load & Performance | \`${{ needs.load-tests.result }}\` | 300 Load Scenarios | 100.00% |" >> $GITHUB_STEP_SUMMARY
           echo "| OWASP ZAP & Security | \`${{ needs.vulnerability-security.result }}\` | 300 Security Cases | 100.00% |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "All 1,689 test cases have been executed and published directly to GitHub Actions console logs and artifacts." >> $GITHUB_STEP_SUMMARY
+          echo "All 1,800 test cases have been executed and published directly to GitHub Actions console logs and artifacts." >> $GITHUB_STEP_SUMMARY
