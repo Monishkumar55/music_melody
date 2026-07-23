@@ -1647,7 +1647,7 @@ function getMoodDesc(mood) {
 
 function getFallbackSongs(mood, lang) {
   const fallbackList = [
-    // HAPPY
+    // HAPPY 😄
     { title: 'Vaadi Pulla Vaadi', artist: 'Anirudh Ravichander', movie: 'Maari', year: 2015, genre: 'Pop', language: 'Tamil', mood: 'happy' },
     { title: 'Rowdy Baby', artist: 'Dhanush, Dhee', movie: 'Maari 2', year: 2018, genre: 'Dance', language: 'Tamil', mood: 'happy' },
     { title: 'Kutti Story', artist: 'Anirudh Ravichander', movie: 'Master', year: 2021, genre: 'Pop', language: 'Tamil', mood: 'happy' },
@@ -1660,7 +1660,7 @@ function getFallbackSongs(mood, lang) {
     { title: 'Hasdi Rehna', artist: 'Jassi Gill', movie: 'Single', year: 2018, genre: 'Pop', language: 'Punjabi', mood: 'happy' },
     { title: 'Dynamite', artist: 'BTS', movie: 'Single', year: 2020, genre: 'Pop', language: 'Korean', mood: 'happy' },
 
-    // SAD
+    // SAD 😢
     { title: 'Kanave Kanave', artist: 'Anirudh Ravichander', movie: '3', year: 2012, genre: 'Pop', language: 'Tamil', mood: 'sad' },
     { title: 'Oru Deivam Thantha Poove', artist: 'Vidyasagar', movie: 'Poovellam Kettuppar', year: 1999, genre: 'Melody', language: 'Tamil', mood: 'sad' },
     { title: 'Channa Mereya', artist: 'Arijit Singh', movie: 'Ae Dil Hai Mushkil', year: 2016, genre: 'Melody', language: 'Hindi', mood: 'sad' },
@@ -1668,7 +1668,7 @@ function getFallbackSongs(mood, lang) {
     { title: 'Kanneer Poovinte', artist: 'K.J. Yesudas', movie: 'Kireedam', year: 1989, genre: 'Melody', language: 'Malayalam', mood: 'sad' },
     { title: 'Someone Like You', artist: 'Adele', movie: '21', year: 2011, genre: 'Pop', language: 'English', mood: 'sad' },
 
-    // ENERGETIC
+    // ENERGETIC ⚡
     { title: 'Aaluma Doluma', artist: 'Anirudh Ravichander', movie: 'Vedhalam', year: 2015, genre: 'Dance', language: 'Tamil', mood: 'energetic' },
     { title: 'Why This Kolaveri Di', artist: 'Dhanush', movie: '3', year: 2012, genre: 'Pop', language: 'Tamil', mood: 'energetic' },
     { title: 'Jalsa Title Song', artist: 'Mani Sharma', movie: 'Jalsa', year: 2008, genre: 'Dance', language: 'Telugu', mood: 'energetic' },
@@ -1676,21 +1676,33 @@ function getFallbackSongs(mood, lang) {
     { title: 'Badtameez Dil', artist: 'Benny Dayal', movie: 'Yeh Jawaani Hai Deewani', year: 2013, genre: 'Pop', language: 'Hindi', mood: 'energetic' },
     { title: 'Uptown Funk', artist: 'Mark Ronson ft. Bruno Mars', movie: 'Uptown Special', year: 2014, genre: 'Funk', language: 'English', mood: 'energetic' },
 
-    // RELAXED
+    // RELAXED / CALM 😌
     { title: 'Samajavaragamana', artist: 'Sid Sriram', movie: 'Ala Vaikunthapurramuloo', year: 2020, genre: 'Melody', language: 'Telugu', mood: 'relaxed' },
     { title: 'Yaaro Ivan', artist: 'S.P. Balasubrahmanyam', movie: 'Vetri Vizha', year: 1989, genre: 'Acoustic', language: 'Tamil', mood: 'relaxed' },
     { title: 'Iktara', artist: 'Kavita Seth', movie: 'Wake Up Sid', year: 2009, genre: 'Acoustic', language: 'Hindi', mood: 'relaxed' },
+    { title: 'Nenjukulle', artist: 'A.R. Rahman', movie: 'Kadal', year: 2013, genre: 'Ambient', language: 'Tamil', mood: 'relaxed' },
 
-    // ROMANTIC
+    // ROMANTIC 💖
     { title: 'Tum Hi Ho', artist: 'Arijit Singh', movie: 'Aashiqui 2', year: 2013, genre: 'Melody', language: 'Hindi', mood: 'romantic' },
     { title: 'Munbe Vaa', artist: 'Shreya Ghoshal, Naresh Iyer', movie: 'Sillunu Oru Kaadhal', year: 2006, genre: 'Love', language: 'Tamil', mood: 'romantic' },
     { title: 'Malare', artist: 'Vijay Yesudas', movie: 'Premam', year: 2015, genre: 'Melody', language: 'Malayalam', mood: 'romantic' },
     { title: 'Perfect', artist: 'Ed Sheeran', movie: '÷', year: 2017, genre: 'Pop', language: 'English', mood: 'romantic' },
 
-    // ANGRY
+    // ANGRY 😡
     { title: 'Master Coming', artist: 'Anirudh Ravichander', movie: 'Master', year: 2021, genre: 'Rock', language: 'Tamil', mood: 'angry' },
     { title: 'Apna Time Aayega', artist: 'Ranveer Singh', movie: 'Gully Boy', year: 2019, genre: 'Rap', language: 'Hindi', mood: 'angry' },
-    { title: 'In the End', artist: 'Linkin Park', movie: 'Hybrid Theory', year: 2000, genre: 'Rock', language: 'English', mood: 'angry' }
+    { title: 'In the End', artist: 'Linkin Park', movie: 'Hybrid Theory', year: 2000, genre: 'Rock', language: 'English', mood: 'angry' },
+    { title: 'Numb', artist: 'Linkin Park', movie: 'Meteora', year: 2003, genre: 'Rock', language: 'English', mood: 'angry' },
+
+    // NEUTRAL 🎧
+    { title: 'Yaar Indha Saalai Oram', artist: 'Ilaiyaraaja', movie: 'Ninaithale Inikkum', year: 1979, genre: 'Melody', language: 'Tamil', mood: 'neutral' },
+    { title: 'Here Comes The Sun', artist: 'The Beatles', movie: 'Abbey Road', year: 1969, genre: 'Pop', language: 'English', mood: 'neutral' },
+    { title: 'Pure Imagination', artist: 'Gene Wilder', movie: 'Willy Wonka', year: 1971, genre: 'Pop', language: 'English', mood: 'neutral' },
+
+    // STRESSED / STRESS RELIEF 😫
+    { title: 'Nee Paartha Vizhigal', artist: 'Anirudh Ravichander', movie: '3', year: 2012, genre: 'Lo-fi', language: 'Tamil', mood: 'stressed' },
+    { title: 'Weightless', artist: 'Marconi Union', movie: 'Ambient', year: 2011, genre: 'Ambient Soundscape', language: 'English', mood: 'stressed' },
+    { title: 'Khaabon Ke Parinday', artist: 'Mohit Chauhan', movie: 'Zindagi Na Milegi Dobara', year: 2011, genre: 'Acoustic', language: 'Hindi', mood: 'stressed' }
   ];
 
   let list = fallbackList;
