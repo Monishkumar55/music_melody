@@ -911,16 +911,16 @@ function hashString(str) {
 }
 
 app.get('/api/stream', (req, res) => {
-  const { title, artist } = req.query;
+  const { title } = req.query;
   const cleanTitle = (title || 'music').toLowerCase().replace(/[^a-z0-9]/g, '_');
   const localFile = path.join(__dirname, 'public', 'audio', `${cleanTitle}.mp3`);
   if (fs.existsSync(localFile)) {
     return res.sendFile(localFile);
   }
   
-  // Map specific song title/artist to unique audio track stream
-  const songKey = `${title || 'music'}_${artist || 'artist'}`;
-  const trackNum = (Math.abs(hashString(songKey)) % 16) + 1;
+  // Deterministic song title mapping: Same song title ALWAYS plays the exact same track
+  const titleKey = (title || 'music').trim().toLowerCase();
+  const trackNum = (Math.abs(hashString(titleKey)) % 16) + 1;
   res.redirect(`https://www.soundhelix.com/examples/mp3/SoundHelix-Song-${trackNum}.mp3`);
 });
 
