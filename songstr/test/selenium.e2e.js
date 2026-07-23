@@ -17,8 +17,10 @@ describe('Selenium E2E Tests - Songstr (300 Test Cases)', function () {
     options.addArguments('--disable-dev-shm-usage');
     options.addArguments('--disable-gpu');
     options.addArguments('--disable-extensions');
-    options.addArguments('--remote-debugging-port=9222');
     options.addArguments('--window-size=1280,800');
+    if (process.env.CHROME_PATH) {
+      options.setChromeBinaryPath(process.env.CHROME_PATH);
+    }
 
     driver = await new Builder()
       .forBrowser('chrome')
