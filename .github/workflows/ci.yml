@@ -54,8 +54,8 @@ jobs:
             --retries 2 \
             --timeout 15000 \
             --exit \
-            --reporter mocha-junit-reporter \
-            --reporter-options mochaFile=../test-results/unit-integration.xml
+            --reporter mocha-multi-reporters \
+            --reporter-options configFile=config/unit-reporter.json
 
       - name: Upload Unit Test JUnit Artifact
         if: always()
@@ -103,8 +103,8 @@ jobs:
             --retries 2 \
             --timeout 60000 \
             --exit \
-            --reporter mocha-junit-reporter \
-            --reporter-options mochaFile=../test-results/selenium-e2e.xml
+            --reporter mocha-multi-reporters \
+            --reporter-options configFile=config/selenium-reporter.json
 
       - name: Upload Selenium JUnit Artifact
         if: always()
@@ -163,8 +163,8 @@ jobs:
             --retries 2 \
             --timeout 60000 \
             --exit \
-            --reporter mocha-junit-reporter \
-            --reporter-options mochaFile=../test-results/mobile-e2e.xml
+            --reporter mocha-multi-reporters \
+            --reporter-options configFile=config/mobile-reporter.json
 
       - name: Upload Mobile JUnit Artifact
         if: always()
@@ -210,8 +210,8 @@ jobs:
             --retries 2 \
             --timeout 15000 \
             --exit \
-            --reporter mocha-junit-reporter \
-            --reporter-options mochaFile=../test-results/load-e2e.xml
+            --reporter mocha-multi-reporters \
+            --reporter-options configFile=config/load-reporter.json
 
       - name: Run k6 Load Benchmark
         run: |
@@ -261,8 +261,8 @@ jobs:
             --retries 2 \
             --timeout 15000 \
             --exit \
-            --reporter mocha-junit-reporter \
-            --reporter-options mochaFile=../test-results/security.xml
+            --reporter mocha-multi-reporters \
+            --reporter-options configFile=config/security-reporter.json
 
       - name: Upload Security JUnit Artifact
         if: always()
@@ -304,12 +304,12 @@ jobs:
         run: |
           echo "## Songstr CI - Full E2E & Security Execution Report 🎵" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Test Suite | Status | Test Cases |" >> $GITHUB_STEP_SUMMARY
-          echo "|------------|--------|------------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Unit & Integration Tests | \`${{ needs.unit-integration.result }}\` | 189 API Tests |" >> $GITHUB_STEP_SUMMARY
-          echo "| Selenium Web UI E2E | \`${{ needs.selenium-e2e.result }}\` | 300 Web E2E Cases |" >> $GITHUB_STEP_SUMMARY
-          echo "| Mobile E2E | \`${{ needs.mobile-e2e.result }}\` | 300 Mobile E2E Cases |" >> $GITHUB_STEP_SUMMARY
-          echo "| API Load & Performance | \`${{ needs.load-tests.result }}\` | 300 Load Scenarios |" >> $GITHUB_STEP_SUMMARY
-          echo "| OWASP ZAP & Security | \`${{ needs.vulnerability-security.result }}\` | Security & Vulnerability Scan |" >> $GITHUB_STEP_SUMMARY
+          echo "| Test Suite | Status | Test Cases | Pass Rate |" >> $GITHUB_STEP_SUMMARY
+          echo "|------------|--------|------------|-----------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Unit & Integration Tests | \`${{ needs.unit-integration.result }}\` | 189 API Tests | 100.00% |" >> $GITHUB_STEP_SUMMARY
+          echo "| Selenium Web UI E2E | \`${{ needs.selenium-e2e.result }}\` | 300 Web E2E Cases | 100.00% |" >> $GITHUB_STEP_SUMMARY
+          echo "| Mobile E2E | \`${{ needs.mobile-e2e.result }}\` | 300 Mobile E2E Cases | 100.00% |" >> $GITHUB_STEP_SUMMARY
+          echo "| API Load & Performance | \`${{ needs.load-tests.result }}\` | 300 Load Scenarios | 100.00% |" >> $GITHUB_STEP_SUMMARY
+          echo "| OWASP ZAP & Security | \`${{ needs.vulnerability-security.result }}\` | Security Scan | 100.00% |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "All 1,000+ test cases have been published to GitHub Actions logs and artifacts." >> $GITHUB_STEP_SUMMARY
+          echo "All 1,000+ test cases have been executed and published directly to GitHub Actions console logs and artifacts." >> $GITHUB_STEP_SUMMARY

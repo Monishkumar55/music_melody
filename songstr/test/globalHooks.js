@@ -29,14 +29,30 @@ exports.mochaHooks = {
   afterAll: async function() {
     if (testServer) {
       await new Promise(resolve => testServer.close(resolve));
-      console.log('[globalHooks] Express server stopped');
+      console.log('\n[globalHooks] Express server stopped');
     }
     try {
+      const results = excelReporter.results;
+      const total = results.length;
+      const passed = results.filter(r => r.status === 'PASSED').length;
+      const failed = results.filter(r => r.status === 'FAILED').length;
+      const skipped = results.filter(r => r.status === 'SKIPPED').length;
+      const passRate = total > 0 ? ((passed / total) * 100).toFixed(2) : '100.00';
+
+      console.log('\n=======================================================================');
+      console.log(` 📊 E2E TEST SUITE SUMMARY REPORT`);
+      console.log('=======================================================================');
+      console.log(` Total Test Cases Executed : ${total}`);
+      console.log(` Passed Test Cases          : ${passed} ✅`);
+      console.log(` Failed Test Cases          : ${failed} ❌`);
+      console.log(` Skipped Test Cases         : ${skipped} ⚠️`);
+      console.log(` Pass Percentage            : ${passRate}% 🎯`);
+      console.log('=======================================================================\n');
+
       const path = await excelReporter.generateExcelReport();
-      console.log(`\n[ExcelReporter] E2E Excel Report generated successfully at: ${path}`);
+      console.log(`[ExcelReporter] E2E Excel Report generated successfully at: ${path}`);
     } catch (err) {
       console.error('[ExcelReporter] Error generating Excel report:', err);
     }
   }
 };
-
