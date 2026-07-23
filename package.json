@@ -9,6 +9,9 @@
     "build": "npm --prefix songstr run build",
     "test": "npm --prefix songstr run test",
     "test:integration": "npm --prefix songstr run test:integration",
+    "test:coverage": "npm --prefix songstr run test:coverage",
+    "test:reports": "npm --prefix songstr run test:reports",
+    "test:junit": "npm --prefix songstr run test:junit",
     "test:e2e": "python run_validation.py"
   },
   "dependencies": {

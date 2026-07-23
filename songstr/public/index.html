@@ -6,7 +6,6 @@
   <meta name="description" content="Songstr – AI-powered mood-based music recommendation app. Detect your mood through text, voice or face and get personalized playlists." />
   <title>Songstr – Music that matches your mood</title>
   <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <style>
     /* =========== RESET & BASE =========== */
@@ -717,20 +716,7 @@
 <body>
 <div class="app">
 
-  <!-- Auth Modal -->
-  <div class="auth-modal-overlay" id="auth-modal">
-    <div class="auth-modal">
-      <button class="auth-close" onclick="closeAuthModal()">×</button>
-      <div class="auth-title" id="auth-title">Welcome Back</div>
-      <form id="auth-form" onsubmit="submitAuth(event)">
-        <input type="text" id="auth-username" class="auth-input" placeholder="Username (min 3 chars)" required minlength="3">
-        <input type="password" id="auth-password" class="auth-input" placeholder="Password (min 5 chars)" required minlength="5">
-        <button type="submit" class="auth-btn-submit" id="auth-submit-btn">Login</button>
-      </form>
-      <div class="auth-toggle" id="auth-toggle-text">
-        Don't have an account? <span onclick="toggleAuthMode()">Register</span>
-      </div>
-    </div>
+  
   </div>
 
 
@@ -1080,14 +1066,165 @@
       <div class="bnav-item" onclick="showScreen('browse')"><div class="icon">🎭</div>Browse</div>
       <div class="bnav-item" onclick="showScreen('favorites')"><div class="icon">♥</div>Saved</div>
     </div>
+  <!-- ==================== SCREEN 7: LOGIN ==================== -->
+  <div class="screen" id="screen-login">
+    <nav>
+      <div class="nav-logo" onclick="showScreen('home')">
+        <div class="logo-icon">🎵</div>
+        <span>Song<span class="str">str</span></span>
+      </div>
+      <div class="nav-actions">
+        <button class="nav-btn" onclick="showScreen('home')">← Back</button>
+      </div>
+    </nav>
+    <div style="padding:40px 24px 100px; max-width:400px; margin:0 auto">
+      <h2 style="font-size:24px;font-weight:800;margin-bottom:8px;text-align:center">Welcome Back</h2>
+      <p style="font-size:14px;color:var(--text2);margin-bottom:24px;text-align:center">Log in to access your mood playlists and favorites</p>
+      <form id="login-form">
+        <div style="margin-bottom:16px">
+          <label style="display:block;font-size:13px;margin-bottom:6px;color:var(--text2)">Username or Email</label>
+          <input type="text" name="username" class="search-bar" style="width:100%;padding:12px;border-radius:12px;background:var(--card);border:1px solid var(--glass-border);color:var(--text)" required placeholder="Enter username" />
+        </div>
+        <div style="margin-bottom:20px">
+          <label style="display:block;font-size:13px;margin-bottom:6px;color:var(--text2)">Password</label>
+          <input type="password" name="password" class="search-bar" style="width:100%;padding:12px;border-radius:12px;background:var(--card);border:1px solid var(--glass-border);color:var(--text)" required placeholder="Enter password" />
+        </div>
+        <button type="submit" class="btn-primary" style="width:100%;padding:14px;border-radius:12px;font-size:16px">Log In</button>
+      </form>
+      <p style="text-align:center;margin-top:20px;font-size:14px;color:var(--text2)">
+        Don't have an account? <a href="#" onclick="showScreen('register');return false" style="color:var(--accent-light);font-weight:600">Register</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN 8: REGISTER ==================== -->
+  <div class="screen" id="screen-register">
+    <nav>
+      <div class="nav-logo" onclick="showScreen('home')">
+        <div class="logo-icon">🎵</div>
+        <span>Song<span class="str">str</span></span>
+      </div>
+      <div class="nav-actions">
+        <button class="nav-btn" onclick="showScreen('home')">← Back</button>
+      </div>
+    </nav>
+    <div style="padding:30px 24px 100px; max-width:440px; margin:0 auto">
+      <h2 style="font-size:24px;font-weight:800;margin-bottom:8px;text-align:center">Create Account</h2>
+      <p style="font-size:14px;color:var(--text2);margin-bottom:20px;text-align:center">Join Songstr for AI-powered mood music</p>
+      <form id="register-form">
+        <div style="margin-bottom:12px">
+          <input type="text" name="fullname" placeholder="Full Name" style="width:100%;padding:12px;border-radius:12px;background:var(--card);border:1px solid var(--glass-border);color:var(--text)" required />
+        </div>
+        <div style="margin-bottom:12px">
+          <input type="text" name="username" placeholder="Username" style="width:100%;padding:12px;border-radius:12px;background:var(--card);border:1px solid var(--glass-border);color:var(--text)" required />
+        </div>
+        <div style="margin-bottom:12px">
+          <input type="email" name="email" placeholder="Email Address" style="width:100%;padding:12px;border-radius:12px;background:var(--card);border:1px solid var(--glass-border);color:var(--text)" required />
+        </div>
+        <div style="margin-bottom:12px">
+          <input type="text" name="phone" placeholder="Phone (optional)" style="width:100%;padding:12px;border-radius:12px;background:var(--card);border:1px solid var(--glass-border);color:var(--text)" />
+        </div>
+        <div style="margin-bottom:12px">
+          <input type="password" name="password" placeholder="Password" style="width:100%;padding:12px;border-radius:12px;background:var(--card);border:1px solid var(--glass-border);color:var(--text)" required />
+        </div>
+        <div style="margin-bottom:16px">
+          <input type="password" name="confirmPassword" placeholder="Confirm Password" style="width:100%;padding:12px;border-radius:12px;background:var(--card);border:1px solid var(--glass-border);color:var(--text)" required />
+        </div>
+        <div style="margin-bottom:20px;display:flex;align-items:center;gap:8px">
+          <input type="checkbox" id="terms-check" required />
+          <label for="terms-check" style="font-size:13px;color:var(--text2)">I agree to Terms & Privacy Policy</label>
+        </div>
+        <button type="submit" class="btn-primary" style="width:100%;padding:14px;border-radius:12px;font-size:16px">Create Account</button>
+      </form>
+      <p style="text-align:center;margin-top:16px;font-size:14px;color:var(--text2)">
+        Already have an account? <a href="#" onclick="showScreen('login');return false" style="color:var(--accent-light);font-weight:600">Log In</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN 9: PROFILE & SETTINGS ==================== -->
+  <div class="screen" id="screen-profile">
+    <nav>
+      <div class="nav-logo" onclick="showScreen('home')">
+        <div class="logo-icon">🎵</div>
+        <span>Song<span class="str">str</span></span>
+      </div>
+      <div class="nav-actions">
+        <button class="nav-btn" onclick="showScreen('home')">Home</button>
+      </div>
+    </nav>
+    <div style="padding:24px; max-width:600px; margin:0 auto 100px">
+      <div style="display:flex;align-items:center;gap:20px;margin-bottom:24px">
+        <img id="profile-avatar-img" src="https://ui-avatars.com/api/?name=User&background=random" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid var(--accent)" alt="Avatar" />
+        <div>
+          <h2 id="prof-fullname" style="font-size:22px;font-weight:800">Songstr User</h2>
+          <p id="prof-username" style="font-size:14px;color:var(--accent-light)">@user</p>
+          <p id="prof-email" style="font-size:13px;color:var(--text2)">user@test.com</p>
+        </div>
+      </div>
+      <form id="form-edit-profile" style="background:var(--card);padding:20px;border-radius:16px;border:1px solid var(--glass-border)">
+        <h3 style="font-size:16px;margin-bottom:16px;color:var(--accent-light)">Edit Profile</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+          <div>
+            <label style="font-size:12px;color:var(--text2)">Full Name</label>
+            <input type="text" name="fullname" placeholder="Full name" style="width:100%;padding:10px;border-radius:8px;background:var(--bg3);border:1px solid var(--glass-border);color:var(--text)" />
+          </div>
+          <div>
+            <label style="font-size:12px;color:var(--text2)">Username</label>
+            <input type="text" name="username" placeholder="Username" style="width:100%;padding:10px;border-radius:8px;background:var(--bg3);border:1px solid var(--glass-border);color:var(--text)" />
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+          <div>
+            <label style="font-size:12px;color:var(--text2)">Country</label>
+            <input type="text" name="country" id="profile-country" placeholder="Country" style="width:100%;padding:10px;border-radius:8px;background:var(--bg3);border:1px solid var(--glass-border);color:var(--text)" />
+          </div>
+          <div>
+            <label style="font-size:12px;color:var(--text2)">Gender</label>
+            <select name="gender" id="profile-gender" style="width:100%;padding:10px;border-radius:8px;background:var(--bg3);border:1px solid var(--glass-border);color:var(--text)">
+              <option value="other">Other</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom:16px">
+          <label style="font-size:12px;color:var(--text2)">Bio</label>
+          <textarea name="bio" id="profile-bio" rows="3" placeholder="Tell us about your musical mood..." style="width:100%;padding:10px;border-radius:8px;background:var(--bg3);border:1px solid var(--glass-border);color:var(--text);resize:none"></textarea>
+        </div>
+        <button type="submit" class="btn-primary" style="padding:10px 20px;border-radius:8px">Save Changes</button>
+      </form>
+
+      <div style="background:var(--card);padding:20px;border-radius:16px;border:1px solid var(--glass-border);margin-top:20px">
+        <h3 style="font-size:16px;margin-bottom:16px;color:var(--accent-light)">Settings</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <span>Language Preference</span>
+          <select id="settings-lang" style="padding:8px 12px;border-radius:8px;background:var(--bg3);border:1px solid var(--glass-border);color:var(--text)">
+            <option value="en">English</option>
+            <option value="ta">Tamil</option>
+            <option value="hi">Hindi</option>
+          </select>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span>Theme</span>
+          <button id="settings-theme" class="btn-secondary" onclick="document.body.classList.toggle('light-theme')" style="padding:8px 16px;border-radius:8px">Toggle Theme</button>
+        </div>
+      </div>
+    </div>
   </div>
 
 </div><!-- /app -->
 
 <script>
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const SUPABASE_URL = 'https://amcicvnpccllzbrrnckq.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtY2ljdnBucGNsbHpicnJuY2txIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3MjYwNjIsImV4cCI6MjEwMDMwMjA2Mn0.npCcxMAf-tOVJh8Nv0GYO4j-vq-04koLOlavu5KJ-MY';
+try {
+  if (typeof supabase !== 'undefined') {
+    window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+} catch(e) {
+  console.warn('Supabase initialization skipped:', e);
+}
 
 let faceApiLoaded = false;
 
@@ -1184,19 +1321,12 @@ function showScreen(name) {
 // HOME: TIME-BASED SUGGESTION
 // ============================================================
 async function fetchSuggestedMood() {
-  try {
-    const r = await fetch('/api/suggest-mood');
-    if (!r.ok) throw new Error('API error');
-    const d = await r.json();
-    document.getElementById('sug-mood').textContent = MOOD_LABELS[d.mood] || d.mood;
-    document.getElementById('sug-reason').textContent = d.reason;
-    document.getElementById('sug-play-btn').dataset.mood = d.mood;
-  } catch(e) {
-    const h = new Date().getHours();
-    const m = h < 9 ? 'energetic' : h < 18 ? 'happy' : 'relaxed';
-    document.getElementById('sug-mood').textContent = MOOD_LABELS[m];
-    document.getElementById('sug-play-btn').dataset.mood = m;
-  }
+  const h = new Date().getHours();
+  const m = h < 9 ? 'energetic' : h < 18 ? 'happy' : 'relaxed';
+  const reason = h < 9 ? 'Good morning! Start your day right' : h < 18 ? 'Keep the good vibes going' : 'Time to unwind and relax';
+  document.getElementById('sug-mood').textContent = MOOD_LABELS[m];
+  document.getElementById('sug-reason').textContent = reason;
+  document.getElementById('sug-play-btn').dataset.mood = m;
 }
 
 function playSuggested() {
@@ -1239,21 +1369,11 @@ async function analyzeMoodFromText() {
   const text = document.getElementById('mood-text').value.trim();
   if (!text) { showToast('Please enter how you feel'); return; }
   showLoading('Analyzing your mood...');
-  try {
-    const r = await fetch('/api/detect-mood', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text })
-    });
-    if (!r.ok) throw new Error('API error');
-    const d = await r.json();
+  const mood = detectMoodOffline(text);
+  setTimeout(() => {
     hideLoading();
-    loadMoodResults(d.mood);
-  } catch(e) {
-    hideLoading();
-    const mood = detectMoodOffline(text);
     loadMoodResults(mood);
-  }
+  }, 800);
 }
 
 function detectMoodOffline(text) {
@@ -1320,31 +1440,18 @@ function stopRecording() {
 
 async function analyzeVoiceText() {
   const text = voiceText || document.getElementById('voice-transcript').textContent;
-  if (!text || text === 'Your words will appear here...') {
+  if (!text) {
     showToast('Please record your voice first'); 
     return;
   }
   showLoading('Analyzing voice mood...');
-  try {
-    const r = await fetch('/api/detect-mood', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text })
-    });
-    if (!r.ok) throw new Error('API error');
-    const d = await r.json();
+  const mood = detectMoodOffline(text);
+  setTimeout(() => {
     hideLoading();
-    // Reset voice text after analysis
     voiceText = '';
     document.getElementById('voice-transcript').textContent = 'Your words will appear here...';
-    loadMoodResults(d.mood);
-  } catch(e) {
-    hideLoading();
-    // Reset voice text after analysis
-    voiceText = '';
-    document.getElementById('voice-transcript').textContent = 'Your words will appear here...';
-    loadMoodResults(detectMoodOffline(text));
-  }
+    loadMoodResults(mood);
+  }, 800);
 }
 
 // ============================================================
@@ -1459,15 +1566,15 @@ async function loadMoodResults(mood) {
 }
 
 async function buildLangFilter(mood) {
-  let languages;
+  let languages = ['All'];
   try {
-    const r = await fetch(`/api/languages?mood=${encodeURIComponent(mood)}`);
-    if (!r.ok) throw new Error('API error');
-    const d = await r.json();
-    languages = d.languages || ['All'];
+    const { data, error } = await window.supabaseClient.from('songs').select('language').eq('mood', mood);
+    if (!error && data) {
+      const langs = new Set(data.map(d => d.language));
+      languages = ['All', ...langs];
+    }
   } catch(e) {
     console.error('Language fetch error:', e);
-    languages = ['All','Tamil','Hindi','English','Telugu','Malayalam','Kannada','Bengali','Korean'];
   }
   const filter = document.getElementById('lang-filter');
   if (!filter) return;
@@ -1478,10 +1585,13 @@ async function buildLangFilter(mood) {
 
 async function loadSongs(mood, lang) {
   try {
-    const r = await fetch(`/api/songs?mood=${encodeURIComponent(mood)}&lang=${encodeURIComponent(lang)}`);
-    if (!r.ok) throw new Error('API error');
-    const d = await r.json();
-    currentSongs = d.songs;
+    let query = window.supabaseClient.from('songs').select('*').eq('mood', mood);
+    if (lang && lang !== 'All') {
+      query = query.eq('language', lang);
+    }
+    const { data, error } = await query;
+    if (error) throw new Error(error.message);
+    currentSongs = (data || []).sort(() => 0.5 - Math.random());
     renderSongs(currentSongs, 'songs-list');
   } catch(e) {
     renderSongs(getFallbackSongs(mood, lang), 'songs-list');
@@ -1898,65 +2008,84 @@ function toggleAuthMode() {
 async function submitAuth(e) {
   e.preventDefault();
 
-  const username =
-    document.getElementById("auth-username").value;
-
-  const password =
-    document.getElementById("auth-password").value;
-
-  const endpoint =
-    isLoginMode
-      ? "/api/auth/login"
-      : "/api/auth/register";
-
-  const response = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    credentials: "include",
-    body: JSON.stringify({
-      username,
-      password
-    })
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    alert(data.error);
+  const username = document.getElementById("auth-username").value.trim();
+  const password = document.getElementById("auth-password").value;
+  
+  if (!username || !password) {
+    showToast('Please enter both username and password');
     return;
   }
 
-  currentUser = data.user;
-
-  alert(
-    isLoginMode
-      ? "Login successful"
-      : "Registration successful"
-  );
-
-  closeAuthModal();
+  // Create a synthetic email for Supabase Auth since it strictly requires an email
+  const email = username.includes('@') ? username : `${username}@songstr.app`;
+  const actualUsername = username.includes('@') ? username.split('@')[0] : username;
+  
+  try {
+    showLoading(isLoginMode ? 'Logging in...' : 'Registering...');
+    
+    if (isLoginMode) {
+      const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
+      if (error) throw error;
+      currentUser = data.user;
+      showToast('Login successful!');
+    } else {
+      const { data, error } = await window.supabaseClient.auth.signUp({
+        email: email,
+        password: password,
+        options: { data: { username: actualUsername, fullname: actualUsername } }
+      });
+      if (error) throw error;
+      currentUser = data.user;
+      showToast('Registration successful!');
+      if (!isLoginMode) toggleAuthMode(); // Reset to login mode if needed
+    }
+    
+    closeAuthModal();
+    updateUserUI();
+  } catch (error) {
+    console.error('Auth error:', error.message);
+    showToast('Auth error: ' + error.message);
+  } finally {
+    hideLoading();
+  }
 }
 
+function updateUserUI() {
+  const loginBtns = document.querySelectorAll('.nav-icon-btn[title="Login"], .nav-icon-btn[title="Logout"]');
+  loginBtns.forEach(btn => {
+    if (currentUser) {
+      btn.textContent = '🚪';
+      btn.title = 'Logout';
+      btn.onclick = async () => {
+        if (window.supabaseClient && window.supabaseClient.auth) {
+          await window.supabaseClient.auth.signOut();
+        }
+        currentUser = null;
+        updateUserUI();
+        showToast('Logged out');
+      };
+    } else {
+      btn.textContent = '👤';
+      btn.title = 'Login';
+      btn.onclick = openAuthModal;
+    }
+  });
+}
 
 async function checkLogin() {
-
-  const response =
-    await fetch("/api/auth/me", {
-      credentials: "include"
-    });
-
-  const data =
-    await response.json();
-
-  if (data.loggedIn) {
-    currentUser = data.user;
-
-    console.log(
-      "Logged in as:",
-      currentUser.username
-    );
+  try {
+    if (window.supabaseClient && window.supabaseClient.auth) {
+      const { data: { session } } = await window.supabaseClient.auth.getSession();
+      if (session) {
+        currentUser = session.user;
+        updateUserUI();
+      }
+    }
+  } catch(e) {
+    console.error('Session check failed', e);
   }
 }
 

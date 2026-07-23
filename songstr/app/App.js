@@ -13,6 +13,7 @@ import { ProfileService } from '../shared/services/profileService.js';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
+  const [detectedMood, setDetectedMood] = useState('happy');
   const [user, setUser] = useState({ username: 'demo_user', fullname: 'Demo User' });
   const [currentTrack, setCurrentTrack] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -69,6 +70,7 @@ export default function App() {
       case 'home':
         return (
           <HomeScreen
+            initialMood={detectedMood}
             currentTrack={currentTrack}
             isPlaying={isPlaying}
             onPlaySong={handlePlaySong}
@@ -79,7 +81,10 @@ export default function App() {
       case 'detect':
         return (
           <DetectScreen
-            onMoodDetected={() => setActiveTab('home')}
+            onMoodDetected={(mood) => {
+              setDetectedMood(mood);
+              setActiveTab('home');
+            }}
           />
         );
       case 'browse':

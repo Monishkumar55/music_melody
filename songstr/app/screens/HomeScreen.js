@@ -6,11 +6,15 @@ import { SongCard } from '../components/SongCard.js';
 const MOODS = ['happy', 'sad', 'angry', 'relaxed', 'energetic', 'stressed', 'romantic', 'neutral'];
 const LANGUAGES = ['All', 'Tamil', 'Telugu', 'Malayalam', 'Hindi', 'English', 'Kannada', 'Bengali', 'Punjabi', 'Korean', 'Japanese'];
 
-export function HomeScreen({ currentTrack, isPlaying, onPlaySong, onToggleFavorite, favorites }) {
-  const [selectedMood, setSelectedMood] = useState('happy');
+export function HomeScreen({ initialMood = 'happy', currentTrack, isPlaying, onPlaySong, onToggleFavorite, favorites }) {
+  const [selectedMood, setSelectedMood] = useState(initialMood);
   const [selectedLanguage, setSelectedLanguage] = useState('All');
   const [songs, setSongs] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setSelectedMood(initialMood);
+  }, [initialMood]);
 
   useEffect(() => {
     loadSongs(selectedMood, selectedLanguage);

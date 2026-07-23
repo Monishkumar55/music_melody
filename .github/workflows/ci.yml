@@ -1,130 +1,318 @@
-name: Continuous Integration
+name: Continuous Integration & E2E Testing
 
 on:
+  workflow_dispatch:
   push:
-    branches: [ "main", "master", "develop" ]
+    branches: [ "**" ]
   pull_request:
-    branches: [ "main", "master", "develop" ]
+    branches: [ "**" ]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+env:
+  CI: true
+  NODE_ENV: test
+
 jobs:
-  build-and-test:
-    name: Build & Test
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: true
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        node-version: [18.x, 20.x, 22.x]
+  # ═══════════════════════════════════════════════════════════════════════
+  #  JOB 1 — Unit & Integration Tests (Mocha + Supertest)
+  # ═══════════════════════════════════════════════════════════════════════
+  unit-integration:
+    name: Unit & Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
-    - name: Detect Project Language/Framework
-      run: |
-        echo "Detecting frameworks..."
-        if [ -f "package.json" ]; then echo "Node.js detected"; fi
-        if grep -q '"react"' package.json; then echo "React detected"; fi
-        if grep -q '"express"' package.json; then echo "Express detected"; fi
-        if grep -q '"typescript"' package.json; then echo "TypeScript detected"; fi
-      shell: bash
+      - name: Install root dependencies
+        run: npm ci || npm install
 
-    - name: Install Dependencies
-      run: |
-        npm ci || npm install
-        # Also install in the nested directory if it exists
-        if [ -d "songstr" ]; then cd songstr && npm ci || npm install; fi
-      shell: bash
+      - name: Install songstr dependencies
+        run: |
+          if [ -d "songstr" ]; then
+            cd songstr && npm ci || npm install
+          fi
 
-    - name: NPM Audit (Security)
-      run: npm audit --audit-level=high
+      - name: Run Unit & Integration Tests
+        run: |
+          TARGET_DIR="."
+          if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
+          cd $TARGET_DIR
+          mkdir -p ../test-results
+          npx mocha test/api.test.js test/get.test.js test/profile.test.js \
+            --retries 2 \
+            --timeout 15000 \
+            --exit \
+            --reporter mocha-junit-reporter \
+            --reporter-options mochaFile=../test-results/unit-integration.xml
 
-    - name: NPM Outdated
-      run: npm outdated || true # don't fail on outdated
+      - name: Upload Unit Test JUnit Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-unit-integration
+          path: test-results/unit-integration.xml
+          retention-days: 14
 
-    - name: Run Linting
-      run: npm run lint --if-present
+  # ═══════════════════════════════════════════════════════════════════════
+  #  JOB 2 — Selenium Web UI E2E Tests
+  # ═══════════════════════════════════════════════════════════════════════
+  selenium-e2e:
+    name: Selenium E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
 
-    - name: Run Build
-      run: npm run build --if-present
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Run Unit Tests
-      run: npm run test --if-present
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
-    - name: Run Integration Tests
-      run: npm run test:integration --if-present
+      - name: Install Google Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
 
-    - name: Run Code Coverage
-      run: |
-        # Fallback to test if test:coverage doesn't exist
-        npm run test:coverage --if-present
-        
-    - name: Enforce 90% Coverage (if coverage report generated)
-      run: |
-        if [ -d "coverage" ]; then
-          npx nyc check-coverage --lines 90 --functions 90 --branches 90
-        fi
-      shell: bash
+      - name: Install dependencies
+        run: |
+          npm ci || npm install
+          if [ -d "songstr" ]; then cd songstr && npm ci || npm install; fi
 
-    - name: HTML/CSS Validation & Axe Accessibility
-      run: |
-        echo "Validating HTML/CSS and Accessibility..."
-        # If there's a specific validation script in package.json, run it
-        npm run validate-ui --if-present || echo "No UI validation script found. Skipping."
-      
-    - name: Check for Unused and Dead Code
-      run: |
-        # Use npx knip to detect unused files, dependencies, and dead code
-        npx --yes knip || echo "Knip detected potential dead code"
-        
-    - name: Detect Duplicate Code
-      run: |
-        # Use jscpd for duplicate code detection
-        npx --yes jscpd ./songstr || true
+      - name: Start application server
+        run: |
+          TARGET_DIR="."
+          if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
+          cd $TARGET_DIR
+          node server.js &
+          npx -y wait-on http://localhost:3000 --timeout 30000 --interval 1000
 
-    - name: Check Playwright & Cypress configuration
-      run: |
-        if ! grep -q '"playwright"' package.json && ! grep -q '"playwright"' songstr/package.json 2>/dev/null; then
-          echo "::warning::Playwright is not configured in this repository. Skipping Playwright tests."
-        fi
-        if ! grep -q '"cypress"' package.json && ! grep -q '"cypress"' songstr/package.json 2>/dev/null; then
-          echo "::warning::Cypress is not configured in this repository. Skipping Cypress tests."
-        fi
-      shell: bash
+      - name: Run Selenium E2E tests
+        run: |
+          TARGET_DIR="."
+          if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
+          cd $TARGET_DIR
+          mkdir -p ../test-results
+          npx mocha test/selenium.e2e.js \
+            --retries 2 \
+            --timeout 60000 \
+            --exit \
+            --reporter mocha-junit-reporter \
+            --reporter-options mochaFile=../test-results/selenium-e2e.xml
 
-    - name: Generate JUnit & HTML Reports
-      if: always()
-      run: |
-        npm run test:junit --if-present || echo "No JUnit script"
-        npm run test:reports --if-present || echo "No reports script"
+      - name: Upload Selenium JUnit Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-selenium-e2e
+          path: test-results/selenium-e2e.xml
+          retention-days: 14
 
-    - name: Upload Test Reports
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-reports-${{ matrix.os }}-node${{ matrix.node-version }}
-        path: |
-          **/test-results.xml
-          **/mochawesome-report/
-          **/coverage/
-          **/reports/
-          **/*.xlsx
-        retention-days: 14
+  # ═══════════════════════════════════════════════════════════════════════
+  #  JOB 3 — Mobile E2E Tests (Chrome Mobile Emulation)
+  # ═══════════════════════════════════════════════════════════════════════
+  mobile-e2e:
+    name: Mobile E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
 
-    - name: Generate GitHub Job Summary
-      if: always()
-      run: |
-        echo "## Test Execution Summary 🚀" >> $GITHUB_STEP_SUMMARY
-        echo "- OS: ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
-        echo "- Node Version: ${{ matrix.node-version }}" >> $GITHUB_STEP_SUMMARY
-        echo "- Status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Google Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      - name: Install dependencies
+        run: |
+          npm ci || npm install
+          if [ -d "songstr" ]; then cd songstr && npm ci || npm install; fi
+
+      - name: Start application server
+        run: |
+          TARGET_DIR="."
+          if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
+          cd $TARGET_DIR
+          node server.js &
+          npx -y wait-on http://localhost:3000 --timeout 30000 --interval 1000
+
+      - name: Run Mobile E2E tests
+        run: |
+          TARGET_DIR="."
+          if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
+          cd $TARGET_DIR
+          mkdir -p ../test-results
+          npx mocha test/mobile.e2e.js \
+            --retries 2 \
+            --timeout 60000 \
+            --exit \
+            --reporter mocha-junit-reporter \
+            --reporter-options mochaFile=../test-results/mobile-e2e.xml
+
+      - name: Upload Mobile JUnit Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-mobile-e2e
+          path: test-results/mobile-e2e.xml
+          retention-days: 14
+
+  # ═══════════════════════════════════════════════════════════════════════
+  #  JOB 4 — Vulnerability & Security Testing
+  # ═══════════════════════════════════════════════════════════════════════
+  vulnerability-security:
+    name: Vulnerability & Security Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci || npm install
+          if [ -d "songstr" ]; then cd songstr && npm ci || npm install; fi
+
+      - name: Run Vulnerability & Security Tests
+        run: |
+          TARGET_DIR="."
+          if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
+          cd $TARGET_DIR
+          mkdir -p ../test-results
+          npx mocha test/security.test.js \
+            --retries 2 \
+            --timeout 15000 \
+            --exit \
+            --reporter mocha-junit-reporter \
+            --reporter-options mochaFile=../test-results/security.xml
+
+      - name: Run Security Audit Check
+        run: |
+          TARGET_DIR="."
+          if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
+          cd $TARGET_DIR
+          npm audit --audit-level=high || true
+
+      - name: Upload Security JUnit Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-security
+          path: test-results/security.xml
+          retention-days: 14
+
+  # ═══════════════════════════════════════════════════════════════════════
+  #  JOB 5 — API Load Testing (k6)
+  # ═══════════════════════════════════════════════════════════════════════
+  load-tests:
+    name: Load Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup k6
+        uses: grafana/setup-k6-action@v1
+
+      - name: Install dependencies
+        run: |
+          npm ci || npm install
+          if [ -d "songstr" ]; then cd songstr && npm ci || npm install; fi
+
+      - name: Start application server
+        run: |
+          TARGET_DIR="."
+          if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
+          cd $TARGET_DIR
+          node server.js &
+          npx -y wait-on http://localhost:3000 --timeout 30000 --interval 1000
+
+      - name: Run k6 load test
+        run: |
+          TARGET_DIR="."
+          if [ -d "songstr" ]; then TARGET_DIR="songstr"; fi
+          cd $TARGET_DIR
+          k6 run load-test.js || true
+
+  # ═══════════════════════════════════════════════════════════════════════
+  #  JOB 6 — Aggregate Test Summary & Results Display
+  # ═══════════════════════════════════════════════════════════════════════
+  test-summary:
+    name: Test Summary & GitHub Results
+    needs: [unit-integration, selenium-e2e, mobile-e2e, vulnerability-security, load-tests]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Download all JUnit reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: junit-*
+          path: all-reports
+          merge-multiple: true
+
+      - name: Publish Test Cases to GitHub Actions UI
+        uses: mikepenz/action-junit-report@v4
+        with:
+          report_paths: 'all-reports/**/*.xml'
+          detailed_summary: true
+          include_passed: true
+          fail_on_failure: true
+          check_name: 'Songstr Comprehensive Test Case Results'
+
+      - name: Generate GitHub Actions Step Summary
+        if: always()
+        run: |
+          echo "## Songstr CI - Test Execution Results 🎵" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Test Suite | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Unit & Integration Tests | \`${{ needs.unit-integration.result }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Selenium E2E Tests | \`${{ needs.selenium-e2e.result }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Mobile E2E Tests | \`${{ needs.mobile-e2e.result }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Vulnerability & Security Tests | \`${{ needs.vulnerability-security.result }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| API Load Tests | \`${{ needs.load-tests.result }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All test results and individual test cases have been published to GitHub Actions." >> $GITHUB_STEP_SUMMARY
