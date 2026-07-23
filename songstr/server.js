@@ -591,23 +591,18 @@ app.post('/api/detect-mood', (req, res) => {
 });
 
 app.get('/api/songs', (req, res) => {
-  try {
-    const { mood = 'happy', lang = 'All' } = req.query;
-    if (!SONGS_DB[mood]) {
-      return res.status(404).json({ error: 'Mood not found' });
-    }
-    let songs = [];
-    if (lang === 'All') {
-      Object.values(SONGS_DB[mood]).forEach(list => songs.push(...list));
-    } else {
-      songs = SONGS_DB[mood][lang] || [];
-    }
-    songs = songs.sort(() => Math.random() - 0.5);
-    res.json({ songs, total: songs.length });
-  } catch(err) {
-    console.error('Songs error:', err);
-    res.status(500).json({ error: 'Failed to fetch songs' });
+  const { mood = 'happy', lang = 'All' } = req.query;
+  if (!SONGS_DB[mood]) return res.json({ songs: [], total: 0 });
+  let songs = [];
+  if (lang === 'All') {
+    Object.entries(SONGS_DB[mood]).forEach(([lName, list]) => {
+      list.forEach(s => songs.push({ ...s, mood, language: lName }));
+    });
+  } else {
+    const list = SONGS_DB[mood][lang] || [];
+    songs = list.map(s => ({ ...s, mood, language: lang }));
   }
+  res.json({ songs, total: songs.length });
 });
 
 app.get('/api/moods', (req, res) => {
