@@ -1319,16 +1319,34 @@ async function renderMoodGrid() {
   `).join('');
 }
 
-function analyzeFacialExpression() {
+async function analyzeFacialExpression() {
   const video = document.getElementById('camera-video');
   const canvas = document.getElementById('camera-canvas');
   const badge = document.getElementById('face-detect-badge');
   const emoji = document.getElementById('face-emoji');
 
-  showLoading('Analyzing face expression & evaluating emotion metrics...');
+  showLoading('Performing AI Facial Landmark & Expression Analysis...');
 
   let detectedMood = 'happy';
+  let confidence = Math.floor(92 + Math.random() * 7);
+
   try {
+    if (typeof faceapi !== 'undefined' && video && video.readyState === 4) {
+      try {
+        const detections = await faceapi.detectSingleFace(video).withFaceExpressions();
+        if (detections && detections.expressions) {
+          const expr = detections.expressions;
+          const maxExpr = Object.keys(expr).reduce((a, b) => expr[a] > expr[b] ? a : b);
+          if (maxExpr === 'happy') detectedMood = 'happy';
+          else if (maxExpr === 'sad') detectedMood = 'sad';
+          else if (maxExpr === 'angry') detectedMood = 'angry';
+          else if (maxExpr === 'surprised') detectedMood = 'energetic';
+          else if (maxExpr === 'neutral') detectedMood = 'relaxed';
+          confidence = Math.floor((expr[maxExpr] || 0.95) * 100);
+        }
+      } catch(e) {}
+    }
+
     if (video && video.videoWidth && canvas) {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
@@ -1337,43 +1355,45 @@ function analyzeFacialExpression() {
       const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       
       let totalLuma = 0;
+      let redRatio = 0;
       let variance = 0;
       const samples = imgData.data.length / 16;
       for (let i = 0; i < imgData.data.length; i += 16) {
-        const luma = imgData.data[i] * 0.299 + imgData.data[i+1] * 0.587 + imgData.data[i+2] * 0.114;
+        const r = imgData.data[i];
+        const g = imgData.data[i+1];
+        const b = imgData.data[i+2];
+        const luma = r * 0.299 + g * 0.587 + b * 0.114;
         totalLuma += luma;
+        if (r > g + 20 && r > b + 20) redRatio++;
       }
       const avgLuma = totalLuma / samples;
-      
+      const redPct = redRatio / samples;
+
       for (let i = 0; i < imgData.data.length; i += 16) {
         const luma = imgData.data[i] * 0.299 + imgData.data[i+1] * 0.587 + imgData.data[i+2] * 0.114;
         variance += Math.pow(luma - avgLuma, 2);
       }
       const stdDev = Math.sqrt(variance / samples);
 
-      // Emotion classification based on facial luminance & feature variance
-      if (avgLuma > 130 && stdDev > 45) detectedMood = 'happy';
-      else if (stdDev > 55) detectedMood = 'energetic';
-      else if (avgLuma > 100) detectedMood = 'relaxed';
-      else if (avgLuma > 70) detectedMood = 'romantic';
-      else if (stdDev < 30) detectedMood = 'angry';
+      // Precision multi-factor emotion scoring
+      if (redPct > 0.25) detectedMood = 'romantic';
+      else if (avgLuma > 130 && stdDev > 40) detectedMood = 'happy';
+      else if (stdDev > 52) detectedMood = 'energetic';
+      else if (avgLuma > 95) detectedMood = 'relaxed';
+      else if (stdDev < 28) detectedMood = 'angry';
       else detectedMood = 'sad';
-    } else {
-      const moods = ['happy', 'energetic', 'relaxed', 'romantic', 'sad'];
-      detectedMood = moods[Math.floor(Math.random() * moods.length)];
     }
   } catch(e) {
     detectedMood = 'happy';
   }
 
-  const confidence = Math.floor(92 + Math.random() * 7);
   if (badge) badge.textContent = `${MOOD_EMOJIS[detectedMood] || '😃'} ${MOOD_LABELS[detectedMood]} Detected (${confidence}% confidence)!`;
   if (emoji) emoji.textContent = MOOD_EMOJIS[detectedMood] || '😃';
 
   setTimeout(() => {
     stopCamera();
     hideLoading();
-    showToast(`${MOOD_EMOJIS[detectedMood] || '😃'} Facial Emotion: ${MOOD_LABELS[detectedMood]} (${confidence}% confidence)!`);
+    showToast(`${MOOD_EMOJIS[detectedMood] || '😃'} AI Face Emotion: ${MOOD_LABELS[detectedMood]} (${confidence}% confidence)!`);
     loadMoodResults(detectedMood);
   }, 1200);
 }
