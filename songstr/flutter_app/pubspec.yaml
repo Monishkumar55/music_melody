@@ -1,0 +1,30 @@
+name: songstr
+description: AI-Powered Mood-Based Music Recommendation App
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  provider: ^6.1.2
+  http: ^1.2.1
+  just_audio: ^0.9.39
+  google_fonts: ^6.2.1
+  shared_preferences: ^2.3.2
+  speech_to_text: ^7.0.0
+  shimmer: ^3.0.0
+  cached_network_image: ^3.4.1
+  audio_video_progress_bar: ^2.0.3
+  image_picker: ^1.2.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true

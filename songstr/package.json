@@ -4,11 +4,9 @@
   "description": "AI-Powered Mood-Based Music Recommendation App",
   "main": "server.js",
   "scripts": {
-    "start": "serve public",
+    "start": "node server.js",
     "start:server": "serve public",
     "start:web": "serve public",
-    "start:app": "cd app && npm start",
-    "build:apk": "cd app && npx eas-cli build -p android --profile preview",
     "dev": "serve public",
     "test": "mocha --require test/globalHooks.js test/**/*.test.js test/*.e2e.js --exit",
     "test:coverage": "nyc --reporter=html --reporter=text mocha --require test/globalHooks.js test/**/*.test.js test/*.e2e.js --exit",
@@ -23,20 +21,18 @@
     "test:appium": "mocha --require test/globalHooks.js test/appium.e2e.js --timeout 60000"
   },
   "dependencies": {
+    "@distube/ytdl-core": "^4.16.12",
     "@supabase/supabase-js": "^2.110.8",
     "axios": "^1.18.1",
     "bcryptjs": "^3.0.3",
-    "better-sqlite3": "^12.11.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "exceljs": "^4.4.0",
     "express": "^5.1.0",
-    "face-api.js": "^0.22.2",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.2.0",
     "puppeteer": "^25.3.0",
-    "react-router-dom": "^7.18.0",
-    "sqlite3": "^6.0.1"
+    "yt-search": "^2.13.1"
   },
   "devDependencies": {
     "chromedriver": "^151.0.0",

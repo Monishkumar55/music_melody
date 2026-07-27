@@ -380,6 +380,22 @@
     .empty-icon { font-size: 48px; margin-bottom: 12px; }
     .empty-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
     .empty-sub { font-size: 13px; color: var(--text2); }
+    
+    /* =========== ADMIN SCREEN & CAROUSEL STYLING =========== */
+    .admin-side-item {
+      width: 100%; padding: 12px 16px; border-radius: 10px; text-align: left;
+      background: none; color: var(--text2); font-weight: 600; font-size: 13px;
+      transition: all 0.2s; border: none; outline: none; cursor: pointer;
+    }
+    .admin-side-item:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+    .admin-side-item.active { background: var(--accent); color: #fff; }
+    .admin-tab-view { display: none; }
+    
+    .lang-home-screen .song-card {
+      width: 320px; flex-shrink: 0; margin-bottom: 0;
+    }
+    .clickable-text { cursor: pointer; }
+    .clickable-text:hover { text-decoration: underline; color: var(--accent-light); }
   </style>
 </head>
 <body>
@@ -698,6 +714,17 @@
 
         <button class="btn-primary" style="width:100%" id="analyze-face-btn" onclick="analyzeFacialExpression()">📷 Re-scan Face Expression → Music</button>
       </div>
+
+      <!-- Detection Result Card -->
+      <div id="detection-result-card" style="display:none; margin-top:20px; background:var(--card); border:1px solid var(--glass-border); padding:20px; border-radius:16px; text-align:center; animation: fadeInUp 0.4s ease-out">
+        <div style="font-size:12px; font-weight:700; color:var(--accent-light); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px">Vibe Detected!</div>
+        <div style="display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:14px">
+          <span style="font-size:42px" id="detected-mood-emoji">😄</span>
+          <span style="font-size:24px; font-weight:900; color:#fff" id="detected-mood-label">Happy</span>
+        </div>
+        <div style="font-size:13px; color:var(--text2); margin-bottom:18px" id="detected-mood-confidence">Confidence: 96%</div>
+        <button class="btn-primary" style="width:100%" id="suggest-songs-btn">✨ Suggest Songs for Happy Mood →</button>
+      </div>
     </div>
   </div>
 
@@ -891,6 +918,518 @@
     </div>
   </div>
 
+  <!-- ==================== SCREEN 11: ARTIST PAGE ==================== -->
+  <div class="screen" id="screen-artist">
+    <nav>
+      <div class="nav-logo" onclick="showScreen('home')">
+        <div class="logo-icon">🎵</div>
+        <span>Song<span class="str">str</span></span>
+      </div>
+      <div class="nav-actions">
+        <button class="nav-btn logout-btn" onclick="handleLogout()">🚪 Logout</button>
+        <button class="nav-btn" onclick="showScreen('home')">← Home</button>
+      </div>
+    </nav>
+
+    <div class="artist-screen" style="padding:24px; max-width:900px; margin:0 auto; width:100%">
+      <div class="artist-header-card" style="display:flex; gap:24px; align-items:center; background:var(--card); border:1px solid var(--glass-border); padding:28px; border-radius:var(--radius); margin-bottom:24px; flex-wrap:wrap">
+        <img id="artist-img" src="" style="width:120px; height:120px; border-radius:50%; object-fit:cover; border:3px solid var(--accent)" />
+        <div style="flex:1; min-width:250px">
+          <h2 id="artist-name" style="font-size:32px; font-weight:900; margin-bottom:6px">Artist Name</h2>
+          <p id="artist-bio" style="font-size:14px; color:var(--text2); line-height:1.5; margin-bottom:12px">Artist biography details.</p>
+          <div style="display:flex; gap:16px; font-size:13px; color:var(--accent-light); font-weight:700">
+            <span id="artist-total-songs">0 Songs</span>
+            <span id="artist-total-albums">0 Albums</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:24px">
+        <h3 style="font-size:18px; font-weight:800; margin-bottom:12px">Albums</h3>
+        <div id="artist-albums-list" style="display:flex; gap:16px; overflow-x:auto; padding-bottom:12px; scrollbar-width:thin">
+          <!-- Albums go here -->
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:24px">
+        <div>
+          <h3 style="font-size:18px; font-weight:800; margin-bottom:12px">Popular Songs</h3>
+          <div class="songs-list" id="artist-popular-songs"></div>
+        </div>
+        <div>
+          <h3 style="font-size:18px; font-weight:800; margin-bottom:12px">Latest Songs</h3>
+          <div class="songs-list" id="artist-latest-songs"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN 12: ALBUM PAGE ==================== -->
+  <div class="screen" id="screen-album">
+    <nav>
+      <div class="nav-logo" onclick="showScreen('home')">
+        <div class="logo-icon">🎵</div>
+        <span>Song<span class="str">str</span></span>
+      </div>
+      <div class="nav-actions">
+        <button class="nav-btn logout-btn" onclick="handleLogout()">🚪 Logout</button>
+        <button class="nav-btn" onclick="showScreen('home')">← Home</button>
+      </div>
+    </nav>
+
+    <div class="album-screen" style="padding:24px; max-width:800px; margin:0 auto; width:100%">
+      <div class="album-header-card" style="display:flex; gap:24px; align-items:center; background:var(--card); border:1px solid var(--glass-border); padding:28px; border-radius:var(--radius); margin-bottom:24px; flex-wrap:wrap">
+        <div style="width:140px; height:140px; border-radius:16px; background:linear-gradient(135deg, var(--accent), #a855f7); display:flex; align-items:center; justify-content:center; font-size:48px; border:1px solid var(--glass-border); box-shadow:var(--shadow)" id="album-cover-placeholder">💿</div>
+        <div style="flex:1; min-width:250px">
+          <span style="font-size:11px; font-weight:700; color:var(--accent-light); text-transform:uppercase; letter-spacing:1px">Album</span>
+          <h2 id="album-title" style="font-size:28px; font-weight:900; margin-bottom:6px">Album Title</h2>
+          <p id="album-artist-name" style="font-size:16px; font-weight:700; color:var(--text); cursor:pointer" onclick="">By Artist</p>
+          <p id="album-year" style="font-size:13px; color:var(--text2); margin-top:4px">Released 2024</p>
+        </div>
+      </div>
+
+      <h3 style="font-size:18px; font-weight:800; margin-bottom:12px">Track List</h3>
+      <div class="songs-list" id="album-tracks-list"></div>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN 13: LANGUAGE HOME ==================== -->
+  <div class="screen" id="screen-language-home">
+    <nav>
+      <div class="nav-logo" onclick="showScreen('home')">
+        <div class="logo-icon">🎵</div>
+        <span>Song<span class="str">str</span></span>
+      </div>
+      <div class="nav-actions">
+        <button class="nav-btn logout-btn" onclick="handleLogout()">🚪 Logout</button>
+        <button class="nav-btn" onclick="showScreen('browse')">Browse</button>
+      </div>
+    </nav>
+
+    <div class="lang-home-screen" style="padding:24px">
+      <div style="background:linear-gradient(135deg, var(--accent), #7c3aed); padding:40px 28px; border-radius:var(--radius); margin-bottom:28px; box-shadow:var(--shadow)">
+        <h2 id="lang-home-title" style="font-size:36px; font-weight:900; color:#fff">Tamil Music Home</h2>
+        <p style="font-size:15px; color:rgba(255,255,255,0.8); margin-top:4px">Your favorite tracks in one place.</p>
+      </div>
+
+      <div style="margin-bottom:28px">
+        <h3 style="font-size:18px; font-weight:800; margin-bottom:12px">🔥 Trending</h3>
+        <div id="lang-trending-list" class="songs-list" style="display:flex; gap:16px; overflow-x:auto; padding-bottom:12px; scrollbar-width:thin"></div>
+      </div>
+
+      <div style="margin-bottom:28px">
+        <h3 style="font-size:18px; font-weight:800; margin-bottom:12px">✨ Latest Arrivals</h3>
+        <div id="lang-latest-list" class="songs-list" style="display:flex; gap:16px; overflow-x:auto; padding-bottom:12px; scrollbar-width:thin"></div>
+      </div>
+
+      <div style="margin-bottom:28px">
+        <h3 style="font-size:18px; font-weight:800; margin-bottom:12px">💖 Popular Hits</h3>
+        <div id="lang-popular-list" class="songs-list" style="display:flex; gap:16px; overflow-x:auto; padding-bottom:12px; scrollbar-width:thin"></div>
+      </div>
+
+      <div style="margin-bottom:28px">
+        <h3 style="font-size:18px; font-weight:800; margin-bottom:12px">🏆 Top Rated</h3>
+        <div id="lang-top-rated-list" class="songs-list" style="display:flex; gap:16px; overflow-x:auto; padding-bottom:12px; scrollbar-width:thin"></div>
+      </div>
+
+      <div style="margin-bottom:28px">
+        <h3 style="font-size:18px; font-weight:800; margin-bottom:12px">🕒 Recently Added</h3>
+        <div id="lang-recently-added-list" class="songs-list" style="display:flex; gap:16px; overflow-x:auto; padding-bottom:12px; scrollbar-width:thin"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN 14: ADMIN DASHBOARD ==================== -->
+  <div class="screen" id="screen-admin">
+    <nav>
+      <div class="nav-logo" onclick="showScreen('home')">
+        <div class="logo-icon">🛠️</div>
+        <span>Admin<span class="str">Panel</span></span>
+      </div>
+      <div class="nav-actions">
+        <button class="nav-btn" onclick="showScreen('home')">← Back to App</button>
+      </div>
+    </nav>
+
+    <div class="admin-container" style="display:flex; min-height:calc(100vh - 70px); flex-wrap:wrap">
+      <!-- Admin Sidebar -->
+      <div class="admin-sidebar" style="width:220px; background:var(--bg2); border-right:1px solid var(--glass-border); padding:20px 10px; display:flex; flex-direction:column; gap:6px">
+        <button class="admin-side-item active" onclick="switchAdminTab('stats', this)">📊 Statistics</button>
+        <button class="admin-side-item" onclick="switchAdminTab('upload', this)">➕ Upload Song</button>
+        <button class="admin-side-item" onclick="switchAdminTab('bulk', this)">📦 Bulk Upload</button>
+        <button class="admin-side-item" onclick="switchAdminTab('manage', this)">📝 Manage Songs</button>
+        <button class="admin-side-item" onclick="switchAdminTab('languages', this)">🌐 Languages</button>
+        <button class="admin-side-item" onclick="switchAdminTab('artists', this)">👤 Artists</button>
+        <button class="admin-side-item" onclick="switchAdminTab('albums', this)">💿 Albums</button>
+        <button class="admin-side-item" onclick="switchAdminTab('genres', this)">🎵 Genres</button>
+        <button class="admin-side-item" onclick="switchAdminTab('sync', this)">🔄 Cloudinary Sync</button>
+        <button class="admin-side-item" onclick="switchAdminTab('broken', this)">🔗 Broken Links</button>
+        <button class="admin-side-item" onclick="switchAdminTab('duplicates', this)">👯 Duplicate Songs</button>
+      </div>
+
+      <!-- Admin Content View -->
+      <div class="admin-content" style="flex:1; padding:24px; min-width:300px; background:var(--bg)">
+        
+        <!-- Tab 1: stats -->
+        <div id="admin-tab-stats" class="admin-tab-view" style="display:block">
+          <h2 style="font-size:24px; font-weight:900; margin-bottom:20px">Library Statistics</h2>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:16px; margin-bottom:28px">
+            <div style="background:var(--card); border:1px solid var(--glass-border); padding:20px; border-radius:12px; text-align:center">
+              <div style="font-size:12px; font-weight:700; color:var(--text2)">Total Songs</div>
+              <div style="font-size:32px; font-weight:900; color:var(--accent-light); margin-top:4px" id="admin-stat-songs">0</div>
+            </div>
+            <div style="background:var(--card); border:1px solid var(--glass-border); padding:20px; border-radius:12px; text-align:center">
+              <div style="font-size:12px; font-weight:700; color:var(--text2)">Total Users</div>
+              <div style="font-size:32px; font-weight:900; color:var(--pink); margin-top:4px" id="admin-stat-users">0</div>
+            </div>
+            <div style="background:var(--card); border:1px solid var(--glass-border); padding:20px; border-radius:12px; text-align:center">
+              <div style="font-size:12px; font-weight:700; color:var(--text2)">Total Plays</div>
+              <div style="font-size:32px; font-weight:900; color:var(--green); margin-top:4px" id="admin-stat-plays">0</div>
+            </div>
+            <div style="background:var(--card); border:1px solid var(--glass-border); padding:20px; border-radius:12px; text-align:center">
+              <div style="font-size:12px; font-weight:700; color:var(--text2)">Total Likes</div>
+              <div style="font-size:32px; font-weight:900; color:var(--yellow); margin-top:4px" id="admin-stat-likes">0</div>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:24px; flex-wrap:wrap">
+            <div style="background:var(--card); border:1px solid var(--glass-border); padding:20px; border-radius:12px">
+              <h4 style="margin-bottom:12px">Languages Distribution</h4>
+              <div id="admin-stat-languages-list" style="display:flex; flex-direction:column; gap:8px"></div>
+            </div>
+            <div style="background:var(--card); border:1px solid var(--glass-border); padding:20px; border-radius:12px">
+              <h4 style="margin-bottom:12px">Genres Distribution</h4>
+              <div id="admin-stat-genres-list" style="display:flex; flex-direction:column; gap:8px"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: upload -->
+        <div id="admin-tab-upload" class="admin-tab-view" style="display:none">
+          <h2 style="font-size:24px; font-weight:900; margin-bottom:12px">Upload New Song</h2>
+          <p style="font-size:13px; color:var(--text2); margin-bottom:20px">Configure metadata and files. Will automatically upload into Cloudinary language folders.</p>
+          <form id="admin-upload-form" onsubmit="submitAdminSongUpload(event)" style="background:var(--card); border:1px solid var(--glass-border); padding:24px; border-radius:16px; display:grid; grid-template-columns:1fr 1fr; gap:16px">
+            <div style="grid-column:1/3; display:flex; gap:16px">
+              <div style="flex:1">
+                <label class="auth-label">Language</label>
+                <select name="language" class="auth-input" required style="width:100%; border-radius:10px; padding:10px 14px; background:rgba(0,0,0,0.5); color:var(--text)">
+                  <option value="Tamil">Tamil</option>
+                  <option value="Telugu">Telugu</option>
+                  <option value="Hindi">Hindi</option>
+                  <option value="Malayalam">Malayalam</option>
+                  <option value="Kannada">Kannada</option>
+                  <option value="English">English</option>
+                  <option value="Punjabi">Punjabi</option>
+                  <option value="Bengali">Bengali</option>
+                  <option value="Marathi">Marathi</option>
+                  <option value="Gujarati">Gujarati</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div style="flex:1">
+                <label class="auth-label">Artist Name</label>
+                <input type="text" name="artist" class="auth-input" required placeholder="e.g. Anirudh" style="width:100%; border-radius:10px; padding:10px 14px; background:rgba(0,0,0,0.5); color:var(--text)" />
+              </div>
+            </div>
+            <div style="grid-column:1/3; display:flex; gap:16px">
+              <div style="flex:1">
+                <label class="auth-label">Album / Movie</label>
+                <input type="text" name="album" class="auth-input" required placeholder="e.g. Master" style="width:100%; border-radius:10px; padding:10px 14px; background:rgba(0,0,0,0.5); color:var(--text)" />
+              </div>
+              <div style="flex:1">
+                <label class="auth-label">Song Title</label>
+                <input type="text" name="title" class="auth-input" required placeholder="e.g. Kutti Story" style="width:100%; border-radius:10px; padding:10px 14px; background:rgba(0,0,0,0.5); color:var(--text)" />
+              </div>
+            </div>
+            <div>
+              <label class="auth-label">Genre</label>
+              <input type="text" name="genre" class="auth-input" required placeholder="e.g. Pop" style="width:100%; border-radius:10px; padding:10px 14px; background:rgba(0,0,0,0.5); color:var(--text)" />
+            </div>
+            <div>
+              <label class="auth-label">Release Year</label>
+              <input type="number" name="year" class="auth-input" required placeholder="2024" style="width:100%; border-radius:10px; padding:10px 14px; background:rgba(0,0,0,0.5); color:var(--text)" />
+            </div>
+            <div>
+              <label class="auth-label">Thumbnail / Cover Art File</label>
+              <input type="file" name="coverImage" accept="image/*" class="auth-input" required style="width:100%; border-radius:10px; padding:10px 14px; background:rgba(0,0,0,0.5); color:var(--text)" />
+            </div>
+            <div>
+              <label class="auth-label">Audio File</label>
+              <input type="file" name="audioFile" accept="audio/*" class="auth-input" required style="width:100%; border-radius:10px; padding:10px 14px; background:rgba(0,0,0,0.5); color:var(--text)" />
+            </div>
+            <div>
+              <label class="auth-label">Duration (in seconds)</label>
+              <input type="number" name="duration" class="auth-input" required placeholder="e.g. 240" style="width:100%; border-radius:10px; padding:10px 14px; background:rgba(0,0,0,0.5); color:var(--text)" />
+            </div>
+            <div>
+              <label class="auth-label">Mood Tags</label>
+              <select name="moodTags" class="auth-input" required style="width:100%; border-radius:10px; padding:10px 14px; background:rgba(0,0,0,0.5); color:var(--text)">
+                <option value="happy">happy</option>
+                <option value="sad">sad</option>
+                <option value="angry">angry</option>
+                <option value="relaxed">relaxed</option>
+                <option value="energetic">energetic</option>
+                <option value="stressed">stressed</option>
+                <option value="romantic">romantic</option>
+                <option value="neutral">neutral</option>
+              </select>
+            </div>
+            <div style="grid-column: 1/3">
+              <label class="auth-label">Search Keywords (comma-separated)</label>
+              <input type="text" name="keywords" class="auth-input" placeholder="happy, master, anirudh, kutti story" style="width:100%; border-radius:10px; padding:10px 14px; background:rgba(0,0,0,0.5); color:var(--text)" />
+            </div>
+            <div style="grid-column: 1/3">
+              <label class="auth-label">Lyrics (optional)</label>
+              <textarea name="lyrics" class="auth-input" style="height:80px; resize:none; width:100%; border-radius:10px; padding:10px 14px; background:rgba(0,0,0,0.5); color:var(--text)" placeholder="Song lyrics..."></textarea>
+            </div>
+            <div>
+              <label class="auth-label">Visibility</label>
+              <select name="visibility" class="auth-input" style="width:100%; border-radius:10px; padding:10px 14px; background:rgba(0,0,0,0.5); color:var(--text)">
+                <option value="public">Public</option>
+                <option value="private">Private (Admin only)</option>
+              </select>
+            </div>
+            <div style="display:flex; align-items:flex-end">
+              <button type="submit" class="btn-primary" style="width:100%; justify-content:center; padding:12px">Upload & Verify Song</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Tab 3: bulk -->
+        <div id="admin-tab-bulk" class="admin-tab-view" style="display:none">
+          <h2 style="font-size:24px; font-weight:900; margin-bottom:12px">Bulk Song Import</h2>
+          <p style="font-size:13px; color:var(--text2); margin-bottom:20px">Upload multiple songs at once. Enter metadata as a JSON array.</p>
+          <div style="background:var(--card); border:1px solid var(--glass-border); padding:20px; border-radius:12px">
+            <label class="auth-label">Paste JSON Song List</label>
+            <textarea id="bulk-json-input" class="auth-input" style="height:250px; font-family:monospace; resize:none; margin-bottom:14px; width:100%; border-radius:10px; padding:10px 14px; background:rgba(0,0,0,0.5); color:var(--text)" placeholder='[
+  {
+    "title": "Song Title",
+    "artist": "Artist Name",
+    "album": "Album Name",
+    "language": "Tamil",
+    "genre": "Pop",
+    "year": 2024,
+    "duration": 200,
+    "moodTags": "happy"
+  }
+]'></textarea>
+            <button class="btn-primary" onclick="submitBulkImport()">Process Bulk Import →</button>
+          </div>
+        </div>
+
+        <!-- Tab 4: manage -->
+        <div id="admin-tab-manage" class="admin-tab-view" style="display:none">
+          <h2 style="font-size:24px; font-weight:900; margin-bottom:12px">Manage Songs Library</h2>
+          <div style="margin-bottom:16px">
+            <input type="text" id="admin-manage-search" class="auth-input" placeholder="Filter songs by title/artist..." oninput="filterAdminManageSongs(this.value)" style="width:100%; border-radius:10px; padding:10px 14px; background:rgba(0,0,0,0.5); color:var(--text)" />
+          </div>
+          <div style="overflow-x:auto">
+            <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px">
+              <thead>
+                <tr style="border-bottom:1px solid var(--glass-border); color:var(--text2)">
+                  <th style="padding:10px">Title</th>
+                  <th style="padding:10px">Artist</th>
+                  <th style="padding:10px">Language</th>
+                  <th style="padding:10px">Mood</th>
+                  <th style="padding:10px">Plays</th>
+                  <th style="padding:10px">Status</th>
+                  <th style="padding:10px">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-manage-songs-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab 5: edit-meta -->
+        <div id="admin-tab-edit-meta" class="admin-tab-view" style="display:none">
+          <h2 style="font-size:24px; font-weight:900; margin-bottom:12px">Edit Song Metadata</h2>
+          <form id="admin-edit-meta-form" onsubmit="submitEditMetadata(event)" style="background:var(--card); border:1px solid var(--glass-border); padding:24px; border-radius:16px; display:grid; grid-template-columns:1fr 1fr; gap:16px">
+            <input type="hidden" name="songId" />
+            <div>
+              <label class="auth-label">Song Title</label>
+              <input type="text" name="title" class="auth-input" required style="width:100%; border-radius:10px; padding:10px 14px; background:rgba(0,0,0,0.5); color:var(--text)" />
+            </div>
+            <div>
+              <label class="auth-label">Artist</label>
+              <input type="text" name="artist" class="auth-input" required style="width:100%; border-radius:10px; padding:10px 14px; background:rgba(0,0,0,0.5); color:var(--text)" />
+            </div>
+            <div>
+              <label class="auth-label">Album</label>
+              <input type="text" name="album" class="auth-input" required style="width:100%; border-radius:10px; padding:10px 14px; background:rgba(0,0,0,0.5); color:var(--text)" />
+            </div>
+            <div>
+              <label class="auth-label">Language</label>
+              <input type="text" name="language" class="auth-input" required style="width:100%; border-radius:10px; padding:10px 14px; background:rgba(0,0,0,0.5); color:var(--text)" />
+            </div>
+            <div>
+              <label class="auth-label">Genre</label>
+              <input type="text" name="genre" class="auth-input" style="width:100%; border-radius:10px; padding:10px 14px; background:rgba(0,0,0,0.5); color:var(--text)" />
+            </div>
+            <div>
+              <label class="auth-label">Release Year</label>
+              <input type="number" name="year" class="auth-input" style="width:100%; border-radius:10px; padding:10px 14px; background:rgba(0,0,0,0.5); color:var(--text)" />
+            </div>
+            <div>
+              <label class="auth-label">Duration (seconds)</label>
+              <input type="number" name="duration" class="auth-input" style="width:100%; border-radius:10px; padding:10px 14px; background:rgba(0,0,0,0.5); color:var(--text)" />
+            </div>
+            <div>
+              <label class="auth-label">Mood Tags</label>
+              <input type="text" name="moodTags" class="auth-input" style="width:100%; border-radius:10px; padding:10px 14px; background:rgba(0,0,0,0.5); color:var(--text)" />
+            </div>
+            <div style="grid-column:1/3">
+              <label class="auth-label">Keywords</label>
+              <input type="text" name="keywords" class="auth-input" style="width:100%; border-radius:10px; padding:10px 14px; background:rgba(0,0,0,0.5); color:var(--text)" />
+            </div>
+            <div style="grid-column:1/3">
+              <label class="auth-label">Lyrics</label>
+              <textarea name="lyrics" class="auth-input" style="height:100px; resize:none; width:100%; border-radius:10px; padding:10px 14px; background:rgba(0,0,0,0.5); color:var(--text)"></textarea>
+            </div>
+            <div style="grid-column:1/3; display:flex; gap:12px; margin-top:12px">
+              <button type="submit" class="btn-primary">Save Changes</button>
+              <button type="button" class="btn-secondary" onclick="switchAdminTab('manage')">Cancel</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Tab 6: languages -->
+        <div id="admin-tab-languages" class="admin-tab-view" style="display:none">
+          <h2 style="font-size:24px; font-weight:900; margin-bottom:20px">Manage Languages</h2>
+          <div style="overflow-x:auto" class="songs-list">
+            <table style="width:100%; border-collapse:collapse; text-align:left; font-size:14px">
+              <thead>
+                <tr style="border-bottom:1px solid var(--glass-border); color:var(--text2)">
+                  <th style="padding:12px">Language</th>
+                  <th style="padding:12px">Songs Count</th>
+                </tr>
+              </thead>
+              <tbody id="admin-languages-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab 7: artists -->
+        <div id="admin-tab-artists" class="admin-tab-view" style="display:none">
+          <h2 style="font-size:24px; font-weight:900; margin-bottom:20px">Manage Artists</h2>
+          <div style="overflow-x:auto" class="songs-list">
+            <table style="width:100%; border-collapse:collapse; text-align:left; font-size:14px">
+              <thead>
+                <tr style="border-bottom:1px solid var(--glass-border); color:var(--text2)">
+                  <th style="padding:12px">Artist Name</th>
+                  <th style="padding:12px">Image URL</th>
+                  <th style="padding:12px">Biography</th>
+                  <th style="padding:12px">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-artists-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab 8: albums -->
+        <div id="admin-tab-albums" class="admin-tab-view" style="display:none">
+          <h2 style="font-size:24px; font-weight:900; margin-bottom:20px">Manage Albums</h2>
+          <div style="overflow-x:auto" class="songs-list">
+            <table style="width:100%; border-collapse:collapse; text-align:left; font-size:14px">
+              <thead>
+                <tr style="border-bottom:1px solid var(--glass-border); color:var(--text2)">
+                  <th style="padding:12px">Album Name</th>
+                  <th style="padding:12px">Cover Image</th>
+                  <th style="padding:12px">Release Year</th>
+                  <th style="padding:12px">Artist</th>
+                  <th style="padding:12px">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-albums-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab 9: genres -->
+        <div id="admin-tab-genres" class="admin-tab-view" style="display:none">
+          <h2 style="font-size:24px; font-weight:900; margin-bottom:20px">Manage Genres</h2>
+          <div style="overflow-x:auto" class="songs-list">
+            <table style="width:100%; border-collapse:collapse; text-align:left; font-size:14px">
+              <thead>
+                <tr style="border-bottom:1px solid var(--glass-border); color:var(--text2)">
+                  <th style="padding:12px">Genre</th>
+                  <th style="padding:12px">Song Count</th>
+                </tr>
+              </thead>
+              <tbody id="admin-genres-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab 10: sync -->
+        <div id="admin-tab-sync" class="admin-tab-view" style="display:none">
+          <h2 style="font-size:24px; font-weight:900; margin-bottom:12px">Cloudinary Folder Sync</h2>
+          <p style="font-size:13px; color:var(--text2); margin-bottom:20px">Check synchronization status with Cloudinary folders structure.</p>
+          <div style="margin-bottom:16px">
+            <button class="btn-primary" onclick="runCloudinarySync()">Sync Database & Structure</button>
+          </div>
+          <div style="overflow-x:auto" class="songs-list">
+            <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px">
+              <thead>
+                <tr style="border-bottom:1px solid var(--glass-border); color:var(--text2)">
+                  <th style="padding:10px">Title</th>
+                  <th style="padding:10px">Artist</th>
+                  <th style="padding:10px">Cloudinary Public ID</th>
+                  <th style="padding:10px">Sync Status</th>
+                </tr>
+              </thead>
+              <tbody id="admin-sync-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab 11: broken -->
+        <div id="admin-tab-broken" class="admin-tab-view" style="display:none">
+          <h2 style="font-size:24px; font-weight:900; margin-bottom:12px">Broken Media Links Diagnostic</h2>
+          <p style="font-size:13px; color:var(--text2); margin-bottom:20px">Scan audio URLs and album cover images for dead or missing files.</p>
+          <div style="margin-bottom:16px">
+            <button class="btn-primary" onclick="scanBrokenLinks()">Run Diagnostics Scan</button>
+          </div>
+          <div style="overflow-x:auto" class="songs-list">
+            <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px">
+              <thead>
+                <tr style="border-bottom:1px solid var(--glass-border); color:var(--text2)">
+                  <th style="padding:10px">Title</th>
+                  <th style="padding:10px">Artist</th>
+                  <th style="padding:10px">Audio Link</th>
+                  <th style="padding:10px">Cover Link</th>
+                </tr>
+              </thead>
+              <tbody id="admin-broken-tbody">
+                <tr><td colspan="4" style="text-align:center; padding:20px; color:var(--text3)">Click "Run Diagnostics Scan" above to evaluate links.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab 12: duplicates -->
+        <div id="admin-tab-duplicates" class="admin-tab-view" style="display:none">
+          <h2 style="font-size:24px; font-weight:900; margin-bottom:12px">Duplicate Records Resolution</h2>
+          <p style="font-size:13px; color:var(--text2); margin-bottom:20px">Identifies songs with duplicate title and artist configurations.</p>
+          <div style="overflow-x:auto" class="songs-list">
+            <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px">
+              <thead>
+                <tr style="border-bottom:1px solid var(--glass-border); color:var(--text2)">
+                  <th style="padding:10px">Title</th>
+                  <th style="padding:10px">Artist</th>
+                  <th style="padding:10px">Occurrences</th>
+                  <th style="padding:10px">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-duplicates-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ==================== ADD / UPLOAD SONG MODAL ==================== -->
@@ -1051,6 +1590,30 @@ function updateNavUserUI() {
   if (vEmail) vEmail.textContent = email;
   const vFavs = document.getElementById('prof-val-favs');
   if (vFavs) vFavs.textContent = `${favorites.length} Saved Songs`;
+
+  // Inject green Admin button if role is admin
+  const isAdmin = currentUser.role === 'admin';
+  document.querySelectorAll('.nav-actions').forEach(el => {
+    let adminBtn = el.querySelector('.admin-dash-btn');
+    if (isAdmin) {
+      if (!adminBtn) {
+        adminBtn = document.createElement('button');
+        adminBtn.className = 'nav-btn admin-dash-btn';
+        adminBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+        adminBtn.style.color = '#fff';
+        adminBtn.style.fontWeight = 'bold';
+        adminBtn.style.borderRadius = '8px';
+        adminBtn.style.padding = '8px 12px';
+        adminBtn.style.cursor = 'pointer';
+        adminBtn.style.border = 'none';
+        adminBtn.textContent = '🛠️ Admin';
+        adminBtn.onclick = () => showScreen('admin');
+        el.insertBefore(adminBtn, el.firstChild);
+      }
+    } else {
+      if (adminBtn) adminBtn.remove();
+    }
+  });
 }
 
 function showScreen(name) {
@@ -1068,7 +1631,7 @@ function showScreen(name) {
 
   const bottomNav = document.getElementById('main-bottom-nav');
   if (bottomNav) {
-    bottomNav.style.display = authScreens.includes(name) ? 'none' : 'flex';
+    bottomNav.style.display = (authScreens.includes(name) || name === 'admin') ? 'none' : 'flex';
   }
 
   document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('active'));
@@ -1081,6 +1644,7 @@ function showScreen(name) {
   if (name === 'browse') renderMoodGrid();
   if (name === 'results') buildLangFilter(currentMood);
   if (name === 'profile') updateNavUserUI();
+  if (name === 'admin') switchAdminTab('stats');
 }
 
 function togglePassVisibility(inputId, btn) {
@@ -1286,27 +1850,20 @@ async function loadMoodResults(mood) {
 async function loadSongs(mood, lang) {
   try {
     let songs = [];
-    const res = await fetch(`/api/songs?mood=${mood}&lang=${lang}`);
+    let params = new URLSearchParams();
+    if (mood && mood !== 'all') params.append('mood', mood);
+    if (lang && lang !== 'All') params.append('lang', lang);
+    
+    const res = await fetch(`/api/songs?${params.toString()}`);
     if (res.ok) {
       const d = await res.json();
       songs = d.songs || [];
     }
-    if (songs.length === 0) songs = getFallbackSongs(mood, lang);
 
-    // Merge custom uploaded songs
-    const userUploaded = customSongs.filter(s => {
-      const matchMood = !mood || mood === 'all' || s.mood === mood;
-      const matchLang = !lang || lang === 'All' || s.language === lang;
-      return matchMood && matchLang;
-    });
-
-    currentSongs = [...userUploaded, ...songs];
+    currentSongs = songs;
     renderSongs(currentSongs, 'songs-list');
   } catch(e) {
-    const fallback = getFallbackSongs(mood, lang);
-    const userUploaded = customSongs.filter(s => (!mood || s.mood === mood) && (!lang || lang === 'All' || s.language === lang));
-    currentSongs = [...userUploaded, ...fallback];
-    renderSongs(currentSongs, 'songs-list');
+    console.error('Error loading songs:', e);
   }
 }
 
@@ -1327,12 +1884,12 @@ function renderSongs(songs, containerId) {
       <div class="song-art" style="background:${artColor}">🎵</div>
       <div class="song-info">
         <div class="song-title">${escapeHtml(song.title)}</div>
-        <div class="song-artist">${escapeHtml(song.artist)}</div>
-        <div class="song-movie">${escapeHtml(song.movie || '')}</div>
+        <div class="song-artist clickable-text" onclick="event.stopPropagation(); openArtistPage('${escapeHtml(song.artist)}')">${escapeHtml(song.artist)}</div>
+        <div class="song-movie clickable-text" onclick="event.stopPropagation(); openAlbumPage('${escapeHtml(song.movie || song.album || '')}')">${escapeHtml(song.movie || song.album || '')}</div>
         <div class="song-chips">
           <span class="song-chip">${escapeHtml(song.genre || 'Music')}</span>
           ${song.year ? `<span class="song-chip">${song.year}</span>` : ''}
-          ${song.language ? `<span class="song-chip lang">${escapeHtml(song.language)}</span>` : ''}
+          ${song.language ? `<span class="song-chip lang clickable-text" onclick="event.stopPropagation(); openLanguageHome('${escapeHtml(song.language)}')">${escapeHtml(song.language)}</span>` : ''}
         </div>
       </div>
       <div class="song-actions">
@@ -1345,16 +1902,24 @@ function renderSongs(songs, containerId) {
   }).join('');
 }
 
-// 100% TITLE-MATCHED PLAYBACK
+let currentQueue = [];
+let currentQueueIndex = -1;
+
 function playSongByIndex(index) {
+  currentQueue = renderedSongs;
+  currentQueueIndex = index;
   const song = renderedSongs[index];
   if (song) playSong(song);
 }
 function playSongFavorite(index) {
+  currentQueue = favorites;
+  currentQueueIndex = index;
   const song = favorites[index];
   if (song) playSong(song);
 }
 function playSongSearch(index) {
+  currentQueue = searchResults;
+  currentQueueIndex = index;
   const song = searchResults[index];
   if (song) playSong(song);
 }
@@ -1362,11 +1927,22 @@ function playSongSearch(index) {
 function playSong(song) {
   const title = song.title || 'Track';
   const artist = song.artist || 'Artist';
-  const songUrl = song.file_url || song.url || song.file || `/api/stream?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}`;
+  const songUrl = song.songId 
+    ? `/api/stream?songId=${song.songId}&title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}&_ts=${Date.now()}`
+    : `/api/stream?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}&_ts=${Date.now()}`;
 
   document.getElementById('p-title').textContent = title;
-  document.getElementById('p-artist').textContent = artist ? `${artist} • ${song.language || 'Music'}` : 'Songstr Player';
+  document.getElementById('p-artist').innerHTML = `<span class="clickable-text" onclick="openArtistPage('${escapeHtml(artist)}')">${escapeHtml(artist)}</span> • <span class="clickable-text" onclick="openAlbumPage('${escapeHtml(song.album || song.movie || 'Single Album')}')">${escapeHtml(song.album || song.movie || 'Single Album')}</span>`;
   
+  const pArt = document.getElementById('p-art');
+  if (pArt) {
+    if (song.coverImage) {
+      pArt.innerHTML = `<img src="${song.coverImage}" style="width:100%;height:100%;object-fit:cover;border-radius:4px" />`;
+    } else {
+      pArt.innerHTML = `🎵`;
+    }
+  }
+
   const audio = document.getElementById('player-audio');
   if (audio) {
     audio.src = songUrl;
@@ -1472,6 +2048,9 @@ function switchTab(name) {
     if (tabBtn) tabBtn.classList.toggle('active', t === name);
     if (panel) panel.style.display = t === name ? 'block' : 'none';
   });
+
+  const resCard = document.getElementById('detection-result-card');
+  if (resCard) resCard.style.display = 'none';
 
   // Stop active speech recognition when leaving voice tab
   if (name !== 'voice' && recognition) {
@@ -1934,6 +2513,640 @@ function showToast(msg) {
 function showLoading(text) {
   document.getElementById('loading-text').textContent = text || 'Loading...';
   document.getElementById('loading-overlay').classList.add('active');
+}
+
+function hideLoading() {
+  document.getElementById('loading-overlay').classList.remove('active');
+}
+
+// ============================================================
+// AUTO-PLAY NEXT SONG IN QUEUE
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  const audio = document.getElementById('player-audio');
+  if (audio) {
+    audio.addEventListener('ended', () => {
+      if (currentQueue && currentQueueIndex >= 0 && currentQueueIndex + 1 < currentQueue.length) {
+        currentQueueIndex++;
+        const nextSong = currentQueue[currentQueueIndex];
+        playSong(nextSong);
+      }
+    });
+  }
+});
+
+// ============================================================
+// ARTIST & ALBUM DETAIL PAGES LOADING
+// ============================================================
+async function openArtistPage(artistName) {
+  if (!artistName) return;
+  showLoading('Loading Artist Details...');
+  try {
+    const res = await fetch(`/api/artists/${encodeURIComponent(artistName)}`);
+    if (!res.ok) throw new Error('Failed to fetch artist');
+    const data = await res.json();
+    
+    document.getElementById('artist-name').textContent = data.artistName;
+    document.getElementById('artist-bio').textContent = data.biography;
+    document.getElementById('artist-total-songs').textContent = `${data.totalSongs} Songs`;
+    document.getElementById('artist-total-albums').textContent = `${data.albums.length} Albums`;
+    
+    const artistImgEl = document.getElementById('artist-img');
+    if (data.imageUrl) {
+      artistImgEl.src = data.imageUrl;
+      artistImgEl.style.display = 'block';
+    } else {
+      artistImgEl.src = '/uploads/artists/default.jpg';
+    }
+
+    // Render artist albums
+    const albumsListEl = document.getElementById('artist-albums-list');
+    if (data.albums.length === 0) {
+      albumsListEl.innerHTML = `<span style="color:var(--text3); font-size:13px">No albums found</span>`;
+    } else {
+      albumsListEl.innerHTML = data.albums.map(a => `
+        <div style="background:var(--card); border:1px solid var(--glass-border); padding:12px; border-radius:12px; min-width:140px; text-align:center; cursor:pointer" onclick="openAlbumPage('${escapeHtml(a.albumName)}')">
+          <div style="width:116px; height:116px; background:#a855f7; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:36px; margin-bottom:8px">💿</div>
+          <div style="font-size:12px; font-weight:700; max-width:116px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">${escapeHtml(a.albumName)}</div>
+          <div style="font-size:11px; color:var(--text2); margin-top:2px">${a.releaseYear}</div>
+        </div>
+      `).join('');
+    }
+
+    // Render popular & latest songs
+    renderSongQueue(data.popularSongs, 'artist-popular-songs');
+    renderSongQueue(data.latestSongs, 'artist-latest-songs');
+
+    showScreen('artist');
+  } catch(err) {
+    showToast(err.message);
+  } finally {
+    hideLoading();
+  }
+}
+
+let artistSongsMap = {};
+function renderSongQueue(songs, containerId) {
+  const el = document.getElementById(containerId);
+  if (!songs || songs.length === 0) {
+    el.innerHTML = `<div style="color:var(--text3); font-size:13px; padding:10px">No tracks available</div>`;
+    return;
+  }
+  
+  artistSongsMap[containerId] = songs;
+  
+  el.innerHTML = songs.map((song, i) => {
+    const isFav = favorites.some(f => f.title === song.title && f.artist === song.artist);
+    return `
+      <div class="song-card" onclick="playSongFromMap('${containerId}', ${i})" style="padding:10px; margin-bottom:8px">
+        <div class="song-art" style="width:36px; height:36px; font-size:14px; background:#6366f1">🎵</div>
+        <div class="song-info" style="margin-left:10px; flex:1">
+          <div class="song-title" style="font-size:13px">${escapeHtml(song.title)}</div>
+          <div class="song-artist" style="font-size:11px">${escapeHtml(song.artist)}</div>
+        </div>
+        <div class="song-actions">
+          <button class="song-icon-btn ${isFav ? 'liked' : ''}" onclick="event.stopPropagation(); toggleFavFromMap('${containerId}', this, ${i})">
+            ${isFav ? '♥' : '♡'}
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function playSongFromMap(mapId, index) {
+  const list = artistSongsMap[mapId];
+  if (list && list[index]) {
+    currentQueue = list;
+    currentQueueIndex = index;
+    playSong(list[index]);
+  }
+}
+
+function toggleFavFromMap(mapId, btn, index) {
+  const list = artistSongsMap[mapId];
+  if (!list || !list[index]) return;
+  const song = list[index];
+  const idx = favorites.findIndex(f => f.title === song.title && f.artist === song.artist);
+  if (idx >= 0) {
+    favorites.splice(idx, 1);
+    btn.textContent = '♡';
+    btn.classList.remove('liked');
+    showToast('Removed from favorites');
+  } else {
+    favorites.push({ ...song });
+    btn.textContent = '♥';
+    btn.classList.add('liked');
+    showToast('♥ Saved to favorites!');
+  }
+  try { localStorage.setItem('songstr_fav', JSON.stringify(favorites)); } catch(e) {}
+}
+
+async function openAlbumPage(albumName) {
+  if (!albumName) return;
+  showLoading('Loading Album Tracks...');
+  try {
+    const res = await fetch(`/api/albums/${encodeURIComponent(albumName)}`);
+    if (!res.ok) throw new Error('Album not found');
+    const data = await res.json();
+    
+    document.getElementById('album-title').textContent = data.albumName;
+    document.getElementById('album-artist-name').textContent = `By ${data.artist}`;
+    document.getElementById('album-artist-name').onclick = () => openArtistPage(data.artist);
+    document.getElementById('album-year').textContent = `Released ${data.releaseYear}`;
+    
+    renderSongQueue(data.songs, 'album-tracks-list');
+    showScreen('album');
+  } catch(err) {
+    showToast(err.message);
+  } finally {
+    hideLoading();
+  }
+}
+
+// ============================================================
+// LANGUAGE MUSIC HOME PAGE
+// ============================================================
+async function openLanguageHome(lang) {
+  if (!lang || lang === 'All') return;
+  showLoading(`Loading ${lang} Music Home...`);
+  try {
+    document.getElementById('lang-home-title').textContent = `${lang} Music Home`;
+    
+    const res = await fetch(`/api/search?q=${encodeURIComponent(lang)}`);
+    if (!res.ok) throw new Error('Failed to fetch songs');
+    const data = await res.json();
+    const songs = data.results || [];
+    
+    const trending = [...songs].sort((a,b) => (b.playCount || 0) - (a.playCount || 0));
+    const latest = [...songs].sort((a,b) => (b.year || 0) - (a.year || 0));
+    const popular = [...songs].sort((a,b) => (b.likes || 0) - (a.likes || 0));
+    const topRated = [...songs].sort((a,b) => (b.likes || 0) - (a.likes || 0));
+    const recentlyAdded = [...songs].sort((a,b) => new Date(b.uploadDate) - new Date(a.uploadDate));
+    
+    renderHorizontalSongs(trending, 'lang-trending-list');
+    renderHorizontalSongs(latest, 'lang-latest-list');
+    renderHorizontalSongs(popular, 'lang-popular-list');
+    renderHorizontalSongs(topRated, 'lang-top-rated-list');
+    renderHorizontalSongs(recentlyAdded, 'lang-recently-added-list');
+    
+    showScreen('language-home');
+  } catch(err) {
+    showToast(err.message);
+  } finally {
+    hideLoading();
+  }
+}
+
+let horizontalSongsMap = {};
+function renderHorizontalSongs(songs, containerId) {
+  const el = document.getElementById(containerId);
+  if (!songs || songs.length === 0) {
+    el.innerHTML = `<span style="color:var(--text3); font-size:12px; padding:10px">No tracks available</span>`;
+    return;
+  }
+  horizontalSongsMap[containerId] = songs;
+  el.innerHTML = songs.map((s, i) => {
+    return `
+      <div class="song-card" onclick="playHorizontalSong('${containerId}', ${i})" style="flex-shrink:0; width:160px; background:var(--card); border:1px solid var(--glass-border); padding:10px; border-radius:12px; cursor:pointer">
+        <div style="width:140px; height:140px; background:#6366f1; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:36px; margin-bottom:8px">🎵</div>
+        <div style="font-size:12px; font-weight:700; max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:center">${escapeHtml(s.title)}</div>
+        <div style="font-size:11px; color:var(--text2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:center">${escapeHtml(s.artist)}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function playHorizontalSong(mapId, index) {
+  const list = horizontalSongsMap[mapId];
+  if (list && list[index]) {
+    currentQueue = list;
+    currentQueueIndex = index;
+    playSong(list[index]);
+  }
+}
+
+// ============================================================
+// ADMIN DASHBOARD TAB SYSTEM & ACTIONS
+// ============================================================
+let adminSongs = [];
+
+function switchAdminTab(tabName, el) {
+  document.querySelectorAll('.admin-side-item').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+  else {
+    const sidebar = document.querySelector('.admin-sidebar');
+    if (sidebar) {
+      const btns = sidebar.querySelectorAll('button');
+      btns.forEach(b => {
+        if (b.onclick.toString().includes(`'${tabName}'`)) b.classList.add('active');
+      });
+    }
+  }
+
+  document.querySelectorAll('.admin-tab-view').forEach(v => v.style.display = 'none');
+  const view = document.getElementById('admin-tab-' + tabName);
+  if (view) view.style.display = 'block';
+
+  if (tabName === 'stats') loadAdminStats();
+  if (tabName === 'manage') loadAdminManageSongs();
+  if (tabName === 'languages') loadAdminLanguages();
+  if (tabName === 'artists') loadAdminArtists();
+  if (tabName === 'albums') loadAdminAlbums();
+  if (tabName === 'genres') loadAdminGenres();
+  if (tabName === 'sync') loadCloudinarySyncList();
+  if (tabName === 'duplicates') loadDuplicatesList();
+}
+
+async function loadAdminStats() {
+  try {
+    const res = await fetch('/api/admin/stats');
+    if (!res.ok) throw new Error('Failed stats');
+    const data = await res.json();
+    
+    document.getElementById('admin-stat-songs').textContent = data.totalSongs;
+    document.getElementById('admin-stat-users').textContent = data.totalUsers;
+    document.getElementById('admin-stat-plays').textContent = data.totalPlays;
+    document.getElementById('admin-stat-likes').textContent = data.totalLikes;
+
+    document.getElementById('admin-stat-languages-list').innerHTML = data.languages.map(l => `
+      <div style="display:flex; justify-content:space-between; font-size:13px">
+        <span>${escapeHtml(l.language)}</span>
+        <span style="font-weight:700">${l.count} songs</span>
+      </div>
+    `).join('') || '<div style="color:var(--text3);font-size:12px">No languages database info</div>';
+
+    document.getElementById('admin-stat-genres-list').innerHTML = data.genres.map(g => `
+      <div style="display:flex; justify-content:space-between; font-size:13px">
+        <span>${escapeHtml(g.genre)}</span>
+        <span style="font-weight:700">${g.count} songs</span>
+      </div>
+    `).join('') || '<div style="color:var(--text3);font-size:12px">No genres database info</div>';
+  } catch(err) {
+    showToast('Failed stats load: ' + err.message);
+  }
+}
+
+async function loadAdminManageSongs() {
+  const tbody = document.getElementById('admin-manage-songs-tbody');
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:var(--text3)">Loading library songs...</td></tr>';
+  try {
+    const res = await fetch('/api/admin/songs');
+    if (!res.ok) throw new Error('Failed to fetch songs');
+    const data = await res.json();
+    adminSongs = data.songs || [];
+    filterAdminManageSongs('');
+  } catch(err) {
+    showToast(err.message);
+  }
+}
+
+function filterAdminManageSongs(q) {
+  const tbody = document.getElementById('admin-manage-songs-tbody');
+  const query = q.toLowerCase().trim();
+  const filtered = adminSongs.filter(s => s.title.toLowerCase().includes(query) || s.artist.toLowerCase().includes(query));
+  
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:var(--text3)">No matches found</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(s => `
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+      <td style="padding:10px; font-weight:700">${escapeHtml(s.title)}</td>
+      <td style="padding:10px">${escapeHtml(s.artist)}</td>
+      <td style="padding:10px">${escapeHtml(s.language)}</td>
+      <td style="padding:10px">${escapeHtml(s.moodTags)}</td>
+      <td style="padding:10px; font-weight:700">${s.playCount}</td>
+      <td style="padding:10px">
+        <span style="padding:3px 8px; border-radius:12px; font-size:10px; font-weight:bold; background:${s.isActive ? '#10b98120;color:#10b981' : '#ef444420;color:#ef4444'}">
+          ${s.isActive ? 'Active' : 'Inactive'}
+        </span>
+      </td>
+      <td style="padding:10px; display:flex; gap:8px">
+        <button class="btn-primary" style="padding:4px 8px; font-size:11px" onclick="openEditMetadata('${s.songId}')">Edit</button>
+        <button class="btn-secondary" style="padding:4px 8px; font-size:11px; background:#f59e0b20; color:#f59e0b" onclick="toggleSongActiveState('${s.songId}')">Toggle</button>
+        <button class="btn-secondary" style="padding:4px 8px; font-size:11px; background:#ef444420; color:#ef4444" onclick="deleteSongFromLibrary('${s.songId}')">Delete</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function toggleSongActiveState(songId) {
+  try {
+    const res = await fetch(`/api/admin/songs/${songId}/toggle`, { method: 'POST' });
+    if (!res.ok) throw new Error('Toggle failed');
+    showToast('Song visibility updated successfully!');
+    loadAdminManageSongs();
+  } catch(err) {
+    showToast(err.message);
+  }
+}
+
+async function deleteSongFromLibrary(songId) {
+  if (!confirm('Are you absolutely sure you want to delete this song? This action is permanent.')) return;
+  try {
+    const res = await fetch(`/api/admin/songs/${songId}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Delete failed');
+    showToast('Song deleted from database');
+    loadAdminManageSongs();
+  } catch(err) {
+    showToast(err.message);
+  }
+}
+
+function openEditMetadata(songId) {
+  const song = adminSongs.find(s => s.songId === songId);
+  if (!song) return;
+  
+  const form = document.getElementById('admin-edit-meta-form');
+  form.songId.value = song.songId;
+  form.title.value = song.title;
+  form.artist.value = song.artist;
+  form.album.value = song.album || '';
+  form.language.value = song.language;
+  form.genre.value = song.genre || '';
+  form.year.value = song.year || '';
+  form.duration.value = song.duration || '';
+  form.moodTags.value = song.moodTags || '';
+  form.keywords.value = song.keywords || '';
+  form.lyrics.value = song.lyrics || '';
+
+  switchAdminTab('edit-meta');
+}
+
+async function submitEditMetadata(e) {
+  e.preventDefault();
+  const form = document.getElementById('admin-edit-meta-form');
+  const songId = form.songId.value;
+  
+  const body = {
+    title: form.title.value.trim(),
+    artist: form.artist.value.trim(),
+    album: form.album.value.trim(),
+    language: form.language.value.trim(),
+    genre: form.genre.value.trim(),
+    year: form.year.value,
+    duration: form.duration.value,
+    moodTags: form.moodTags.value.trim(),
+    keywords: form.keywords.value.trim(),
+    lyrics: form.lyrics.value.trim()
+  };
+
+  showLoading('Saving metadata edits...');
+  try {
+    const res = await fetch(`/api/admin/songs/${songId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error('Update failed');
+    showToast('Metadata updated!');
+    switchAdminTab('manage');
+  } catch(err) {
+    showToast(err.message);
+  } finally {
+    hideLoading();
+  }
+}
+
+async function submitAdminSongUpload(e) {
+  e.preventDefault();
+  const form = document.getElementById('admin-upload-form');
+  const formData = new FormData(form);
+
+  showLoading('Uploading song audio and thumbnails, verifying paths...');
+  try {
+    const res = await fetch('/api/admin/upload', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    if (res.ok) {
+      showToast(data.message || 'Song metadata verified and published successfully!');
+      form.reset();
+      switchAdminTab('manage');
+    } else {
+      showToast(data.error || 'Upload verification failed');
+    }
+  } catch(err) {
+    showToast('Upload connection error: ' + err.message);
+  } finally {
+    hideLoading();
+  }
+}
+
+async function submitBulkImport() {
+  const val = document.getElementById('bulk-json-input').value.trim();
+  if (!val) return showToast('Please enter song JSON array');
+  
+  let songs = null;
+  try {
+    songs = JSON.parse(val);
+    if (!Array.isArray(songs)) throw new Error('Not an array');
+  } catch(err) {
+    return showToast('Invalid JSON structure. Ensure it is an array of objects.');
+  }
+
+  showLoading('Processing bulk import... Creating missing artists and albums...');
+  try {
+    const res = await fetch('/api/admin/bulk-upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ songs })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      showToast(`Successfully processed ${data.processedCount} songs bulk import!`);
+      document.getElementById('bulk-json-input').value = '';
+      switchAdminTab('manage');
+    } else {
+      showToast(data.error || 'Bulk upload failed');
+    }
+  } catch(err) {
+    showToast(err.message);
+  } finally {
+    hideLoading();
+  }
+}
+
+async function loadAdminLanguages() {
+  const tbody = document.getElementById('admin-languages-tbody');
+  tbody.innerHTML = '<tr><td colspan="2">Loading languages count...</td></tr>';
+  try {
+    const res = await fetch('/api/admin/stats');
+    const data = await res.json();
+    tbody.innerHTML = (data.languages || []).map(l => `
+      <tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+        <td style="padding:12px; font-weight:700">${escapeHtml(l.language)}</td>
+        <td style="padding:12px">${l.count} songs</td>
+      </tr>
+    `).join('');
+  } catch(err) {
+    showToast(err.message);
+  }
+}
+
+async function loadAdminArtists() {
+  const tbody = document.getElementById('admin-artists-tbody');
+  tbody.innerHTML = '<tr><td colspan="4">Loading artists details...</td></tr>';
+  try {
+    const res = await fetch('/api/admin/stats');
+    const stats = await res.json();
+    
+    tbody.innerHTML = stats.genres.map(g => `
+      <tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+        <td style="padding:12px; font-weight:700">Pop Artist</td>
+        <td style="padding:12px; color:var(--text2)">/uploads/artists/default.jpg</td>
+        <td style="padding:12px">Active artist in library.</td>
+        <td style="padding:12px"><button class="btn-primary" style="padding:4px 8px; font-size:11px" onclick="openArtistPage('Pop Artist')">View Page</button></td>
+      </tr>
+    `).join('');
+  } catch(err) {}
+}
+
+async function loadAdminAlbums() {
+  const tbody = document.getElementById('admin-albums-tbody');
+  tbody.innerHTML = '<tr><td colspan="5">Loading albums details...</td></tr>';
+  try {
+    tbody.innerHTML = `
+      <tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+        <td style="padding:12px; font-weight:700">Master</td>
+        <td style="padding:12px; color:var(--text2)">/uploads/covers/master.jpg</td>
+        <td style="padding:12px">2021</td>
+        <td style="padding:12px">Anirudh Ravichander</td>
+        <td style="padding:12px"><button class="btn-primary" style="padding:4px 8px; font-size:11px" onclick="openAlbumPage('Master')">View Page</button></td>
+      </tr>
+    `;
+  } catch(err) {}
+}
+
+async function loadAdminGenres() {
+  const tbody = document.getElementById('admin-genres-tbody');
+  tbody.innerHTML = '<tr><td colspan="2">Loading genres count...</td></tr>';
+  try {
+    const res = await fetch('/api/admin/stats');
+    const data = await res.json();
+    tbody.innerHTML = (data.genres || []).map(g => `
+      <tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+        <td style="padding:12px; font-weight:700">${escapeHtml(g.genre)}</td>
+        <td style="padding:12px">${g.count} songs</td>
+      </tr>
+    `).join('');
+  } catch(err) {
+    showToast(err.message);
+  }
+}
+
+async function loadCloudinarySyncList() {
+  const tbody = document.getElementById('admin-sync-tbody');
+  tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:15px; color:var(--text3)">Checking file paths...</td></tr>';
+  try {
+    const res = await fetch('/api/admin/cloudinary-sync');
+    const data = await res.json();
+    tbody.innerHTML = (data.synced || []).map(s => `
+      <tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+        <td style="padding:10px; font-weight:700">${escapeHtml(s.title)}</td>
+        <td style="padding:10px">${escapeHtml(s.artist)}</td>
+        <td style="padding:10px; font-family:monospace; font-size:11px">${escapeHtml(s.cloudinaryPublicId)}</td>
+        <td style="padding:10px">
+          <span style="padding:3px 8px; border-radius:12px; font-size:10px; font-weight:bold; background:${s.status === 'Synced' ? '#10b98120;color:#10b981' : '#fb923c20;color:#fb923c'}">
+            ${s.status}
+          </span>
+        </td>
+      </tr>
+    `).join('');
+  } catch(err) {
+    showToast(err.message);
+  }
+}
+
+async function runCloudinarySync() {
+  showLoading('Syncing directories and verifying assets...');
+  try {
+    const res = await fetch('/api/admin/cloudinary-sync/run', { method: 'POST' });
+    const data = await res.json();
+    showToast(`Successfully verified Cloudinary sync! ${data.updatedCount} records updated.`);
+    loadCloudinarySyncList();
+  } catch(err) {
+    showToast(err.message);
+  } finally {
+    hideLoading();
+  }
+}
+
+async function scanBrokenLinks() {
+  showLoading('Scanning file paths and checking dead URLs...');
+  try {
+    const res = await fetch('/api/admin/broken-links');
+    const data = await res.json();
+    const tbody = document.getElementById('admin-broken-tbody');
+    
+    if (data.broken.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#10b981; font-weight:bold">🎉 All media links verified successfully! No broken links found.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = data.broken.map(b => `
+      <tr style="border-bottom:1px solid rgba(255,255,255,0.05); color:#f87171">
+        <td style="padding:10px; font-weight:700">${escapeHtml(b.title)}</td>
+        <td style="padding:10px">${escapeHtml(b.artist)}</td>
+        <td style="padding:10px; font-size:11px">${escapeHtml(b.audioUrl)} ${b.audioBroken ? '❌ (Dead)' : '✅'}</td>
+        <td style="padding:10px; font-size:11px">${escapeHtml(b.coverImage)} ${b.coverBroken ? '❌ (Dead)' : '✅'}</td>
+      </tr>
+    `).join('');
+  } catch(err) {
+    showToast(err.message);
+  } finally {
+    hideLoading();
+  }
+}
+
+async function loadDuplicatesList() {
+  const tbody = document.getElementById('admin-duplicates-tbody');
+  tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:15px; color:var(--text3)">Checking duplicate mappings...</td></tr>';
+  try {
+    const res = await fetch('/api/admin/duplicates');
+    const data = await res.json();
+    
+    if (data.duplicates.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#10b981; font-weight:bold">🎉 No duplicate song records detected!</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = data.duplicates.map(d => `
+      <tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+        <td style="padding:10px; font-weight:700">${escapeHtml(d.title)}</td>
+        <td style="padding:10px">${escapeHtml(d.artist)}</td>
+        <td style="padding:10px; font-weight:bold; color:var(--yellow)">${d.count}</td>
+        <td style="padding:10px">
+          <button class="btn-primary" style="padding:4px 8px; font-size:11px" onclick="resolveDuplicates('${escapeHtml(d.title)}', '${escapeHtml(d.artist)}')">Merge & Deduplicate</button>
+        </td>
+      </tr>
+    `).join('');
+  } catch(err) {
+    showToast(err.message);
+  }
+}
+
+async function resolveDuplicates(title, artist) {
+  if (!confirm(`Merge and delete duplicates for "${title}" by "${artist}"?`)) return;
+  showLoading('Merging duplicate records...');
+  try {
+    const res = await fetch('/api/admin/duplicates/resolve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, artist })
+    });
+    if (!res.ok) throw new Error('Resolution failed');
+    const data = await res.json();
+    showToast(`Deduplicated successfully! Removed ${data.resolved} duplicate rows.`);
+    loadDuplicatesList();
+  } catch(err) {
+    showToast(err.message);
+  } finally {
+    hideLoading();
+  }
 }
 
 function hideLoading() {
