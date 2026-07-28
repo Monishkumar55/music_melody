@@ -5,7 +5,7 @@ import RecommendationList from './RecommendationList';
 import { useEmotionDetection } from '../hooks/useEmotionDetection';
 import { getRecommendationsByEmotion } from '../services/recommendationService';
 import { saveEmotionHistory } from '../services/emotionService';
-import { auth } from '../firebase';
+import { supabase } from '../supabase';
 
 const EmotionDetector = () => {
   const [isActive, setIsActive] = useState(false);

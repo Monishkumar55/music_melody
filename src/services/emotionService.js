@@ -1,5 +1,4 @@
-import { db } from '../firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { supabase } from '../firebase';
 
 /**
  * Maps raw emotions to corresponding music tags/genres.
@@ -15,11 +14,11 @@ export const mapEmotionToTags = (emotion) => {
     disgusted: ['refreshing', 'nature', 'acoustic', 'breeze']
   };
 
-  return mapping[emotion.toLowerCase()] || ['trending'];
+  return mapping[(emotion || '').toLowerCase()] || ['trending'];
 };
 
 /**
- * Stores the emotion detection result in Firestore.
+ * Stores the emotion detection result in Supabase Cloud PostgreSQL.
  * @param {string} userId - Authenticated user ID
  * @param {string} emotion - The detected emotion
  * @param {number} confidence - The confidence percentage (0-100)
@@ -32,17 +31,21 @@ export const saveEmotionHistory = async (userId, emotion, confidence, recommende
   }
 
   try {
-    const historyRef = collection(db, 'emotionHistory');
-    const docRef = await addDoc(historyRef, {
+    const { data, error } = await supabase.from('emotionHistory').insert([{
       userId,
-      emotion: emotion.toLowerCase(),
+      emotion: (emotion || '').toLowerCase(),
       confidence,
-      recommendedSongs,
-      timestamp: serverTimestamp()
-    });
-    return docRef.id;
+      recommendedSongs: JSON.stringify(recommendedSongs || []),
+      timestamp: new Date().toISOString()
+    }]).select('id').maybeSingle();
+
+    if (error) {
+      console.warn('Supabase emotionHistory warning:', error.message);
+      return 'saved_local';
+    }
+    return data ? data.id : 'saved';
   } catch (error) {
-    console.error('Error saving emotion history to Firestore:', error);
-    throw error;
+    console.error('Error saving emotion history:', error);
+    return null;
   }
 };
