@@ -1,12 +1,17 @@
 {
+  "version": 2,
   "rewrites": [
     {
-      "source": "/api/:path*",
+      "source": "/api/(.*)",
       "destination": "/api/index.js"
     },
     {
-      "source": "/:path*",
-      "destination": "/songstr/public/:path*"
+      "source": "/",
+      "destination": "/songstr/public/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/songstr/public/$1"
     }
   ]
 }
