@@ -7,9 +7,8 @@ const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const multer = require('multer');
 const axios = require('axios');
-let yts = null, ytdl = null;
-try { yts = require('yt-search'); } catch(e) {}
-try { ytdl = require('@distube/ytdl-core'); } catch(e) {}
+const yts = require('yt-search');
+const ytdl = require('@distube/ytdl-core');
 const { createClient } = require('@supabase/supabase-js');
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://amcicvpnpcllzbrrnckq.supabase.co';
@@ -215,47 +214,16 @@ app.get('/api/songs', async (req, res) => {
 
     const { data: rawSongs, error } = await supaQuery.range(offset, offset + limitNum - 1);
 
-    let songs = (rawSongs || []).map(mapSongResponse);
-    if (!songs || songs.length === 0) {
-      songs = CUSTOM_TAMIL_SONGS.map((s, idx) => ({
-        songId: 'supa_c_' + idx,
-        id: 'supa_c_' + idx,
-        title: s.title,
-        artist: s.artist,
-        album: s.album,
-        language: 'Tamil',
-        genre: 'Film Song',
-        year: 2024,
-        duration: 210,
-        coverImage: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop',
-        audioUrl: s.url,
-        file_url: s.url,
-        moodTags: s.mood,
-        createdBy: 'system',
-        isActive: 1
-      }));
+    if (error) {
+      console.error('Supabase songs error:', error.message);
+      return res.status(500).json({ error: 'Database fetch failed', songs: [], total: 0 });
     }
+
+    const songs = (rawSongs || []).map(mapSongResponse);
     res.json({ songs, total: songs.length });
   } catch(err) {
     console.error('Songs error:', err);
-    const fallbackSongs = CUSTOM_TAMIL_SONGS.map((s, idx) => ({
-      songId: 'supa_c_' + idx,
-      id: 'supa_c_' + idx,
-      title: s.title,
-      artist: s.artist,
-      album: s.album,
-      language: 'Tamil',
-      genre: 'Film Song',
-      year: 2024,
-      duration: 210,
-      coverImage: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop',
-      audioUrl: s.url,
-      file_url: s.url,
-      moodTags: s.mood,
-      createdBy: 'system',
-      isActive: 1
-    }));
-    res.json({ songs: fallbackSongs, total: fallbackSongs.length });
+    res.status(500).json({ error: 'Failed to fetch songs' });
   }
 });
 
