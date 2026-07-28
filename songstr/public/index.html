@@ -1894,7 +1894,7 @@ function renderSongs(songs, containerId) {
     el.innerHTML = `<div class="empty-state"><div class="empty-icon">🎵</div><div class="empty-title">No songs found</div><div class="empty-sub">Try selecting 'All' languages or click ➕ Add Song</div></div>`;
     return;
   }
-  renderedSongs = songs.slice(0, 30);
+  renderedSongs = songs;
   el.innerHTML = renderedSongs.map((song, i) => {
     const artColor = SONG_ART_COLORS[i % SONG_ART_COLORS.length];
     const isFav = favorites.some(f => f.title === song.title && f.artist === song.artist);

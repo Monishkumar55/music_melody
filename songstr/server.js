@@ -219,7 +219,25 @@ app.get('/api/songs', async (req, res) => {
       return res.status(500).json({ error: 'Database fetch failed', songs: [], total: 0 });
     }
 
-    const songs = (rawSongs || []).map(mapSongResponse);
+    let songs = (rawSongs || []).map(mapSongResponse);
+    if (!songs || songs.length === 0) {
+      songs = CUSTOM_TAMIL_SONGS.map((s, idx) => ({
+        songId: 'supa_' + (idx + 1),
+        id: 'supa_' + (idx + 1),
+        title: s.title,
+        artist: s.artist,
+        album: s.album || 'Tamil Hits',
+        language: 'Tamil',
+        genre: 'Film Song',
+        year: 2024,
+        duration: 210,
+        coverImage: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop',
+        audioUrl: s.url,
+        moodTags: s.mood,
+        createdBy: 'system',
+        isActive: 1
+      }));
+    }
     res.json({ songs, total: songs.length });
   } catch(err) {
     console.error('Songs error:', err);
