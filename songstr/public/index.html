@@ -1874,10 +1874,39 @@ async function loadSongs(mood, lang) {
     if (mood && mood !== 'all') params.append('mood', mood);
     if (lang && lang !== 'All') params.append('lang', lang);
     
-    const res = await fetch(`/api/songs?${params.toString()}`);
-    if (res.ok) {
-      const d = await res.json();
-      songs = d.songs || [];
+    try {
+      const res = await fetch(`/api/songs?${params.toString()}`);
+      if (res.ok) {
+        const d = await res.json();
+        songs = d.songs || [];
+      }
+    } catch(e) {}
+
+    // Fallback: Direct Supabase Cloud PostgreSQL Query
+    if ((!songs || songs.length === 0) && window.supabaseClient) {
+      try {
+        let q = window.supabaseClient.from('songs').select('*');
+        if (mood && mood !== 'all' && mood !== 'happy') {
+          q = q.ilike('mood', mood);
+        }
+        const { data: supaData } = await q;
+        if (supaData && supaData.length > 0) {
+          songs = supaData.map(s => ({
+            songId: s.id,
+            id: s.id,
+            title: s.title,
+            artist: s.artist,
+            movie: s.movie || 'Tamil Hits',
+            album: s.movie || 'Tamil Hits',
+            language: s.language || 'Tamil',
+            genre: s.genre || 'Film Song',
+            year: s.release_year || 2024,
+            coverImage: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop',
+            audioUrl: s.file_url || '',
+            moodTags: s.mood || 'romantic'
+          }));
+        }
+      } catch(e) {}
     }
 
     currentSongs = songs;
