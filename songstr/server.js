@@ -12,7 +12,7 @@ const ytdl = require('@distube/ytdl-core');
 const { createClient } = require('@supabase/supabase-js');
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://amcicvpnpcllzbrrnckq.supabase.co';
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtY2ljdnBucGNsbHpicnJuY2txIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzAwMDAwMDAsImV4cCI6MjAwMDAwMDAwMH0.placeholder';
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtY2ljdnBucGNsbHpicnJuY2txIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3MjYwNjIsImV4cCI6MjEwMDMwMjA2Mn0.npCcxMAf-tOVJh8Nv0GYO4j-vq-04koLOlavu5KJ-MY';
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 function detectLanguageFromText(text) {
@@ -118,40 +118,19 @@ const CUSTOM_TAMIL_SONGS = [
 
 async function seedDatabase() {
   try {
-    const { data: supaAdmin } = await supabase.from('users').select('id').eq('role', 'admin').maybeSingle();
-    if (!supaAdmin) {
-      const salt = bcrypt.genSaltSync(10);
-      const hash = bcrypt.hashSync('admin123', salt);
-      await supabase.from('users').insert([{
-        username: 'admin',
-        email: 'admin@songstr.app',
-        fullname: 'Songstr Administrator',
-        role: 'admin',
-        password_hash: hash
-      }]);
-    }
-
     const { count } = await supabase.from('songs').select('*', { count: 'exact', head: true });
     if (!count || count === 0) {
       const supaSongs = CUSTOM_TAMIL_SONGS.map(s => ({
-        songId: crypto.randomUUID(),
         title: s.title,
         artist: s.artist,
-        album: s.album,
+        movie: s.album,
         language: 'Tamil',
         genre: 'Film Song',
-        year: 2024,
-        duration: 210,
-        coverImage: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop',
-        audioUrl: s.url,
-        cloudinaryPublicId: s.url,
-        lyrics: `Lyrics for ${s.title}`,
-        moodTags: s.mood,
-        keywords: `${s.title.toLowerCase()}, ${s.artist.toLowerCase()}, tamil, ${s.mood}`,
-        createdBy: 'system',
-        isActive: 1
+        release_year: 2024,
+        mood: s.mood,
+        file_url: s.url
       }));
-      await supabase.from('songs').upsert(supaSongs, { onConflict: 'songId' });
+      await supabase.from('songs').insert(supaSongs);
       console.log(`Seeded ${CUSTOM_TAMIL_SONGS.length} songs into Supabase PostgreSQL.`);
     }
   } catch(e) {
@@ -160,6 +139,26 @@ async function seedDatabase() {
 }
 
 seedDatabase();
+
+function mapSongResponse(s) {
+  if (!s) return null;
+  return {
+    songId: s.id,
+    id: s.id,
+    title: s.title,
+    artist: s.artist,
+    album: s.movie || s.album || 'Single',
+    language: s.language || 'Tamil',
+    genre: s.genre || 'Film Song',
+    year: s.release_year || s.year || 2024,
+    duration: s.duration || 210,
+    coverImage: s.coverImage || s.cover_image || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop',
+    audioUrl: s.file_url || s.audioUrl || '',
+    moodTags: s.mood || s.moodTags || 'romantic',
+    createdBy: 'system',
+    isActive: 1
+  };
+}
 
 function detectMoodFromText(text) {
   const lower = text.toLowerCase();
@@ -195,25 +194,26 @@ app.get('/api/songs', async (req, res) => {
     const offset = (parseInt(page, 10) - 1) * parseInt(limit, 10);
     const limitNum = parseInt(limit, 10);
 
-    let supaQuery = supabase.from('songs').select('*', { count: 'exact' }).eq('isActive', 1);
+    let supaQuery = supabase.from('songs').select('*');
 
     const validMoods = ['happy', 'sad', 'angry', 'relaxed', 'energetic', 'stressed', 'romantic', 'neutral'];
     if (mood && validMoods.includes(mood)) {
-      supaQuery = supaQuery.eq('moodTags', mood);
+      supaQuery = supaQuery.ilike('mood', mood);
     }
 
     if (targetLang && targetLang !== 'All') {
       supaQuery = supaQuery.ilike('language', targetLang);
     }
 
-    const { data: songs, count: total, error } = await supaQuery.range(offset, offset + limitNum - 1);
+    const { data: rawSongs, error } = await supaQuery.range(offset, offset + limitNum - 1);
 
     if (error) {
       console.error('Supabase songs error:', error.message);
       return res.status(500).json({ error: 'Database fetch failed', songs: [], total: 0 });
     }
 
-    res.json({ songs: songs || [], total: total || (songs ? songs.length : 0) });
+    const songs = (rawSongs || []).map(mapSongResponse);
+    res.json({ songs, total: songs.length });
   } catch(err) {
     console.error('Songs error:', err);
     res.status(500).json({ error: 'Failed to fetch songs' });
