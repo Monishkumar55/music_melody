@@ -1880,6 +1880,14 @@ async function loadSongs(mood, lang) {
       songs = d.songs || [];
     }
 
+    if (!songs || songs.length === 0) {
+      const resAll = await fetch('/api/songs');
+      if (resAll.ok) {
+        const dAll = await resAll.json();
+        songs = dAll.songs || [];
+      }
+    }
+
     currentSongs = songs;
     renderSongs(currentSongs, 'songs-list');
   } catch(e) {
@@ -1894,7 +1902,7 @@ function renderSongs(songs, containerId) {
     el.innerHTML = `<div class="empty-state"><div class="empty-icon">🎵</div><div class="empty-title">No songs found</div><div class="empty-sub">Try selecting 'All' languages or click ➕ Add Song</div></div>`;
     return;
   }
-  renderedSongs = songs;
+  renderedSongs = songs.slice(0, 50);
   el.innerHTML = renderedSongs.map((song, i) => {
     const artColor = SONG_ART_COLORS[i % SONG_ART_COLORS.length];
     const isFav = favorites.some(f => f.title === song.title && f.artist === song.artist);
@@ -1947,9 +1955,12 @@ function playSongSearch(index) {
 function playSong(song) {
   const title = song.title || 'Track';
   const artist = song.artist || 'Artist';
-  const songUrl = song.songId 
-    ? `/api/stream?songId=${song.songId}&title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}&_ts=${Date.now()}`
-    : `/api/stream?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}&_ts=${Date.now()}`;
+  const directUrl = song.audioUrl || song.file_url || '';
+  const songUrl = directUrl.startsWith('http')
+    ? directUrl
+    : (song.songId 
+        ? `/api/stream?songId=${song.songId}&title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}&_ts=${Date.now()}`
+        : `/api/stream?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}&_ts=${Date.now()}`);
 
   document.getElementById('p-title').textContent = title;
   document.getElementById('p-artist').innerHTML = `<span class="clickable-text" onclick="openArtistPage('${escapeHtml(artist)}')">${escapeHtml(artist)}</span> • <span class="clickable-text" onclick="openAlbumPage('${escapeHtml(song.album || song.movie || 'Single Album')}')">${escapeHtml(song.album || song.movie || 'Single Album')}</span>`;
