@@ -1,20 +1,21 @@
-import { supabase } from '../firebase';
+import { supabase } from '../supabase';
 
 /**
- * Maps raw emotions to corresponding music tags/genres.
+ * Maps raw detected facial emotions to corresponding music mood tags (including romantic).
  */
 export const mapEmotionToTags = (emotion) => {
   const mapping = {
-    happy: ['energetic', 'dance', 'party', 'upbeat'],
-    sad: ['motivational', 'uplifting', 'positive'],
-    angry: ['calm', 'relaxing', 'meditation', 'lofi'],
-    neutral: ['trending', 'popular', 'chill'],
-    surprised: ['adventure', 'exciting', 'pop'],
-    fearful: ['meditation', 'soft', 'ambient', 'instrumental'],
-    disgusted: ['refreshing', 'nature', 'acoustic', 'breeze']
+    happy: ['romantic', 'happy', 'energetic', 'upbeat'],
+    sad: ['romantic', 'sad', 'relaxed', 'soothing'],
+    angry: ['energetic', 'relaxed', 'calm'],
+    neutral: ['romantic', 'relaxed', 'happy', 'chill'],
+    surprised: ['romantic', 'energetic', 'happy'],
+    fearful: ['romantic', 'relaxed', 'calm'],
+    disgusted: ['romantic', 'relaxed'],
+    romantic: ['romantic', 'happy', 'relaxed']
   };
 
-  return mapping[(emotion || '').toLowerCase()] || ['trending'];
+  return mapping[(emotion || '').toLowerCase()] || ['romantic', 'happy'];
 };
 
 /**

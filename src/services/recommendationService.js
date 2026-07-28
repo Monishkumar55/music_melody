@@ -1,29 +1,44 @@
-import { supabase } from '../firebase';
+import { supabase } from '../supabase';
 import { mapEmotionToTags } from './emotionService';
 
 /**
- * Fetches music recommendations based on the detected emotion via Supabase.
+ * Fetches exact Cloudinary Tamil song recommendations based on detected emotion and romantic session matching.
  * @param {string} emotion - The detected emotion
  * @param {number} maxResults - Max number of songs to return
  */
-export const getRecommendationsByEmotion = async (emotion, maxResults = 10) => {
+export const getRecommendationsByEmotion = async (emotion, maxResults = 15) => {
   try {
-    const { data: songs, error } = await supabase
+    const tags = mapEmotionToTags(emotion);
+    const primaryMood = tags[0] || 'romantic';
+
+    // First try filtering by mood on Supabase songs table
+    const { data: moodSongs } = await supabase
       .from('songs')
       .select('*')
-      .eq('isActive', 1)
+      .ilike('mood', primaryMood)
       .limit(maxResults);
 
-    if (error || !songs || songs.length === 0) {
-      const res = await fetch(`/api/songs?mood=${encodeURIComponent(emotion)}`);
-      if (res.ok) {
-        const d = await res.json();
-        return d.songs || [];
-      }
-      return [];
+    if (moodSongs && moodSongs.length > 0) {
+      return moodSongs;
     }
 
-    return songs;
+    // Fallback: Return all exact Cloudinary Tamil songs from Supabase
+    const { data: allSongs } = await supabase
+      .from('songs')
+      .select('*')
+      .limit(maxResults);
+
+    if (allSongs && allSongs.length > 0) {
+      return allSongs;
+    }
+
+    // Final fallback to REST API
+    const res = await fetch(`/api/songs?mood=${encodeURIComponent(primaryMood)}`);
+    if (res.ok) {
+      const d = await res.json();
+      return d.songs || [];
+    }
+    return [];
   } catch (error) {
     console.error('Error fetching recommendations:', error);
     return [];
