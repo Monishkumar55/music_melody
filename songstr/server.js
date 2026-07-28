@@ -7,8 +7,9 @@ const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const multer = require('multer');
 const axios = require('axios');
-const yts = require('yt-search');
-const ytdl = require('@distube/ytdl-core');
+let yts = null, ytdl = null;
+try { yts = require('yt-search'); } catch(e) {}
+try { ytdl = require('@distube/ytdl-core'); } catch(e) {}
 const { createClient } = require('@supabase/supabase-js');
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://amcicvpnpcllzbrrnckq.supabase.co';
