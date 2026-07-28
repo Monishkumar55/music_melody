@@ -2,10 +2,7 @@ import 'package:flutter/foundation.dart';
 
 class ApiConfig {
   static String get baseUrl {
-    if (kIsWeb) {
-      return 'http://localhost:3000';
-    }
-    return 'http://192.168.1.12:3000';
+    return 'https://music-melody-phi.vercel.app';
   }
 
   static String get jiosaavnSearchUrl => '$baseUrl/api/music/search';
