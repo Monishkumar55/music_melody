@@ -8,8 +8,8 @@ const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const multer = require('multer');
 const axios = require('axios');
-const yts = require('yt-search');
-const ytdl = require('@distube/ytdl-core');
+// Deezer public API (no key needed) for audio previews & metadata
+const DEEZER_API = 'https://api.deezer.com';
 const { createClient } = require('@supabase/supabase-js');
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://amcicvpnpcllzbrrnckq.supabase.co';
@@ -94,6 +94,109 @@ async function fetchFromJioSaavnWithRetry(url, options = {}) {
     return result;
   } finally {
     inFlightRequests.delete(requestKey);
+  }
+}
+
+// ============================================================
+// DEEZER PUBLIC API — UNIVERSAL AUDIO RESOLVER
+// ============================================================
+const deezerCache = new Map();
+const DEEZER_CACHE_TTL = 10 * 60 * 1000; // 10 min
+
+async function resolveDeezerAudio(title, artist) {
+  if (!title) return null;
+  const cacheKey = `${(title || '').toLowerCase().trim()}|${(artist || '').toLowerCase().trim()}`;
+  const cached = deezerCache.get(cacheKey);
+  if (cached && Date.now() - cached.ts < DEEZER_CACHE_TTL) return cached.data;
+
+  try {
+    const q = `${title} ${artist || ''}`.trim();
+    const res = await axios.get(`${DEEZER_API}/search`, {
+      params: { q, limit: 5 },
+      timeout: 6000
+    });
+    const tracks = res.data?.data;
+    if (!tracks || tracks.length === 0) return null;
+
+    // Find best match by comparing title similarity
+    const titleLower = title.toLowerCase().trim();
+    let best = tracks[0];
+    for (const t of tracks) {
+      if (t.title.toLowerCase().trim() === titleLower ||
+          t.title_short?.toLowerCase().trim() === titleLower) {
+        best = t;
+        break;
+      }
+    }
+
+    const result = {
+      previewUrl: best.preview || '',
+      coverImage: best.album?.cover_big || best.album?.cover_medium || best.album?.cover || '',
+      coverSmall: best.album?.cover_small || '',
+      deezerTrackId: String(best.id),
+      deezerTitle: best.title,
+      deezerArtist: best.artist?.name || '',
+      deezerAlbum: best.album?.title || '',
+      duration: best.duration || 0,
+      artistImage: best.artist?.picture_medium || best.artist?.picture || '',
+      source: 'deezer'
+    };
+
+    deezerCache.set(cacheKey, { data: result, ts: Date.now() });
+    return result;
+  } catch (err) {
+    console.warn('Deezer resolve error:', err.message);
+    return null;
+  }
+}
+
+async function deezerSearchTracks(query, limit = 15) {
+  try {
+    const res = await axios.get(`${DEEZER_API}/search`, {
+      params: { q: query, limit },
+      timeout: 6000
+    });
+    return (res.data?.data || []).map(t => ({
+      id: String(t.id),
+      title: t.title,
+      artist: t.artist?.name || 'Unknown',
+      album: t.album?.title || 'Unknown',
+      duration: t.duration || 0,
+      coverImage: t.album?.cover_big || t.album?.cover_medium || '',
+      coverSmall: t.album?.cover_small || '',
+      previewUrl: t.preview || '',
+      artistImage: t.artist?.picture_medium || '',
+      deezerTrackId: String(t.id),
+      source: 'deezer'
+    }));
+  } catch (err) {
+    console.warn('Deezer search error:', err.message);
+    return [];
+  }
+}
+
+async function deezerGetCharts(limit = 20) {
+  try {
+    const res = await axios.get(`${DEEZER_API}/chart/0/tracks`, {
+      params: { limit },
+      timeout: 6000
+    });
+    return (res.data?.data || []).map(t => ({
+      id: String(t.id),
+      title: t.title,
+      artist: t.artist?.name || 'Unknown',
+      album: t.album?.title || '',
+      duration: t.duration || 0,
+      coverImage: t.album?.cover_big || t.album?.cover_medium || '',
+      coverSmall: t.album?.cover_small || '',
+      previewUrl: t.preview || '',
+      artistImage: t.artist?.picture_medium || '',
+      position: t.position || 0,
+      source: 'deezer'
+    }));
+  } catch (err) {
+    console.warn('Deezer charts error:', err.message);
+    return [];
   }
 }
 
@@ -1692,28 +1795,18 @@ app.get('/api/jiosaavn/lyrics/:id', async (req, res) => {
 });
 
 // ============================================================
-// AUDIO STREAMING ROUTE
+// AUDIO STREAMING ROUTE (JioSaavn → Deezer Preview fallback)
 // ============================================================
-function hashString(str) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = (hash << 5) - hash + str.charCodeAt(i);
-    hash |= 0;
-  }
-  return hash;
-}
-
 app.get('/api/stream', async (req, res) => {
   try {
     const { songId, jioId, title, artist } = req.query;
 
-    // Priority 1: JioSaavn direct download by targetJioId (jioId or songId)
+    // Priority 1: JioSaavn direct download by ID (full-length track)
     const targetJioId = jioId || songId;
-    if (targetJioId && !targetJioId.includes('/') && !targetJioId.startsWith('local_')) {
+    if (targetJioId && !targetJioId.includes('/') && !targetJioId.startsWith('local_') && !targetJioId.startsWith('user_')) {
       try {
         const jioSong = await jiosaavnGetSong(targetJioId);
         if (jioSong && jioSong.downloadUrl && jioSong.downloadUrl.length > 0) {
-          // Pick highest quality download URL
           const bestUrl = jioSong.downloadUrl[jioSong.downloadUrl.length - 1].url;
           if (bestUrl) return res.redirect(bestUrl);
         }
@@ -1722,19 +1815,29 @@ app.get('/api/stream', async (req, res) => {
       }
     }
 
-    // Priority 2: Look up song in Supabase
+    // Priority 2: Look up song in Supabase for stored file_url
     let song = null;
     if (songId) {
-      const { data: supaSong } = await supabase.from('songs').select('file_url, title').eq('song_id', songId).maybeSingle();
+      const { data: supaSong } = await supabase.from('songs').select('file_url, title, artist').eq('song_id', songId).maybeSingle();
       song = supaSong;
     }
     if (!song && title) {
-      const { data: supaSongs } = await supabase.from('songs').select('file_url, title').ilike('title', title.trim());
+      const { data: supaSongs } = await supabase.from('songs').select('file_url, title, artist').ilike('title', title.trim()).limit(1);
       song = supaSongs && supaSongs[0] ? supaSongs[0] : null;
     }
 
-    // Priority 3: JioSaavn search by title+artist (when no jioId given)
-    if (!jioId && title) {
+    // If Supabase has a valid HTTP URL, redirect to it
+    const songUrl = song ? song.file_url : null;
+    if (songUrl && songUrl.startsWith('http') && !songUrl.includes('cloudinary') && !songUrl.includes('JIOSAAVN_SEARCH')) {
+      return res.redirect(songUrl);
+    }
+    if (songUrl && (songUrl.startsWith('/uploads/') || songUrl.startsWith('/audio/'))) {
+      const localPath = path.join(__dirname, 'public', songUrl);
+      if (fs.existsSync(localPath)) return res.sendFile(localPath);
+    }
+
+    // Priority 3: JioSaavn search by title+artist (full-length)
+    if (title) {
       try {
         const searchQ = `${title} ${artist || ''}`.trim();
         const jioResults = await jiosaavnSearchSongs(searchQ, 3);
@@ -1750,93 +1853,43 @@ app.get('/api/stream', async (req, res) => {
       }
     }
 
-    const pipeYouTubeAudio = async (queryStr) => {
-      try {
-        const r = await yts(queryStr);
-        const video = r ? (r.videos && r.videos[0] ? r.videos[0] : r) : null;
-        if (!video || !video.url) throw new Error('No video found');
-
-        return new Promise((resolve) => {
-          let streamed = false;
-          try {
-            const stream = ytdl(video.url, {
-              filter: 'audioonly',
-              highWaterMark: 1 << 25
-            });
-
-            stream.on('response', () => {
-              streamed = true;
-              if (!res.headersSent) {
-                res.setHeader('Content-Type', 'audio/mpeg');
-                stream.pipe(res);
-              }
-              resolve(true);
-            });
-
-            stream.on('error', (err) => {
-              console.warn('YTDL stream error, triggering instant fallback:', err.message);
-              if (!streamed && !res.headersSent) {
-                const trackNum = (Math.abs(hashString(queryStr)) % 16) + 1;
-                res.redirect(`https://www.soundhelix.com/examples/mp3/SoundHelix-Song-${trackNum}.mp3`);
-                resolve(true);
-              }
-            });
-
-            setTimeout(() => {
-              if (!streamed && !res.headersSent) {
-                console.warn('YTDL stream timeout, triggering instant fallback for:', queryStr);
-                const trackNum = (Math.abs(hashString(queryStr)) % 16) + 1;
-                res.redirect(`https://www.soundhelix.com/examples/mp3/SoundHelix-Song-${trackNum}.mp3`);
-                resolve(true);
-              }
-            }, 3000);
-          } catch (e) {
-            console.warn('YTDL init error, triggering instant fallback:', e.message);
-            if (!res.headersSent) {
-              const trackNum = (Math.abs(hashString(queryStr)) % 16) + 1;
-              res.redirect(`https://www.soundhelix.com/examples/mp3/SoundHelix-Song-${trackNum}.mp3`);
-              resolve(true);
-            }
-          }
-        });
-      } catch (err) {
-        console.error('YouTube search/stream failed:', err.message);
-        if (!res.headersSent) {
-          const trackNum = (Math.abs(hashString(queryStr)) % 16) + 1;
-          res.redirect(`https://www.soundhelix.com/examples/mp3/SoundHelix-Song-${trackNum}.mp3`);
-          return true;
-        }
-        return false;
-      }
-    };
-
-    const songUrl = song ? (song.file_url || song.audioUrl) : null;
-    if (songUrl) {
-      const audioUrl = songUrl;
-
-      if (audioUrl.startsWith('JIOSAAVN_SEARCH:')) {
-        const query = audioUrl.replace('JIOSAAVN_SEARCH:', '');
-        const success = await pipeYouTubeAudio(query);
-        if (success) return;
-      }
-
-      if (audioUrl.startsWith('/uploads/') || audioUrl.startsWith('/audio/')) {
-        const localPath = path.join(__dirname, 'public', audioUrl);
-        if (fs.existsSync(localPath)) {
-          return res.sendFile(localPath);
-        }
-      }
-
-      if (audioUrl.startsWith('http')) {
-        return res.redirect(audioUrl);
-      }
+    // Priority 4: Deezer preview (guaranteed 30s audio)
+    const deezerResult = await resolveDeezerAudio(title || 'music', artist);
+    if (deezerResult && deezerResult.previewUrl) {
+      return res.redirect(deezerResult.previewUrl);
     }
 
-    const fallbackQuery = `${title || 'music'} ${artist || ''}`.trim();
-    await pipeYouTubeAudio(fallbackQuery);
+    res.status(404).json({ error: 'No audio source found for this track' });
   } catch (err) {
     console.error('Stream error:', err);
     res.status(500).json({ error: 'Failed to stream audio' });
+  }
+});
+
+// ============================================================
+// DEEZER RESOLVE & CHARTS ENDPOINTS
+// ============================================================
+app.get('/api/deezer/resolve', async (req, res) => {
+  try {
+    const { title, artist } = req.query;
+    if (!title) return res.status(400).json({ error: 'Title is required' });
+    const result = await resolveDeezerAudio(title, artist);
+    if (!result) return res.status(404).json({ error: 'Track not found on Deezer' });
+    res.json(result);
+  } catch (err) {
+    console.error('Deezer resolve error:', err);
+    res.status(500).json({ error: 'Failed to resolve Deezer audio' });
+  }
+});
+
+app.get('/api/deezer/charts', async (req, res) => {
+  try {
+    const { limit = 20 } = req.query;
+    const charts = await deezerGetCharts(parseInt(limit, 10) || 20);
+    res.json({ results: charts, source: 'deezer' });
+  } catch (err) {
+    console.error('Deezer charts error:', err);
+    res.status(500).json({ error: 'Failed to fetch charts', results: [] });
   }
 });
 
