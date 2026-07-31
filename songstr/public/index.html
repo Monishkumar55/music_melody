@@ -1893,7 +1893,7 @@ function renderSongs(songs, containerId) {
     el.innerHTML = `<div class="empty-state"><div class="empty-icon">🎵</div><div class="empty-title">No songs found</div><div class="empty-sub">Try selecting 'All' languages or click ➕ Add Song</div></div>`;
     return;
   }
-  renderedSongs = songs.slice(0, 50);
+  renderedSongs = songs.slice(0, 100);
   el.innerHTML = renderedSongs.map((song, i) => {
     const artColor = SONG_ART_COLORS[i % SONG_ART_COLORS.length];
     const isFav = favorites.some(f => f.title === song.title && f.artist === song.artist);
@@ -1901,7 +1901,8 @@ function renderSongs(songs, containerId) {
     const artContent = hasCover 
       ? `<div class="song-art" style="background:${artColor};padding:0;overflow:hidden"><img src="${song.coverImage}" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='🎵'"/></div>` 
       : `<div class="song-art" style="background:${artColor}">🎵</div>`;
-    const sourceTag = song.source === 'jiosaavn' ? `<span class="song-chip" style="background:rgba(52,211,153,0.15);color:#34d399">JioSaavn</span>` : '';
+    const isPublic = song.source === 'jiosaavn' || song.source === 'public_api' || (song.songId && String(song.songId).length > 15);
+    const sourceTag = isPublic ? `<span class="song-chip" style="background:rgba(52,211,153,0.15);color:#34d399">JioSaavn</span>` : `<span class="song-chip" style="background:rgba(99,102,241,0.15);color:#818cf8">Public API</span>`;
     const durationStr = song.duration ? `<span class="song-chip">${Math.floor(song.duration/60)}:${String(song.duration%60).padStart(2,'0')}</span>` : '';
     return `
     <div class="song-card" onclick="playSongByIndex(${i})">
