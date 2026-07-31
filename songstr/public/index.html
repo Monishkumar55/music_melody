@@ -759,7 +759,6 @@
       <div class="playlist-header">
         <h3 style="font-size:18px;font-weight:800">Recommended Tracks</h3>
         <div style="display:flex;gap:8px">
-          <button class="action-chip add-btn" onclick="openAddSongModal()">➕ Add / Insert Song</button>
           <button class="action-chip" onclick="openShareModal()">🔗 Share Vibe</button>
           <button class="action-chip" onclick="refreshSongs()">↻ Refresh</button>
         </div>
@@ -1853,12 +1852,16 @@ async function loadMoodResults(mood) {
   hideLoading();
 }
 
-async function loadSongs(mood, lang) {
+async function loadSongs(mood, lang, isRefresh = false) {
   try {
     let songs = [];
     let params = new URLSearchParams();
     if (mood && mood !== 'all') params.append('mood', mood);
     if (lang && lang !== 'All') params.append('lang', lang);
+    if (isRefresh) {
+      params.append('refresh', 'true');
+      params.append('_t', Date.now());
+    }
     
     try {
       const res = await fetch(`/api/songs?${params.toString()}`);
@@ -1870,6 +1873,10 @@ async function loadSongs(mood, lang) {
 
     if (!songs || songs.length === 0) {
       songs = getFallbackSongs(mood, lang);
+    }
+
+    if (isRefresh && songs.length > 1) {
+      songs = [...songs].sort(() => Math.random() - 0.5);
     }
 
     currentSongs = songs;
@@ -2442,9 +2449,16 @@ async function renderMoodGrid() {
   `).join('');
 }
 
-function refreshSongs() {
-  showLoading('Refreshing playlist...');
-  loadSongs(currentMood, currentLang).then(() => hideLoading());
+async function refreshSongs() {
+  showLoading('Fetching fresh music picks...');
+  try {
+    await loadSongs(currentMood, currentLang, true);
+    showToast('↻ Playlist refreshed with fresh tracks!');
+  } catch(e) {
+    showToast('Refreshed playlist tracks');
+  } finally {
+    hideLoading();
+  }
 }
 
 function playSuggested() {
