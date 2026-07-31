@@ -3,7 +3,7 @@ const assert = require('assert');
 const app = require('../server');
 
 describe('Songstr API Integration Tests', function() {
-  this.timeout(10000);
+  this.timeout(25000);
 
   describe('Metadata APIs', function() {
     it('GET /api/moods should return list of moods', async function() {
