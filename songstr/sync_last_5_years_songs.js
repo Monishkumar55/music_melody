@@ -92,6 +92,7 @@ async function fetchSongs(query) {
       return res.data.data.results;
     }
   } catch (err) {
+    console.warn('Fetch query notice:', err.message);
     try {
       await new Promise(r => setTimeout(r, 800));
       const url = `${JIOSAAVN_BASE}/api/search/songs?query=${encodeURIComponent(query)}&limit=40`;

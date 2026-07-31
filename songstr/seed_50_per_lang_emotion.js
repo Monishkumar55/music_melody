@@ -125,6 +125,7 @@ async function fetchSongsForQuery(query) {
       return res.data.data.results;
     }
   } catch (err) {
+    console.warn('Fetch query notice:', err.message);
     // Retry once on error
     try {
       await new Promise(r => setTimeout(r, 1000));

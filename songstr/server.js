@@ -1017,6 +1017,7 @@ app.get('/api/admin/stats', async (req, res) => {
       genres
     });
   } catch (err) {
+    console.error('Stats error:', err.message);
     res.status(500).json({ error: 'Failed to fetch admin stats' });
   }
 });
@@ -1026,6 +1027,7 @@ app.get('/api/admin/songs', async (req, res) => {
     const { data: songs } = await supabase.from('songs').select('*').limit(200);
     res.json({ songs: (songs || []).map(mapSongResponse).filter(Boolean) });
   } catch (err) {
+    console.error('Admin songs error:', err.message);
     res.status(500).json({ error: 'Failed to fetch admin songs' });
   }
 });
@@ -1034,6 +1036,7 @@ app.post('/api/admin/songs/:id/toggle', async (req, res) => {
   try {
     res.json({ success: true, message: 'Song visibility updated' });
   } catch (err) {
+    console.error('Toggle error:', err.message);
     res.status(500).json({ error: 'Failed to toggle song' });
   }
 });
@@ -1043,6 +1046,7 @@ app.delete('/api/admin/songs/:id', async (req, res) => {
     await supabase.from('songs').delete().eq('song_id', req.params.id);
     res.json({ success: true, message: 'Song deleted' });
   } catch (err) {
+    console.error('Delete error:', err.message);
     res.status(500).json({ error: 'Failed to delete song' });
   }
 });
@@ -1060,6 +1064,7 @@ app.put('/api/admin/songs/:id', async (req, res) => {
 
     res.json({ success: true, message: 'Metadata updated' });
   } catch (err) {
+    console.error('Update error:', err.message);
     res.status(500).json({ error: 'Failed to update song metadata' });
   }
 });
@@ -1083,6 +1088,7 @@ app.post('/api/admin/upload', upload.fields([{ name: 'audio', maxCount: 1 }, { n
     await supabase.from('songs').upsert(newSong, { onConflict: 'song_id' });
     res.json({ success: true, message: 'Song uploaded & published!', song: newSong });
   } catch (err) {
+    console.error('Upload error:', err.message);
     res.status(500).json({ error: 'Upload failed' });
   }
 });
@@ -1109,6 +1115,7 @@ app.post('/api/admin/bulk-upload', async (req, res) => {
     }
     res.json({ success: true, processedCount: count });
   } catch (err) {
+    console.error('Bulk error:', err.message);
     res.status(500).json({ error: 'Bulk upload failed' });
   }
 });
