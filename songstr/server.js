@@ -497,6 +497,22 @@ function mapSongResponse(s) {
   };
 }
 
+function getReqUser(req) {
+  let token = req.cookies?.token;
+  if (!token && req.headers.authorization) {
+    const parts = req.headers.authorization.split(' ');
+    if (parts.length === 2 && parts[0] === 'Bearer') {
+      token = parts[1];
+    }
+  }
+  if (!token) return null;
+  try {
+    return jwt.verify(token, JWT_SECRET);
+  } catch {
+    return null;
+  }
+}
+
 function detectMoodFromText(text) {
   const lower = text.toLowerCase();
   const scores = {};
@@ -510,13 +526,31 @@ function detectMoodFromText(text) {
   return best[1] > 0 ? best[0] : 'neutral';
 }
 
-app.post('/api/detect-mood', (req, res) => {
+app.post('/api/detect-mood', async (req, res) => {
   try {
-    const { text } = req.body;
+    const { text, source = 'text_input', confidence = 0.95 } = req.body;
     if (!text || typeof text !== 'string') {
       return res.status(400).json({ error: 'Text is required' });
     }
     const mood = detectMoodFromText(text);
+
+    // Record user activity into user_moods table in Supabase
+    const user = getReqUser(req);
+    if (user && user.id) {
+      try {
+        await supabase.from('user_moods').insert({
+          user_id: user.id,
+          mood: mood,
+          detected_mood: mood,
+          confidence: confidence,
+          source: source,
+          timestamp: new Date().toISOString()
+        });
+      } catch (logErr) {
+        console.warn('User mood activity log notice:', logErr.message);
+      }
+    }
+
     res.json({ mood });
   } catch(err) {
     console.error('Mood detect error:', err);
@@ -993,6 +1027,189 @@ function authenticateToken(req, res, next) {
     next();
   });
 }
+
+// ============================================================
+// USER FAVORITES & ACTIVITY LOGGING ROUTES (SUPABASE DATABASE)
+// ============================================================
+
+app.get('/api/favorites', async (req, res) => {
+  const user = getReqUser(req);
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+  try {
+    const { data: favs, error } = await supabase
+      .from('favorite_songs')
+      .select('song_id, favorited_at, songs(*)')
+      .eq('user_id', user.id)
+      .order('favorited_at', { ascending: false });
+
+    if (error) throw error;
+
+    const favorites = (favs || [])
+      .map(f => f.songs ? mapSongResponse(f.songs) : null)
+      .filter(Boolean);
+
+    res.json({ favorites });
+  } catch (err) {
+    console.error('Fetch favorites error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch favorites' });
+  }
+});
+
+app.post('/api/favorites', async (req, res) => {
+  const user = getReqUser(req);
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+  const { song } = req.body;
+  if (!song || (!song.title && !song.songId && !song.id)) {
+    return res.status(400).json({ error: 'Song object required' });
+  }
+
+  try {
+    const mapped = mapSongResponse(song);
+    await upsertSongToSupabase(mapped);
+
+    const songId = mapped.songId || mapped.id || `song_${Date.now()}`;
+
+    const { error } = await supabase
+      .from('favorite_songs')
+      .upsert({
+        user_id: user.id,
+        song_id: songId,
+        favorited_at: new Date().toISOString()
+      }, { onConflict: 'user_id,song_id' });
+
+    if (error) throw error;
+
+    res.status(201).json({ success: true, message: 'Added to favorites' });
+  } catch (err) {
+    console.error('Add favorite error:', err.message);
+    res.status(500).json({ error: 'Failed to add favorite' });
+  }
+});
+
+app.delete('/api/favorites', async (req, res) => {
+  const user = getReqUser(req);
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+  const { title, artist, songId, id } = req.body;
+  if (!title && !songId && !id) {
+    return res.status(400).json({ error: 'Song title or ID required' });
+  }
+
+  try {
+    let targetSongId = songId || id;
+    if (!targetSongId && title && artist) {
+      const { data: songs } = await supabase
+        .from('songs')
+        .select('song_id')
+        .ilike('title', title.trim())
+        .ilike('artist', artist.trim())
+        .maybeSingle();
+      if (songs) targetSongId = songs.song_id;
+    }
+
+    if (targetSongId) {
+      await supabase
+        .from('favorite_songs')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('song_id', targetSongId);
+    }
+
+    res.json({ success: true, message: 'Removed from favorites' });
+  } catch (err) {
+    console.error('Delete favorite error:', err.message);
+    res.status(500).json({ error: 'Failed to remove favorite' });
+  }
+});
+
+app.post('/api/activity/play', async (req, res) => {
+  try {
+    const user = getReqUser(req);
+    const { song, mood, language, device } = req.body;
+    if (!song) return res.status(400).json({ error: 'Song required' });
+
+    const mapped = mapSongResponse(song);
+    await upsertSongToSupabase(mapped);
+
+    const songId = mapped.songId || mapped.id || `song_${Date.now()}`;
+    const nowIso = new Date().toISOString();
+
+    if (user && user.id) {
+      await supabase.from('recently_played').insert({
+        user_id: user.id,
+        song_id: songId,
+        played_at: nowIso
+      });
+
+      await supabase.from('listening_history').insert({
+        user_id: user.id,
+        song_id: songId,
+        started_at: nowIso,
+        mood: mood || mapped.moodTags || 'happy',
+        language: language || mapped.language || 'Tamil',
+        device: device || req.headers['user-agent'] || 'web'
+      });
+
+      const userLang = language || mapped.language || 'Tamil';
+      if (userLang) {
+        await supabase.from('language_preferences').upsert({
+          user_id: user.id,
+          language: userLang,
+          last_listened: nowIso
+        }, { onConflict: 'user_id,language' });
+      }
+    }
+
+    res.json({ success: true, logged: Boolean(user) });
+  } catch (err) {
+    console.error('Play activity log error:', err.message);
+    res.status(500).json({ error: 'Failed to log play activity' });
+  }
+});
+
+app.get('/api/recently-played', async (req, res) => {
+  const user = getReqUser(req);
+  if (!user) return res.json({ songs: [] });
+
+  try {
+    const { data: recents } = await supabase
+      .from('recently_played')
+      .select('song_id, played_at, songs(*)')
+      .eq('user_id', user.id)
+      .order('played_at', { ascending: false })
+      .limit(25);
+
+    const songs = (recents || [])
+      .map(r => r.songs ? mapSongResponse(r.songs) : null)
+      .filter(Boolean);
+
+    res.json({ songs });
+  } catch (err) {
+    console.error('Recently played fetch error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch recently played' });
+  }
+});
+
+app.get('/api/activity/history', async (req, res) => {
+  const user = getReqUser(req);
+  if (!user) return res.json({ history: [] });
+
+  try {
+    const { data: history } = await supabase
+      .from('listening_history')
+      .select('id, song_id, started_at, mood, language, device, songs(*)')
+      .eq('user_id', user.id)
+      .order('started_at', { ascending: false })
+      .limit(50);
+
+    res.json({ history: history || [] });
+  } catch (err) {
+    console.error('History fetch error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch listening history' });
+  }
+});
 
 // ============================================================
 // ADMIN API ROUTES

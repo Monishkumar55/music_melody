@@ -1992,6 +1992,19 @@ function playSong(song) {
     });
   }
 
+  // Automatically record user playback activity in Supabase database
+  try {
+    fetch('/api/activity/play', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        song: song,
+        mood: currentMood || 'happy',
+        language: currentLang || 'Tamil'
+      })
+    }).catch(() => {});
+  } catch(e) {}
+
   const bar = document.getElementById('player-bar');
   if (bar) bar.classList.add('active');
 }
@@ -2359,11 +2372,25 @@ function toggleFavByIndex(btn, index) {
     btn.textContent = '♡';
     btn.classList.remove('liked');
     showToast('Removed from favorites');
+    try {
+      fetch('/api/favorites', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: song.title, artist: song.artist, songId: song.songId || song.id })
+      }).catch(() => {});
+    } catch(e) {}
   } else {
     favorites.push({ ...song });
     btn.textContent = '♥';
     btn.classList.add('liked');
     showToast('♥ Saved to favorites!');
+    try {
+      fetch('/api/favorites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ song: song })
+      }).catch(() => {});
+    } catch(e) {}
   }
   try { localStorage.setItem('songstr_fav', JSON.stringify(favorites)); } catch(e) {}
 }
