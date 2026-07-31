@@ -1,4 +1,4 @@
-import { supabase } from '../firebase';
+import { supabase } from '../supabase';
 
 /**
  * Maps raw emotions to corresponding music tags/genres.

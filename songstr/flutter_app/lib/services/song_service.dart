@@ -95,20 +95,20 @@ class SongService {
         'Content-Type': 'application/json',
         'Cookie': 'token=$token',
       },
-      body: jsonEncode(song.toJson()),
+      body: jsonEncode({'song': song.toJson()}),
     );
     return res.statusCode == 200 || res.statusCode == 201;
   }
 
   /// Remove from favorites
-  Future<bool> removeFavorite(String token, String title) async {
+  Future<bool> removeFavorite(String token, String title, String artist) async {
     final res = await http.delete(
       Uri.parse(ApiConfig.favoritesUrl),
       headers: {
         'Content-Type': 'application/json',
         'Cookie': 'token=$token',
       },
-      body: jsonEncode({'title': title}),
+      body: jsonEncode({'title': title, 'artist': artist}),
     );
     return res.statusCode == 200;
   }

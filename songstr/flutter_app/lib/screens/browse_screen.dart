@@ -17,7 +17,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
   List<Song> _results = [];
   bool _loading = false;
   String _selectedLang = 'All';
-  final _languages = ['All', 'Tamil', 'Telugu', 'Hindi', 'Malayalam', 'Kannada', 'English', 'Punjabi', 'Korean', 'Japanese'];
+  final _languages = ['All', 'Tamil', 'Telugu', 'Hindi', 'Malayalam', 'English'];
 
   @override
   void initState() {

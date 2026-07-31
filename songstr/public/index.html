@@ -259,7 +259,7 @@
     .song-chips { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
     .song-chip { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 6px; background: rgba(255,255,255,0.06); color: var(--text2); }
     .song-chip.lang { background: var(--accent-glow); color: var(--accent-light); }
-    .song-actions { display: flex; items-center: center; gap: 8px; flex-shrink: 0; }
+    .song-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
     .song-icon-btn {
       background: var(--glass); color: var(--text2); font-size: 16px;
       width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -1116,10 +1116,7 @@
                   <option value="Telugu">Telugu</option>
                   <option value="Hindi">Hindi</option>
                   <option value="Malayalam">Malayalam</option>
-                  <option value="Kannada">Kannada</option>
                   <option value="English">English</option>
-                  <option value="Punjabi">Punjabi</option>
-                  <option value="Bengali">Bengali</option>
                   <option value="Marathi">Marathi</option>
                   <option value="Gujarati">Gujarati</option>
                   <option value="Other">Other</option>
@@ -1456,11 +1453,6 @@
           <option value="Malayalam">Malayalam</option>
           <option value="Hindi">Hindi</option>
           <option value="English">English</option>
-          <option value="Kannada">Kannada</option>
-          <option value="Bengali">Bengali</option>
-          <option value="Punjabi">Punjabi</option>
-          <option value="Korean">Korean</option>
-          <option value="Japanese">Japanese</option>
         </select>
       </div>
       <div style="margin-bottom:12px">
@@ -1520,7 +1512,7 @@ let searchResults = [];
 let customSongs = [];
 let mediaStream = null;
 
-const ALL_LANGUAGES = ['All', 'Tamil', 'Telugu', 'Malayalam', 'Hindi', 'English', 'Kannada', 'Bengali', 'Punjabi', 'Korean', 'Japanese'];
+const ALL_LANGUAGES = ['All', 'Tamil', 'English', 'Telugu', 'Hindi'];
 
 const MOOD_COLORS = {
   happy: '#fbbf24', sad: '#60a5fa', angry: '#f87171', relaxed: '#34d399',
@@ -1746,17 +1738,11 @@ async function handleRegister(e) {
       updateNavUserUI();
       showToast('Registration successful! Welcome to Songstr 🎉');
       showScreen('home');
-    } else if (data && data.error) {
-      showToast(data.error);
     } else {
-      currentUser = { id: 'usr_' + Date.now(), username: username || 'user', email, fullname: fullname || username, role: 'user' };
-      try { localStorage.setItem('songstr_user', JSON.stringify(currentUser)); } catch(e) {}
-      updateNavUserUI();
-      showToast('Account created successfully! Welcome to Songstr 🎉');
-      showScreen('home');
+      showToast((data && data.error) ? data.error : 'Registration failed');
     }
   } catch(err) {
-    showToast('Account created successfully!');
+    showToast(err.message || 'Registration error');
   } finally {
     hideLoading();
   }
@@ -1882,31 +1868,8 @@ async function loadSongs(mood, lang) {
       }
     } catch(e) {}
 
-    // Fallback: Direct Supabase Cloud PostgreSQL Query
-    if ((!songs || songs.length === 0) && window.supabaseClient) {
-      try {
-        let q = window.supabaseClient.from('songs').select('*');
-        if (mood && mood !== 'all' && mood !== 'happy') {
-          q = q.ilike('mood', mood);
-        }
-        const { data: supaData } = await q;
-        if (supaData && supaData.length > 0) {
-          songs = supaData.map(s => ({
-            songId: s.id,
-            id: s.id,
-            title: s.title,
-            artist: s.artist,
-            movie: s.movie || 'Tamil Hits',
-            album: s.movie || 'Tamil Hits',
-            language: s.language || 'Tamil',
-            genre: s.genre || 'Film Song',
-            year: s.release_year || 2024,
-            coverImage: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop',
-            audioUrl: s.file_url || '',
-            moodTags: s.mood || 'romantic'
-          }));
-        }
-      } catch(e) {}
+    if (!songs || songs.length === 0) {
+      songs = getFallbackSongs(mood, lang);
     }
 
     currentSongs = songs;
@@ -1923,14 +1886,20 @@ function renderSongs(songs, containerId) {
     el.innerHTML = `<div class="empty-state"><div class="empty-icon">🎵</div><div class="empty-title">No songs found</div><div class="empty-sub">Try selecting 'All' languages or click ➕ Add Song</div></div>`;
     return;
   }
-  renderedSongs = songs.slice(0, 30);
+  renderedSongs = songs.slice(0, 50);
   el.innerHTML = renderedSongs.map((song, i) => {
     const artColor = SONG_ART_COLORS[i % SONG_ART_COLORS.length];
     const isFav = favorites.some(f => f.title === song.title && f.artist === song.artist);
+    const hasCover = song.coverImage && !song.coverImage.includes('unsplash.com');
+    const artContent = hasCover 
+      ? `<div class="song-art" style="background:${artColor};padding:0;overflow:hidden"><img src="${song.coverImage}" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='🎵'"/></div>` 
+      : `<div class="song-art" style="background:${artColor}">🎵</div>`;
+    const sourceTag = song.source === 'jiosaavn' ? `<span class="song-chip" style="background:rgba(52,211,153,0.15);color:#34d399">JioSaavn</span>` : '';
+    const durationStr = song.duration ? `<span class="song-chip">${Math.floor(song.duration/60)}:${String(song.duration%60).padStart(2,'0')}</span>` : '';
     return `
     <div class="song-card" onclick="playSongByIndex(${i})">
       <div class="song-num" style="background:${color}18;color:${color}">${String(i+1).padStart(2,'0')}</div>
-      <div class="song-art" style="background:${artColor}">🎵</div>
+      ${artContent}
       <div class="song-info">
         <div class="song-title">${escapeHtml(song.title)}</div>
         <div class="song-artist clickable-text" onclick="event.stopPropagation(); openArtistPage('${escapeHtml(song.artist)}')">${escapeHtml(song.artist)}</div>
@@ -1939,6 +1908,8 @@ function renderSongs(songs, containerId) {
           <span class="song-chip">${escapeHtml(song.genre || 'Music')}</span>
           ${song.year ? `<span class="song-chip">${song.year}</span>` : ''}
           ${song.language ? `<span class="song-chip lang clickable-text" onclick="event.stopPropagation(); openLanguageHome('${escapeHtml(song.language)}')">${escapeHtml(song.language)}</span>` : ''}
+          ${durationStr}
+          ${sourceTag}
         </div>
       </div>
       <div class="song-actions">
@@ -1976,9 +1947,19 @@ function playSongSearch(index) {
 function playSong(song) {
   const title = song.title || 'Track';
   const artist = song.artist || 'Artist';
-  const songUrl = song.songId 
-    ? `/api/stream?songId=${song.songId}&title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}&_ts=${Date.now()}`
-    : `/api/stream?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}&_ts=${Date.now()}`;
+  
+  // Build stream URL with JioSaavn priority
+  let songUrl;
+  if (song.downloadUrl && song.downloadUrl.startsWith('http')) {
+    // Direct JioSaavn download URL — bypass stream proxy
+    songUrl = song.downloadUrl;
+  } else if (song.jioId) {
+    songUrl = `/api/stream?jioId=${song.jioId}&title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}&_ts=${Date.now()}`;
+  } else if (song.songId) {
+    songUrl = `/api/stream?songId=${song.songId}&title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}&_ts=${Date.now()}`;
+  } else {
+    songUrl = `/api/stream?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}&_ts=${Date.now()}`;
+  }
 
   document.getElementById('p-title').textContent = title;
   document.getElementById('p-artist').innerHTML = `<span class="clickable-text" onclick="openArtistPage('${escapeHtml(artist)}')">${escapeHtml(artist)}</span> • <span class="clickable-text" onclick="openAlbumPage('${escapeHtml(song.album || song.movie || 'Single Album')}')">${escapeHtml(song.album || song.movie || 'Single Album')}</span>`;
@@ -2418,24 +2399,36 @@ function searchSongs(q) {
         el.innerHTML = `<div class="empty-state"><div class="empty-icon">🎵</div><div class="empty-title">No songs found for "${escapeHtml(q)}"</div></div>`;
         return;
       }
-      el.innerHTML = searchResults.map((song, i) => `
+      el.innerHTML = searchResults.map((song, i) => {
+        const hasCover = song.coverImage && !song.coverImage.includes('unsplash.com');
+        const artContent = hasCover
+          ? `<div class="song-art" style="background:var(--accent);padding:0;overflow:hidden"><img src="${song.coverImage}" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='🎵'"/></div>`
+          : `<div class="song-art" style="background:var(--accent)">🎵</div>`;
+        const sourceTag = song.source === 'jiosaavn' ? `<span class="song-chip" style="background:rgba(52,211,153,0.15);color:#34d399">JioSaavn</span>` : '';
+        const albumText = song.album ? `<div class="song-movie">${escapeHtml(song.album)}</div>` : '';
+        const durationStr = song.duration ? `<span class="song-chip">${Math.floor(song.duration/60)}:${String(song.duration%60).padStart(2,'0')}</span>` : '';
+        return `
         <div class="song-card" onclick="playSongSearch(${i})">
           <div class="song-num" style="background:var(--accent-glow);color:var(--accent-light)">${String(i+1).padStart(2,'0')}</div>
-          <div class="song-art" style="background:var(--accent)">🎵</div>
+          ${artContent}
           <div class="song-info">
             <div class="song-title">${escapeHtml(song.title)}</div>
             <div class="song-artist">${escapeHtml(song.artist)}</div>
+            ${albumText}
             <div class="song-chips">
-              <span class="song-chip">${escapeHtml(song.mood || '')}</span>
-              <span class="song-chip lang">${escapeHtml(song.language || '')}</span>
+              ${song.language ? `<span class="song-chip lang">${escapeHtml(song.language)}</span>` : ''}
+              ${song.year ? `<span class="song-chip">${song.year}</span>` : ''}
+              ${durationStr}
+              ${sourceTag}
             </div>
           </div>
           <div class="song-actions">
             <button class="song-icon-btn" style="background:var(--accent);color:#fff" onclick="event.stopPropagation(); playSongSearch(${i})">▶</button>
           </div>
-        </div>`).join('');
+        </div>`;
+      }).join('');
     } catch(e) {}
-  }, 300);
+  }, 400);
 }
 
 async function renderMoodGrid() {
@@ -2481,57 +2474,75 @@ function getFallbackSongs(mood, lang) {
     { title: 'Rowdy Baby', artist: 'Dhanush, Dhee', movie: 'Maari 2', year: 2018, genre: 'Dance', language: 'Tamil', mood: 'happy' },
     { title: 'Kutti Story', artist: 'Anirudh Ravichander', movie: 'Master', year: 2021, genre: 'Pop', language: 'Tamil', mood: 'happy' },
     { title: 'Butta Bomma', artist: 'Armaan Malik', movie: 'Ala Vaikunthapurramuloo', year: 2020, genre: 'Pop', language: 'Telugu', mood: 'happy' },
-    { title: 'Jimikki Kammal', artist: 'Vineeth Sreenivasan', movie: 'Velipadinte Pusthakam', year: 2017, genre: 'Dance', language: 'Malayalam', mood: 'happy' },
+    { title: 'Inkem Inkem Inkem Kaavale', artist: 'Sid Sriram', movie: 'Geetha Govindam', year: 2018, genre: 'Melody', language: 'Telugu', mood: 'happy' },
     { title: 'Balam Pichkari', artist: 'Vishal Dadlani', movie: 'Yeh Jawaani Hai Deewani', year: 2013, genre: 'Pop', language: 'Hindi', mood: 'happy' },
+    { title: 'Gallan Goodiyaan', artist: 'Yashita Sharma', movie: 'Dil Dhadakne Do', year: 2015, genre: 'Dance', language: 'Hindi', mood: 'happy' },
     { title: 'Happy', artist: 'Pharrell Williams', movie: 'Despicable Me 2', year: 2013, genre: 'Pop', language: 'English', mood: 'happy' },
-    { title: 'Bombe Helutaithe', artist: 'Rajesh Krishnan', movie: 'Mungaru Male', year: 2006, genre: 'Melody', language: 'Kannada', mood: 'happy' },
-    { title: 'Mon Majhi Re', artist: 'Anupam Roy', movie: 'Boss', year: 2013, genre: 'Pop', language: 'Bengali', mood: 'happy' },
-    { title: 'Hasdi Rehna', artist: 'Jassi Gill', movie: 'Single', year: 2018, genre: 'Pop', language: 'Punjabi', mood: 'happy' },
-    { title: 'Dynamite', artist: 'BTS', movie: 'Single', year: 2020, genre: 'Pop', language: 'Korean', mood: 'happy' },
+    { title: 'Can\'t Stop the Feeling!', artist: 'Justin Timberlake', movie: 'Trolls', year: 2016, genre: 'Pop', language: 'English', mood: 'happy' },
 
-    // SAD 😢
+    // SAD 😢 (Soulful Sad)
     { title: 'Kanave Kanave', artist: 'Anirudh Ravichander', movie: '3', year: 2012, genre: 'Pop', language: 'Tamil', mood: 'sad' },
     { title: 'Oru Deivam Thantha Poove', artist: 'Vidyasagar', movie: 'Poovellam Kettuppar', year: 1999, genre: 'Melody', language: 'Tamil', mood: 'sad' },
+    { title: 'Poo Nee Poo', artist: 'Anirudh Ravichander', movie: '3', year: 2012, genre: 'Soul', language: 'Tamil', mood: 'sad' },
     { title: 'Channa Mereya', artist: 'Arijit Singh', movie: 'Ae Dil Hai Mushkil', year: 2016, genre: 'Melody', language: 'Hindi', mood: 'sad' },
     { title: 'Agar Tum Saath Ho', artist: 'Alka Yagnik, Arijit Singh', movie: 'Tamasha', year: 2015, genre: 'Soul', language: 'Hindi', mood: 'sad' },
-    { title: 'Kanneer Poovinte', artist: 'K.J. Yesudas', movie: 'Kireedam', year: 1989, genre: 'Melody', language: 'Malayalam', mood: 'sad' },
+    { title: 'Tujhe Kitna Chhein Lage', artist: 'Arijit Singh', movie: 'Kabir Singh', year: 2019, genre: 'Melody', language: 'Hindi', mood: 'sad' },
+    { title: 'Urike Urike', artist: 'Sid Sriram', movie: 'Hit 2', year: 2022, genre: 'Melody', language: 'Telugu', mood: 'sad' },
     { title: 'Someone Like You', artist: 'Adele', movie: '21', year: 2011, genre: 'Pop', language: 'English', mood: 'sad' },
+    { title: 'Fix You', artist: 'Coldplay', movie: 'X&Y', year: 2005, genre: 'Alternative', language: 'English', mood: 'sad' },
 
-    // ENERGETIC ⚡
+    // ENERGETIC ⚡ (Energetic Beats)
     { title: 'Aaluma Doluma', artist: 'Anirudh Ravichander', movie: 'Vedhalam', year: 2015, genre: 'Dance', language: 'Tamil', mood: 'energetic' },
+    { title: 'Naa Ready', artist: 'Anirudh Ravichander, Vijay', movie: 'Leo', year: 2023, genre: 'Mass Beats', language: 'Tamil', mood: 'energetic' },
     { title: 'Why This Kolaveri Di', artist: 'Dhanush', movie: '3', year: 2012, genre: 'Pop', language: 'Tamil', mood: 'energetic' },
-    { title: 'Jalsa Title Song', artist: 'Mani Sharma', movie: 'Jalsa', year: 2008, genre: 'Dance', language: 'Telugu', mood: 'energetic' },
-    { title: 'Dhimmak Dhamaka', artist: 'Anirudh Ravichander', movie: 'Remo', year: 2016, genre: 'Dance', language: 'Telugu', mood: 'energetic' },
+    { title: 'Ramuloo Ramulaa', artist: 'Anurag Kulkarni', movie: 'Ala Vaikunthapurramuloo', year: 2020, genre: 'Dance', language: 'Telugu', mood: 'energetic' },
     { title: 'Badtameez Dil', artist: 'Benny Dayal', movie: 'Yeh Jawaani Hai Deewani', year: 2013, genre: 'Pop', language: 'Hindi', mood: 'energetic' },
+    { title: 'Kar Gayi Chull', artist: 'Badshah, Neha Kakkar', movie: 'Kapoor & Sons', year: 2016, genre: 'EDM', language: 'Hindi', mood: 'energetic' },
     { title: 'Uptown Funk', artist: 'Mark Ronson ft. Bruno Mars', movie: 'Uptown Special', year: 2014, genre: 'Funk', language: 'English', mood: 'energetic' },
+    { title: 'Eye of the Tiger', artist: 'Survivor', movie: 'Rocky III', year: 1982, genre: 'Rock', language: 'English', mood: 'energetic' },
 
     // RELAXED / CALM 😌
-    { title: 'Samajavaragamana', artist: 'Sid Sriram', movie: 'Ala Vaikunthapurramuloo', year: 2020, genre: 'Melody', language: 'Telugu', mood: 'relaxed' },
-    { title: 'Yaaro Ivan', artist: 'S.P. Balasubrahmanyam', movie: 'Vetri Vizha', year: 1989, genre: 'Acoustic', language: 'Tamil', mood: 'relaxed' },
-    { title: 'Iktara', artist: 'Kavita Seth', movie: 'Wake Up Sid', year: 2009, genre: 'Acoustic', language: 'Hindi', mood: 'relaxed' },
     { title: 'Nenjukulle', artist: 'A.R. Rahman', movie: 'Kadal', year: 2013, genre: 'Ambient', language: 'Tamil', mood: 'relaxed' },
+    { title: 'Moongil Thottam', artist: 'Abhay Jodhpurkar', movie: 'Kadal', year: 2013, genre: 'Melody', language: 'Tamil', mood: 'relaxed' },
+    { title: 'Samajavaragamana', artist: 'Sid Sriram', movie: 'Ala Vaikunthapurramuloo', year: 2020, genre: 'Melody', language: 'Telugu', mood: 'relaxed' },
+    { title: 'Iktara', artist: 'Kavita Seth', movie: 'Wake Up Sid', year: 2009, genre: 'Acoustic', language: 'Hindi', mood: 'relaxed' },
+    { title: 'Kun Faya Kun', artist: 'A.R. Rahman, Javed Ali', movie: 'Rockstar', year: 2011, genre: 'Sufi Ambient', language: 'Hindi', mood: 'relaxed' },
+    { title: 'Sunflower', artist: 'Post Malone, Swae Lee', movie: 'Spider-Man', year: 2018, genre: 'Chill Pop', language: 'English', mood: 'relaxed' },
+    { title: 'Yellow', artist: 'Coldplay', movie: 'Parachutes', year: 2000, genre: 'Acoustic', language: 'English', mood: 'relaxed' },
 
-    // ROMANTIC 💖
-    { title: 'Tum Hi Ho', artist: 'Arijit Singh', movie: 'Aashiqui 2', year: 2013, genre: 'Melody', language: 'Hindi', mood: 'romantic' },
+    // ROMANTIC 💖 (Romantic Romance)
     { title: 'Munbe Vaa', artist: 'Shreya Ghoshal, Naresh Iyer', movie: 'Sillunu Oru Kaadhal', year: 2006, genre: 'Love', language: 'Tamil', mood: 'romantic' },
-    { title: 'Malare', artist: 'Vijay Yesudas', movie: 'Premam', year: 2015, genre: 'Melody', language: 'Malayalam', mood: 'romantic' },
+    { title: 'Enna Sona', artist: 'Arijit Singh', movie: 'OK Jaanu', year: 2017, genre: 'Romantic', language: 'Hindi', mood: 'romantic' },
+    { title: 'Tum Hi Ho', artist: 'Arijit Singh', movie: 'Aashiqui 2', year: 2013, genre: 'Melody', language: 'Hindi', mood: 'romantic' },
+    { title: 'Kesariya', artist: 'Arijit Singh', movie: 'Brahmastra', year: 2022, genre: 'Love', language: 'Hindi', mood: 'romantic' },
+    { title: 'Priyamanamani', artist: 'Sid Sriram', movie: 'Brochevarevarura', year: 2019, genre: 'Melody', language: 'Telugu', mood: 'romantic' },
     { title: 'Perfect', artist: 'Ed Sheeran', movie: '÷', year: 2017, genre: 'Pop', language: 'English', mood: 'romantic' },
+    { title: 'All of Me', artist: 'John Legend', movie: 'Love in the Future', year: 2013, genre: 'Piano Ballad', language: 'English', mood: 'romantic' },
 
-    // ANGRY 😡
+    // ANGRY 😡 (High Energy / Mass)
     { title: 'Master Coming', artist: 'Anirudh Ravichander', movie: 'Master', year: 2021, genre: 'Rock', language: 'Tamil', mood: 'angry' },
+    { title: 'Halamithi Habibo', artist: 'Anirudh Ravichander', movie: 'Beast', year: 2022, genre: 'Mass Beats', language: 'Tamil', mood: 'angry' },
     { title: 'Apna Time Aayega', artist: 'Ranveer Singh', movie: 'Gully Boy', year: 2019, genre: 'Rap', language: 'Hindi', mood: 'angry' },
+    { title: 'Zinda', artist: 'Siddharth Mahadevan', movie: 'Bhaag Milkha Bhaag', year: 2013, genre: 'Rock', language: 'Hindi', mood: 'angry' },
+    { title: 'Dookudu Title Song', artist: 'Shankar Mahadevan', movie: 'Dookudu', year: 2011, genre: 'Mass Beats', language: 'Telugu', mood: 'angry' },
     { title: 'In the End', artist: 'Linkin Park', movie: 'Hybrid Theory', year: 2000, genre: 'Rock', language: 'English', mood: 'angry' },
     { title: 'Numb', artist: 'Linkin Park', movie: 'Meteora', year: 2003, genre: 'Rock', language: 'English', mood: 'angry' },
 
-    // NEUTRAL 🎧
+    // NEUTRAL 🎧 (Everyday Neutral)
     { title: 'Yaar Indha Saalai Oram', artist: 'Ilaiyaraaja', movie: 'Ninaithale Inikkum', year: 1979, genre: 'Melody', language: 'Tamil', mood: 'neutral' },
+    { title: 'Vathi Coming', artist: 'Anirudh Ravichander', movie: 'Master', year: 2021, genre: 'Beats', language: 'Tamil', mood: 'neutral' },
+    { title: 'Kabira', artist: 'Tochi Raina, Rekha Bhardwaj', movie: 'Yeh Jawaani Hai Deewani', year: 2013, genre: 'Folk Pop', language: 'Hindi', mood: 'neutral' },
+    { title: 'Evare', artist: 'Vijay Prakash', movie: 'Premam', year: 2016, genre: 'Melody', language: 'Telugu', mood: 'neutral' },
     { title: 'Here Comes The Sun', artist: 'The Beatles', movie: 'Abbey Road', year: 1969, genre: 'Pop', language: 'English', mood: 'neutral' },
-    { title: 'Pure Imagination', artist: 'Gene Wilder', movie: 'Willy Wonka', year: 1971, genre: 'Pop', language: 'English', mood: 'neutral' },
+    { title: 'Count on Me', artist: 'Bruno Mars', movie: 'Doo-Wops & Hooligans', year: 2010, genre: 'Acoustic Pop', language: 'English', mood: 'neutral' },
 
-    // STRESSED / STRESS RELIEF 😫
+    // STRESSED 😫 (Stress Relief)
     { title: 'Nee Paartha Vizhigal', artist: 'Anirudh Ravichander', movie: '3', year: 2012, genre: 'Lo-fi', language: 'Tamil', mood: 'stressed' },
+    { title: 'Khaabon Ke Parinday', artist: 'Mohit Chauhan', movie: 'Zindagi Na Milegi Dobara', year: 2011, genre: 'Acoustic', language: 'Hindi', mood: 'stressed' },
+    { title: 'Love You Zindagi', artist: 'Jasleen Royal', movie: 'Dear Zindagi', year: 2016, genre: 'Acoustic', language: 'Hindi', mood: 'stressed' },
+    { title: 'Telusa Telusa', artist: 'Jubin Nautiyal', movie: 'Sarrainodu', year: 2016, genre: 'Melody', language: 'Telugu', mood: 'stressed' },
     { title: 'Weightless', artist: 'Marconi Union', movie: 'Ambient', year: 2011, genre: 'Ambient Soundscape', language: 'English', mood: 'stressed' },
-    { title: 'Khaabon Ke Parinday', artist: 'Mohit Chauhan', movie: 'Zindagi Na Milegi Dobara', year: 2011, genre: 'Acoustic', language: 'Hindi', mood: 'stressed' }
+    { title: 'Three Little Birds', artist: 'Bob Marley', movie: 'Exodus', year: 1977, genre: 'Reggae Chill', language: 'English', mood: 'stressed' }
   ];
 
   let list = fallbackList;

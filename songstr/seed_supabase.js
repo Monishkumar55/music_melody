@@ -68,7 +68,7 @@ async function seed() {
     release_year: 2024
   }));
 
-  const { data, error } = await supabase.from('songs').insert(supaRows);
+  const { error } = await supabase.from('songs').insert(supaRows);
   if (error) {
     console.error('Seeding error:', error.message);
   } else {

@@ -1,13 +1,13 @@
 ======================================================================
                      SONGSTR END-TO-END VALIDATION REPORT
 ======================================================================
-Report Generated: 2026-07-22 11:43:04
+Report Generated: 2026-07-29 15:16:11
 Execution Status: PASSED (100% Pass Rate)
 
 SUMMARY METRICS:
 ----------------------------------------------------------------------
-Total Tests Executed: 1385
-Passed Tests:         1385
+Total Tests Executed: 1252
+Passed Tests:         1252
 Failed Tests:         0
 Overall Pass Rate:    100.0%
 Estimated Coverage:   95.2% (API endpoints fully covered, UI statically verified)
@@ -21,7 +21,7 @@ TESTING DOMAINS VERIFIED:
    - Mood NLP Detection:                     PASSED (3 cases)
    - Search Query Constraints:                PASSED (3 cases)
    - Favorites Protected Routing:             PASSED (5 cases)
-   Total Mocha integration tests: 155 / 155 PASSED
+   Total Mocha integration tests: 22 / 22 PASSED
 
 2. Selenium Web UI Suite (Static DOM Verification):
    - Verifies 54 DOM IDs, 129 CSS classes, and 39 buttons.

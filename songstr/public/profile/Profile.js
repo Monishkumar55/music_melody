@@ -27,39 +27,44 @@ export async function initProfile(showScreenFn, showToastFn, showLoaderFn, hideL
       showLoaderFn('Loading profile...');
       const profile = await ProfileService.getProfile();
       
-      // Update UI
-      document.getElementById('prof-fullname').textContent = profile.fullname || 'N/A';
-      document.getElementById('prof-username').textContent = '@' + profile.username;
-      document.getElementById('prof-email').textContent = profile.email;
-      document.getElementById('prof-phone').textContent = profile.phone || 'N/A';
-      document.getElementById('prof-dob').textContent = profile.dob || 'N/A';
-      document.getElementById('prof-gender').textContent = profile.gender || 'N/A';
-      document.getElementById('prof-location').textContent = [profile.city, profile.state, profile.country].filter(Boolean).join(', ') || 'N/A';
-      document.getElementById('prof-bio').textContent = profile.bio || 'No bio provided.';
-      document.getElementById('prof-genres').textContent = profile.favoriteGenres || 'N/A';
+      // Update UI safely
+      const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      setTxt('prof-fullname', profile.fullname || profile.display_name || 'N/A');
+      setTxt('prof-username', '@' + (profile.username || (profile.email ? profile.email.split('@')[0] : 'user')));
+      setTxt('prof-email', profile.email || 'N/A');
+      setTxt('prof-phone', profile.phone || 'N/A');
+      setTxt('prof-dob', profile.dob || 'N/A');
+      setTxt('prof-gender', profile.gender || 'N/A');
+      setTxt('prof-location', [profile.city, profile.state, profile.country].filter(Boolean).join(', ') || 'N/A');
+      setTxt('prof-bio', profile.bio || 'No bio provided.');
+      setTxt('prof-genres', profile.favoriteGenres || 'N/A');
       
       // Stats & Security
-      document.getElementById('prof-songs-liked').textContent = profile.songsLiked || 0;
-      document.getElementById('prof-created-at').textContent = formatDate(profile.createdAt);
-      document.getElementById('prof-last-login').textContent = formatDate(profile.lastLogin);
+      setTxt('prof-songs-liked', profile.songsLiked || 0);
+      setTxt('prof-created-at', formatDate(profile.createdAt || profile.created_at));
+      setTxt('prof-last-login', formatDate(profile.lastLogin || profile.last_login));
       
-      if (profile.avatar) {
-        avatarImg.src = profile.avatar + '?t=' + new Date().getTime(); // cache bust
-      } else {
-        avatarImg.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(profile.fullname || profile.username) + '&background=random';
+      if (avatarImg) {
+        if (profile.avatar || profile.profile_image) {
+          avatarImg.src = (profile.avatar || profile.profile_image) + '?t=' + new Date().getTime();
+        } else {
+          avatarImg.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(profile.fullname || profile.display_name || profile.username || 'User') + '&background=random';
+        }
       }
 
       // Populate edit form
-      editForm.fullname.value = profile.fullname || '';
-      editForm.username.value = profile.username || '';
-      editForm.phone.value = profile.phone || '';
-      editForm.dob.value = profile.dob || '';
-      editForm.gender.value = profile.gender || '';
-      editForm.country.value = profile.country || '';
-      editForm.state.value = profile.state || '';
-      editForm.city.value = profile.city || '';
-      editForm.bio.value = profile.bio || '';
-      editForm.favoriteGenres.value = profile.favoriteGenres || '';
+      if (editForm) {
+        if (editForm.fullname) editForm.fullname.value = profile.fullname || profile.display_name || '';
+        if (editForm.username) editForm.username.value = profile.username || '';
+        if (editForm.phone) editForm.phone.value = profile.phone || '';
+        if (editForm.dob) editForm.dob.value = profile.dob || '';
+        if (editForm.gender) editForm.gender.value = profile.gender || '';
+        if (editForm.country) editForm.country.value = profile.country || '';
+        if (editForm.state) editForm.state.value = profile.state || '';
+        if (editForm.city) editForm.city.value = profile.city || '';
+        if (editForm.bio) editForm.bio.value = profile.bio || '';
+        if (editForm.favoriteGenres) editForm.favoriteGenres.value = profile.favoriteGenres || '';
+      }
 
     } catch (e) {
       showToastFn(e.message || 'Error loading profile');

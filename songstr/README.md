@@ -10,7 +10,7 @@ node server.js
 
 ## Features
 - AI mood detection from text/voice/face
-- 200+ songs: Tamil, Telugu, Malayalam, Hindi, English, Kannada, Bengali, Korean, Japanese
+- 200+ songs: Tamil, Telugu, Malayalam, Hindi, English
 - 8 moods: Happy, Sad, Angry, Relaxed, Energetic, Stressed, Romantic, Neutral
  - Spotify search integration and local audio playback
 - Save favorites (localStorage)

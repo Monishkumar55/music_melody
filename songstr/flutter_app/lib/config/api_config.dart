@@ -2,11 +2,21 @@ import 'package:flutter/foundation.dart';
 
 class ApiConfig {
   static String get baseUrl {
+    if (kDebugMode) {
+      return 'http://localhost:3000';
+    }
     return 'https://music-melody-phi.vercel.app';
   }
 
-  static String get jiosaavnSearchUrl => '$baseUrl/api/music/search';
-  static String get jiosaavnSongUrl => '$baseUrl/api/music/song';
+  static String get jiosaavnSearchUrl => '$baseUrl/api/jiosaavn/search';
+  static String get jiosaavnSongUrl => '$baseUrl/api/jiosaavn/song';
+  static String get jiosaavnAlbumUrl => '$baseUrl/api/jiosaavn/album';
+  static String get jiosaavnArtistUrl => '$baseUrl/api/jiosaavn/artist';
+  static String get jiosaavnPlaylistUrl => '$baseUrl/api/jiosaavn/playlist';
+  static String get jiosaavnTrendingUrl => '$baseUrl/api/jiosaavn/trending';
+  static String get jiosaavnNewReleasesUrl => '$baseUrl/api/jiosaavn/new-releases';
+  static String get jiosaavnRecommendationsUrl => '$baseUrl/api/jiosaavn/recommendations';
+  static String get jiosaavnLyricsUrl => '$baseUrl/api/jiosaavn/lyrics';
   static String get deezerSearchUrl => '$baseUrl/api/music/deezer/search';
   static String get deezerTrackUrl => '$baseUrl/api/music/deezer/track';
   static String get songsUrl => '$baseUrl/api/songs';

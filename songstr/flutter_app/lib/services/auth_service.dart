@@ -36,15 +36,21 @@ class AuthService {
       final data = jsonDecode(res.body);
       _user = AppUser.fromJson(data['user']);
       
-      // Extract token from cookie
-      final cookies = res.headers['set-cookie'];
-      if (cookies != null) {
-        final tokenMatch = RegExp(r'token=([^;]+)').firstMatch(cookies);
-        if (tokenMatch != null) {
-          _token = tokenMatch.group(1);
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('auth_token', _token!);
+      if (data['token'] != null) {
+        _token = data['token'];
+      } else {
+        final cookies = res.headers['set-cookie'];
+        if (cookies != null) {
+          final tokenMatch = RegExp(r'token=([^;]+)').firstMatch(cookies);
+          if (tokenMatch != null) {
+            _token = tokenMatch.group(1);
+          }
         }
+      }
+
+      if (_token != null) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', _token!);
       }
       return _user!;
     } else {
@@ -68,14 +74,22 @@ class AuthService {
     if (res.statusCode == 200) {
       final data = jsonDecode(res.body);
       _user = AppUser.fromJson(data['user']);
-      final cookies = res.headers['set-cookie'];
-      if (cookies != null) {
-        final tokenMatch = RegExp(r'token=([^;]+)').firstMatch(cookies);
-        if (tokenMatch != null) {
-          _token = tokenMatch.group(1);
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('auth_token', _token!);
+      
+      if (data['token'] != null) {
+        _token = data['token'];
+      } else {
+        final cookies = res.headers['set-cookie'];
+        if (cookies != null) {
+          final tokenMatch = RegExp(r'token=([^;]+)').firstMatch(cookies);
+          if (tokenMatch != null) {
+            _token = tokenMatch.group(1);
+          }
         }
+      }
+
+      if (_token != null) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', _token!);
       }
       return _user!;
     } else {

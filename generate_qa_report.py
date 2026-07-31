@@ -108,8 +108,8 @@ def launch_server():
             pass
             
     if not success:
-        # Get server error log if failed
-        stdout, stderr = proc.communicate(timeout=1)
+        proc.kill()
+        stdout, stderr = proc.communicate()
         error(f"Failed to start backend server. Stderr: {stderr}")
         raise RuntimeError("Server startup failed.")
         

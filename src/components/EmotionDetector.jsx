@@ -46,10 +46,10 @@ const EmotionDetector = () => {
           setRecommendations(songs);
           
           // Save to history if logged in
-          const user = auth.currentUser;
+          const { data: { user } } = await supabase.auth.getUser();
           if (user) {
             const songIds = songs.map(s => s.id);
-            await saveEmotionHistory(user.uid, emotion, confidence, songIds);
+            await saveEmotionHistory(user.id, emotion, confidence, songIds);
           }
         } catch (err) {
           console.error("Error processing emotion match:", err);

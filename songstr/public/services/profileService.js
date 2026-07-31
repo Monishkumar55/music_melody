@@ -1,88 +1,160 @@
 export const ProfileService = {
   async getProfile() {
-    const { data: { session } } = await window.supabaseClient.auth.getSession();
-    if (!session) throw new Error('Not authenticated');
+    try {
+      const res = await fetch('/api/profile');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.profile) return data.profile;
+      }
+    } catch (_) {}
 
-    const { data, error } = await window.supabaseClient
-      .from('profiles')
-      .select('*')
-      .eq('id', session.user.id)
-      .single();
-    
-    if (error) throw new Error(error.message);
-    return data;
+    if (window.supabaseClient && window.supabaseClient.auth) {
+      const { data: { session } } = await window.supabaseClient.auth.getSession();
+      if (session) {
+        const { data, error } = await window.supabaseClient
+          .from('users')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+        if (!error && data) return data;
+      }
+    }
+    throw new Error('Failed to load profile');
   },
 
   async updateProfile(profileData) {
-    const { data: { session } } = await window.supabaseClient.auth.getSession();
-    if (!session) throw new Error('Not authenticated');
+    try {
+      const res = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profileData)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return { success: true, profile: data.profile };
+      }
+    } catch (_) {}
 
-    const { data, error } = await window.supabaseClient
-      .from('profiles')
-      .update(profileData)
-      .eq('id', session.user.id)
-      .select()
-      .single();
-
-    if (error) throw new Error(error.message);
-    return { success: true, profile: data };
+    if (window.supabaseClient && window.supabaseClient.auth) {
+      const { data: { session } } = await window.supabaseClient.auth.getSession();
+      if (session) {
+        const { data, error } = await window.supabaseClient
+          .from('users')
+          .update(profileData)
+          .eq('id', session.user.id)
+          .select()
+          .single();
+        if (!error) return { success: true, profile: data };
+      }
+    }
+    throw new Error('Failed to update profile');
   },
 
   async uploadAvatar(file) {
-    const { data: { session } } = await window.supabaseClient.auth.getSession();
-    if (!session) throw new Error('Not authenticated');
+    const formData = new FormData();
+    formData.append('avatar', file);
 
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${session.user.id}-${Math.random()}.${fileExt}`;
+    try {
+      const res = await fetch('/api/profile/avatar', {
+        method: 'POST',
+        body: formData
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return { success: true, avatar_url: data.avatarUrl };
+      }
+    } catch (_) {}
 
-    const { error: uploadError } = await window.supabaseClient.storage
-      .from('avatars')
-      .upload(fileName, file);
+    if (window.supabaseClient && window.supabaseClient.auth) {
+      const { data: { session } } = await window.supabaseClient.auth.getSession();
+      if (session) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${session.user.id}-${Math.random()}.${fileExt}`;
 
-    if (uploadError) throw new Error(uploadError.message);
+        const { error: uploadError } = await window.supabaseClient.storage
+          .from('avatars')
+          .upload(fileName, file);
 
-    const { data: { publicUrl } } = window.supabaseClient.storage
-      .from('avatars')
-      .getPublicUrl(fileName);
+        if (uploadError) throw new Error(uploadError.message);
 
-    const { data, error: updateError } = await window.supabaseClient
-      .from('profiles')
-      .update({ avatar_url: publicUrl })
-      .eq('id', session.user.id)
-      .select()
-      .single();
-      
-    if (updateError) throw new Error(updateError.message);
-    return { success: true, avatar_url: publicUrl, profile: data };
+        const { data: { publicUrl } } = window.supabaseClient.storage
+          .from('avatars')
+          .getPublicUrl(fileName);
+
+        const { data, error: updateError } = await window.supabaseClient
+          .from('users')
+          .update({ profile_image: publicUrl })
+          .eq('id', session.user.id)
+          .select()
+          .single();
+          
+        if (updateError) throw new Error(updateError.message);
+        return { success: true, avatar_url: publicUrl, profile: data };
+      }
+    }
+    throw new Error('Failed to upload avatar');
   },
 
   async deleteAvatar() {
-    const { data: { session } } = await window.supabaseClient.auth.getSession();
-    if (!session) throw new Error('Not authenticated');
+    try {
+      const res = await fetch('/api/profile/avatar', { method: 'DELETE' });
+      if (res.ok) return { success: true };
+    } catch (_) {}
 
-    const { data, error } = await window.supabaseClient
-      .from('profiles')
-      .update({ avatar_url: null })
-      .eq('id', session.user.id)
-      .select()
-      .single();
+    if (window.supabaseClient && window.supabaseClient.auth) {
+      const { data: { session } } = await window.supabaseClient.auth.getSession();
+      if (session) {
+        const { data, error } = await window.supabaseClient
+          .from('users')
+          .update({ profile_image: null })
+          .eq('id', session.user.id)
+          .select()
+          .single();
 
-    if (error) throw new Error(error.message);
-    return { success: true, profile: data };
+        if (error) throw new Error(error.message);
+        return { success: true, profile: data };
+      }
+    }
+    throw new Error('Failed to delete avatar');
   },
 
   async changePassword(currentPassword, newPassword) {
-    const { error } = await window.supabaseClient.auth.updateUser({
-      password: newPassword
-    });
-    if (error) throw new Error(error.message);
-    return { success: true };
+    try {
+      const res = await fetch('/api/profile/password', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword, newPassword })
+      });
+      if (res.ok) return { success: true };
+      const err = await res.json();
+      if (err.error) throw new Error(err.error);
+    } catch (e) {
+      if (e.message) throw e;
+    }
+
+    if (window.supabaseClient && window.supabaseClient.auth) {
+      const { error } = await window.supabaseClient.auth.updateUser({
+        password: newPassword
+      });
+      if (error) throw new Error(error.message);
+      return { success: true };
+    }
+    throw new Error('Failed to change password');
   },
 
-  async deleteAccount() {
-    // Supabase JS client cannot delete the user directly without service role key or Edge Function.
-    // As a workaround for client side, we might log them out or call an RPC if setup.
-    // For now, throw unsupported or just clear data.
-    throw new Error('Account deletion requires contacting support or a backend edge function.');
+  async deleteAccount(password) {
+    try {
+      const res = await fetch('/api/profile', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      if (res.ok) return { success: true };
+      const err = await res.json();
+      if (err.error) throw new Error(err.error);
+    } catch (e) {
+      if (e.message) throw e;
+    }
+    throw new Error('Failed to delete account');
   }
 };
