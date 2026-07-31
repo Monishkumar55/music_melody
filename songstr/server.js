@@ -670,6 +670,12 @@ app.get('/api/suggest-mood', (req, res) => {
   res.json({ mood, reason });
 });
 
+app.get('/api/jiosaavn/search', (req, res) => {
+  const query = req.query.q || req.query.query || '';
+  req.url = `/api/search?q=${encodeURIComponent(query)}&limit=${req.query.limit || 15}`;
+  return app.handle(req, res);
+});
+
 app.get('/api/search', async (req, res) => {
   try {
     const { q = '' } = req.query;
