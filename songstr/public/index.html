@@ -584,6 +584,17 @@
       </div>
       <button class="suggested-play" id="sug-play-btn" onclick="playSuggested()">Play →</button>
     </div>
+
+    <!-- HOME SCREEN TRENDING MUSIC SECTION -->
+    <div style="margin-top:24px; padding:0 24px 32px">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px">
+        <h3 style="font-size:20px; font-weight:800; color:var(--text)">🔥 Trending Mood Music</h3>
+        <button class="action-chip" onclick="showScreen('browse')">View All Moods →</button>
+      </div>
+      <div class="songs-list" id="home-songs-list">
+        <!-- Home songs automatically injected here -->
+      </div>
+    </div>
   </div>
 
   <!-- ==================== SCREEN 5: DETECT MOOD ==================== -->
@@ -1631,6 +1642,7 @@ function showScreen(name) {
 
   window.scrollTo(0, 0);
 
+  if (name === 'home') loadHomeSongs();
   if (name === 'favorites') renderFavorites();
   if (name === 'browse') renderMoodGrid();
   if (name === 'results') buildLangFilter(currentMood);
@@ -1886,14 +1898,34 @@ async function loadSongs(mood, lang, isRefresh = false) {
   }
 }
 
-function renderSongs(songs, containerId) {
-  const el = document.getElementById(containerId);
-  const color = MOOD_COLORS[currentMood] || '#6366f1';
-  if (!songs || songs.length === 0) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-icon">🎵</div><div class="empty-title">No songs found</div><div class="empty-sub">Try selecting 'All' languages or click ➕ Add Song</div></div>`;
+async function loadHomeSongs() {
+  const el = document.getElementById('home-songs-list');
+  if (!el) return;
+  try {
+    const res = await fetch('/api/songs?mood=happy&limit=25');
+    let songs = [];
+    if (res.ok) {
+      const data = await res.json();
+      songs = data.songs || [];
+    }
+    if (!songs || songs.length === 0) {
+      songs = getFallbackSongs('happy', 'All');
+    }
+    renderHomeSongs(songs);
+  } catch(e) {
+    console.error('Home songs error:', e);
+    renderHomeSongs(getFallbackSongs('happy', 'All'));
+  }
+}
+
+function renderHomeSongs(songs) {
+  const el = document.getElementById('home-songs-list');
+  if (!el) return;
+  renderedSongs = (songs || []).slice(0, 25);
+  if (renderedSongs.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">🎵</div><div class="empty-title">Loading songs...</div></div>`;
     return;
   }
-  renderedSongs = songs.slice(0, 100);
   el.innerHTML = renderedSongs.map((song, i) => {
     const artColor = SONG_ART_COLORS[i % SONG_ART_COLORS.length];
     const isFav = favorites.some(f => f.title === song.title && f.artist === song.artist);
@@ -1901,8 +1933,50 @@ function renderSongs(songs, containerId) {
     const artContent = hasCover 
       ? `<div class="song-art" style="background:${artColor};padding:0;overflow:hidden"><img src="${song.coverImage}" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='🎵'"/></div>` 
       : `<div class="song-art" style="background:${artColor}">🎵</div>`;
-    const isPublic = song.source === 'jiosaavn' || song.source === 'public_api' || (song.songId && String(song.songId).length > 15);
-    const sourceTag = isPublic ? `<span class="song-chip" style="background:rgba(52,211,153,0.15);color:#34d399">JioSaavn</span>` : `<span class="song-chip" style="background:rgba(99,102,241,0.15);color:#818cf8">Public API</span>`;
+    const sourceTag = song.source === 'jiosaavn' ? `<span class="song-chip" style="background:rgba(52,211,153,0.15);color:#34d399">JioSaavn</span>` : '';
+    const durationStr = song.duration ? `<span class="song-chip">${Math.floor(song.duration/60)}:${String(song.duration%60).padStart(2,'0')}</span>` : '';
+    return `
+    <div class="song-card" onclick="playSongByIndex(${i})">
+      <div class="song-num" style="background:var(--accent-glow);color:var(--accent-light)">${String(i+1).padStart(2,'0')}</div>
+      ${artContent}
+      <div class="song-info">
+        <div class="song-title">${escapeHtml(song.title)}</div>
+        <div class="song-artist clickable-text" onclick="event.stopPropagation(); openArtistPage('${escapeHtml(song.artist)}')">${escapeHtml(song.artist)}</div>
+        <div class="song-movie clickable-text" onclick="event.stopPropagation(); openAlbumPage('${escapeHtml(song.movie || song.album || '')}')">${escapeHtml(song.movie || song.album || '')}</div>
+        <div class="song-chips">
+          <span class="song-chip">${escapeHtml(song.genre || 'Music')}</span>
+          ${song.year ? `<span class="song-chip">${song.year}</span>` : ''}
+          ${song.language ? `<span class="song-chip lang">${escapeHtml(song.language)}</span>` : ''}
+          ${durationStr}
+          ${sourceTag}
+        </div>
+      </div>
+      <div class="song-actions">
+        <button class="song-icon-btn ${isFav ? 'liked' : ''}" onclick="event.stopPropagation(); toggleFavByIndex(this, ${i})" title="Save favorite">
+          ${isFav ? '♥' : '♡'}
+        </button>
+        <button class="song-icon-btn" style="background:var(--accent);color:#fff" onclick="event.stopPropagation(); playSongByIndex(${i})" title="Play song">▶</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderSongs(songs, containerId) {
+  const el = document.getElementById(containerId);
+  const color = MOOD_COLORS[currentMood] || '#6366f1';
+  if (!songs || songs.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">🎵</div><div class="empty-title">No songs found</div></div>`;
+    return;
+  }
+  renderedSongs = songs.slice(0, 50);
+  el.innerHTML = renderedSongs.map((song, i) => {
+    const artColor = SONG_ART_COLORS[i % SONG_ART_COLORS.length];
+    const isFav = favorites.some(f => f.title === song.title && f.artist === song.artist);
+    const hasCover = song.coverImage && !song.coverImage.includes('unsplash.com');
+    const artContent = hasCover 
+      ? `<div class="song-art" style="background:${artColor};padding:0;overflow:hidden"><img src="${song.coverImage}" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='🎵'"/></div>` 
+      : `<div class="song-art" style="background:${artColor}">🎵</div>`;
+    const sourceTag = song.source === 'jiosaavn' ? `<span class="song-chip" style="background:rgba(52,211,153,0.15);color:#34d399">JioSaavn</span>` : '';
     const durationStr = song.duration ? `<span class="song-chip">${Math.floor(song.duration/60)}:${String(song.duration%60).padStart(2,'0')}</span>` : '';
     return `
     <div class="song-card" onclick="playSongByIndex(${i})">
