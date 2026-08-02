@@ -5,7 +5,11 @@ const SUPABASE_URL = process.env.SUPABASE_URL || 'https://amcicvpnpcllzbrrnckq.s
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtY2ljdnBucGNsbHpicnJuY2txIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3MjYwNjIsImV4cCI6MjEwMDMwMjA2Mn0.npCcxMAf-tOVJh8Nv0GYO4j-vq-04koLOlavu5KJ-MY';
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const JIOSAAVN_BASE = process.env.JIOSAAVN_API_URL || 'https://saavn.sumit.co';
+const API_MIRRORS = [
+  'https://saavn.sumit.co',
+  'https://saavn.dev',
+  'https://jiosaavn-api-v2.vercel.app'
+];
 
 const LANGUAGES = ['Tamil', 'English', 'Telugu', 'Hindi'];
 const EMOTIONS = [
@@ -105,36 +109,26 @@ function mapJioSaavnSong(s, language, mood) {
     title: s.name || s.title || 'Unknown',
     artist: primaryArtists,
     movie: albumName,
-    image: bestImage,
     language: language,
     genre: s.genre || 'Film Song',
     mood: mood,
     file_url: bestDownload,
     release_year: parseInt(s.year || s.releaseDate || s.release_year, 10) || 2024,
-    explicit: Boolean(s.explicit),
-    lyrics_available: Boolean(s.hasLyrics || s.lyrics_available),
     updated_at: new Date().toISOString()
   };
 }
 
 async function fetchSongsForQuery(query) {
-  try {
-    const url = `${JIOSAAVN_BASE}/api/search/songs?query=${encodeURIComponent(query)}&limit=30`;
-    const res = await axios.get(url, { timeout: 8000 });
-    if (res.data && res.data.success && res.data.data && res.data.data.results) {
-      return res.data.data.results;
-    }
-  } catch (err) {
-    console.warn('Fetch query notice:', err.message);
-    // Retry once on error
+  for (const baseUrl of API_MIRRORS) {
     try {
-      await new Promise(r => setTimeout(r, 1000));
-      const url = `${JIOSAAVN_BASE}/api/search/songs?query=${encodeURIComponent(query)}&limit=30`;
-      const res = await axios.get(url, { timeout: 10000 });
+      const url = `${baseUrl}/api/search/songs?query=${encodeURIComponent(query)}&limit=30`;
+      const res = await axios.get(url, { timeout: 6000 });
       if (res.data && res.data.success && res.data.data && res.data.data.results) {
         return res.data.data.results;
       }
-    } catch {}
+    } catch (err) {
+      // Try next mirror
+    }
   }
   return [];
 }
@@ -165,15 +159,13 @@ async function seed50PerLangPerEmotion() {
           if (collectedSongs.size >= 55) break;
         }
         
-        // Brief rate limit throttle
-        await new Promise(r => setTimeout(r, 250));
+        await new Promise(r => setTimeout(r, 150));
       }
 
       const songList = Array.from(collectedSongs.values());
       console.log(`  Found ${songList.length} unique songs for [${lang}] - [${mood}]. Upserting into Supabase...`);
 
       if (songList.length > 0) {
-        // Upsert in batches of 25
         for (let i = 0; i < songList.length; i += 25) {
           const batch = songList.slice(i, i + 25);
           const { error } = await supabase.from('songs').upsert(batch, { onConflict: 'song_id' });

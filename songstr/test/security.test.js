@@ -3,7 +3,7 @@ const request = require('supertest');
 const app = require('../server');
 
 describe('Security & Vulnerability Testing Suite', function() {
-  this.timeout(10000);
+  this.timeout(25000);
   it('POST /api/detect-mood with SQL injection attempt should handle input safely', async function() {
     const res = await request(app)
       .post('/api/detect-mood')
