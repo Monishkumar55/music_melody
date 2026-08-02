@@ -846,6 +846,131 @@ app.get('/api/search', async (req, res) => {
   }
 });
 
+// ============================================================
+// AUDIO STREAMING & MUSIC PROXY ENDPOINTS (JIOSAAVN & DEEZER)
+// ============================================================
+app.get('/api/stream', async (req, res) => {
+  try {
+    const { songId, jioId, title, artist } = req.query;
+
+    let targetUrl = '';
+
+    const targetId = songId || jioId;
+    if (targetId) {
+      const songData = await jiosaavnGetSong(targetId);
+      if (songData) {
+        const mapped = mapJioSaavnSong(songData);
+        if (mapped && mapped.audioUrl && mapped.audioUrl.startsWith('http')) {
+          targetUrl = mapped.audioUrl;
+        }
+      }
+    }
+
+    if (!targetUrl && title) {
+      const query = `${title} ${artist || ''}`.trim();
+      const results = await jiosaavnSearchSongs(query, 5);
+      if (results && results.length > 0) {
+        const mapped = mapJioSaavnSong(results[0]);
+        if (mapped && mapped.audioUrl && mapped.audioUrl.startsWith('http')) {
+          targetUrl = mapped.audioUrl;
+        }
+      }
+    }
+
+    if (!targetUrl && title) {
+      try {
+        const deezerRes = await axios.get(`https://api.deezer.com/search?q=${encodeURIComponent(title + ' ' + (artist || ''))}`, { timeout: 4000 });
+        if (deezerRes.data && deezerRes.data.data && deezerRes.data.data.length > 0) {
+          targetUrl = deezerRes.data.data[0].preview;
+        }
+      } catch (_) {}
+    }
+
+    if (!targetUrl) {
+      return res.status(404).json({ error: 'Audio stream unavailable' });
+    }
+
+    return res.redirect(302, targetUrl);
+  } catch (err) {
+    console.error('Stream error:', err.message);
+    res.status(500).json({ error: 'Audio streaming failed' });
+  }
+});
+
+app.get('/api/deezer/resolve', async (req, res) => {
+  try {
+    const { title = '', artist = '' } = req.query;
+    if (!title) return res.json({ previewUrl: null, coverImage: null });
+
+    const deezerRes = await axios.get(`https://api.deezer.com/search?q=${encodeURIComponent(title + ' ' + artist)}`, { timeout: 4000 });
+    if (deezerRes.data && deezerRes.data.data && deezerRes.data.data.length > 0) {
+      const track = deezerRes.data.data[0];
+      return res.json({
+        previewUrl: track.preview || null,
+        coverImage: track.album?.cover_big || track.album?.cover_medium || null,
+        title: track.title,
+        artist: track.artist?.name
+      });
+    }
+    res.json({ previewUrl: null, coverImage: null });
+  } catch (err) {
+    res.json({ previewUrl: null, coverImage: null });
+  }
+});
+
+app.get('/api/music/deezer/search', async (req, res) => {
+  try {
+    const { q = '', limit = 15 } = req.query;
+    if (!q) return res.json({ results: [] });
+
+    const deezerRes = await axios.get(`https://api.deezer.com/search?q=${encodeURIComponent(q)}&limit=${limit}`, { timeout: 4000 });
+    const results = (deezerRes.data?.data || []).map(t => ({
+      songId: `deezer_${t.id}`,
+      id: `deezer_${t.id}`,
+      title: t.title,
+      artist: t.artist?.name || 'Unknown',
+      album: t.album?.title || 'Single',
+      coverImage: t.album?.cover_big || t.album?.cover_medium,
+      audioUrl: t.preview,
+      downloadUrl: t.preview,
+      source: 'deezer',
+      duration: t.duration || 30
+    }));
+
+    res.json({ results });
+  } catch (err) {
+    res.status(500).json({ results: [] });
+  }
+});
+
+app.get('/api/music/deezer/track', async (req, res) => {
+  try {
+    const { id } = req.query;
+    if (!id) return res.status(400).json({ error: 'Track ID required' });
+
+    const cleanId = id.replace('deezer_', '');
+    const deezerRes = await axios.get(`https://api.deezer.com/track/${cleanId}`, { timeout: 4000 });
+    const t = deezerRes.data;
+    if (!t || t.error) return res.status(404).json({ error: 'Track not found' });
+
+    res.json({
+      track: {
+        songId: `deezer_${t.id}`,
+        id: `deezer_${t.id}`,
+        title: t.title,
+        artist: t.artist?.name || 'Unknown',
+        album: t.album?.title || 'Single',
+        coverImage: t.album?.cover_big || t.album?.cover_medium,
+        audioUrl: t.preview,
+        downloadUrl: t.preview,
+        source: 'deezer',
+        duration: t.duration || 30
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch Deezer track' });
+  }
+});
 
 // ============================================================
 // AUTHENTICATION & SESSION ROUTES (SUPABASE INTEGRATED)
