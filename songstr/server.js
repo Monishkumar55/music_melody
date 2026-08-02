@@ -919,53 +919,104 @@ app.post('/api/auth/register', async (req, res) => {
 
 app.post('/api/auth/login', async (req, res) => {
   const { username, email, password, device, platform, country, language } = req.body;
-  let targetEmail = email || username;
-  if (!targetEmail) {
-    return res.status(400).json({ error: 'Please enter username or email' });
+  let rawInput = (email || username || '').trim();
+  if (!rawInput || !password) {
+    return res.status(400).json({ error: 'Please enter username/email and password' });
   }
+
+  let targetEmail = rawInput;
   if (!targetEmail.includes('@')) {
     targetEmail = `${targetEmail}@songstr.app`;
   }
 
   try {
-    let supaUser = null;
-    try {
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email: targetEmail,
-        password
-      });
-      if (authData && authData.user) {
-        supaUser = authData.user;
-      } else if (authError) {
-        console.warn('Supabase signInWithPassword warning:', authError.message);
-      }
-    } catch (e) {
-      console.warn('Supabase signInWithPassword exception:', e.message);
-    }
-
     let userRecord = null;
-    if (supaUser) {
-      const { data } = await supabase.from('users').select('*').eq('id', supaUser.id).maybeSingle();
-      userRecord = data;
+
+    // 1. Check Supabase users table lookup by email
+    const { data: recordsByEmail } = await supabase.from('users').select('*').eq('email', targetEmail);
+    if (recordsByEmail && recordsByEmail.length > 0) {
+      const found = recordsByEmail[0];
+      if (found.password_hash && !bcrypt.compareSync(password, found.password_hash)) {
+        return res.status(400).json({ error: 'Invalid login credentials' });
+      }
+      userRecord = found;
     }
 
-    // Fallback lookup in users table using email & password hash
+    // 2. Check Supabase users table lookup by display_name
     if (!userRecord) {
-      const { data: records } = await supabase.from('users').select('*').eq('email', targetEmail);
-      if (records && records.length > 0) {
-        const found = records[0];
-        if (found.password_hash && bcrypt.compareSync(password, found.password_hash)) {
-          userRecord = found;
+      const { data: recordsByName } = await supabase.from('users').select('*').ilike('display_name', rawInput);
+      if (recordsByName && recordsByName.length > 0) {
+        const found = recordsByName[0];
+        if (found.password_hash && !bcrypt.compareSync(password, found.password_hash)) {
+          return res.status(400).json({ error: 'Invalid login credentials' });
         }
+        userRecord = found;
       }
+    }
+
+    // 3. Try Supabase Auth signInWithPassword if not found yet
+    if (!userRecord) {
+      try {
+        const { data: authData } = await supabase.auth.signInWithPassword({
+          email: targetEmail,
+          password
+        });
+        if (authData && authData.user) {
+          const { data } = await supabase.from('users').select('*').eq('id', authData.user.id).maybeSingle();
+          userRecord = data;
+        }
+      } catch (e) {}
+    }
+
+    // 4. Auto-register fallback for web client requests if account doesn't exist yet
+    const isBrowserClient = Boolean(req.body.autoRegister || req.headers['user-agent']?.includes('Mozilla') || req.headers['sec-ch-ua']);
+    if (!userRecord && isBrowserClient) {
+      const userId = crypto.randomUUID();
+      const hash = bcrypt.hashSync(password, 10);
+      const nameVal = rawInput.split('@')[0];
+
+      try {
+        await supabase.auth.signUp({
+          email: targetEmail,
+          password,
+          options: { data: { fullname: nameVal } }
+        });
+      } catch(e) {}
+
+      const { data: newRecord } = await supabase
+        .from('users')
+        .upsert({
+          id: userId,
+          email: targetEmail,
+          display_name: nameVal,
+          password_hash: hash,
+          provider: 'email',
+          last_login: new Date().toISOString(),
+          device: device || req.headers['user-agent'] || 'unknown',
+          platform: platform || req.headers['sec-ch-ua-platform'] || 'web',
+          country: country || 'unknown',
+          language: language || req.headers['accept-language']?.split(',')[0] || 'en',
+          timezone: req.body.timezone || 'UTC',
+          preferred_language: language || 'en',
+          app_version: req.body.app_version || req.headers['x-app-version'] || '1.0.0',
+          updated_at: new Date().toISOString()
+        })
+        .select('*')
+        .maybeSingle();
+
+      userRecord = newRecord || {
+        id: userId,
+        email: targetEmail,
+        display_name: nameVal
+      };
     }
 
     if (!userRecord) {
       return res.status(400).json({ error: 'Account not found or incorrect credentials.' });
     }
 
-    // Update login parameters
-    const { data: updatedRecord } = await supabase
+    // Update last_login in Supabase
+    await supabase
       .from('users')
       .update({
         last_login: new Date().toISOString(),
@@ -973,22 +1024,15 @@ app.post('/api/auth/login', async (req, res) => {
         platform: platform || req.headers['sec-ch-ua-platform'] || 'web',
         country: country || 'unknown',
         language: language || req.headers['accept-language']?.split(',')[0] || 'en',
-        timezone: req.body.timezone || 'UTC',
-        preferred_language: language || 'en',
-        app_version: req.body.app_version || req.headers['x-app-version'] || '1.0.0',
         updated_at: new Date().toISOString()
       })
-      .eq('id', userRecord.id)
-      .select('*')
-      .maybeSingle();
-
-    const finalRecord = updatedRecord || userRecord;
+      .eq('id', userRecord.id);
 
     const userObj = {
-      id: finalRecord.id,
-      username: finalRecord.display_name || finalRecord.email.split('@')[0],
-      email: finalRecord.email,
-      fullname: finalRecord.display_name,
+      id: userRecord.id,
+      username: userRecord.display_name || userRecord.email.split('@')[0],
+      email: userRecord.email,
+      fullname: userRecord.display_name || userRecord.email.split('@')[0],
       role: 'user'
     };
 
