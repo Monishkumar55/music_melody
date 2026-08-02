@@ -1957,13 +1957,13 @@ function playSong(song) {
   
   // Build stream URL with JioSaavn priority
   let songUrl;
-  if (song.downloadUrl && song.downloadUrl.startsWith('http')) {
-    // Direct JioSaavn download URL — bypass stream proxy
-    songUrl = song.downloadUrl;
-  } else if (song.jioId) {
-    songUrl = `/api/stream?jioId=${song.jioId}&title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}&_ts=${Date.now()}`;
-  } else if (song.songId) {
-    songUrl = `/api/stream?songId=${song.songId}&title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}&_ts=${Date.now()}`;
+  const audioCandidate = (typeof song.downloadUrl === 'string' && song.downloadUrl.startsWith('http')) ? song.downloadUrl : ((typeof song.audioUrl === 'string' && song.audioUrl.startsWith('http')) ? song.audioUrl : ((typeof song.file_url === 'string' && song.file_url.startsWith('http')) ? song.file_url : ''));
+
+  if (audioCandidate) {
+    songUrl = audioCandidate;
+  } else if (song.jioId || song.songId || song.id) {
+    const id = song.jioId || song.songId || song.id;
+    songUrl = `/api/stream?songId=${id}&title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}&_ts=${Date.now()}`;
   } else {
     songUrl = `/api/stream?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}&_ts=${Date.now()}`;
   }

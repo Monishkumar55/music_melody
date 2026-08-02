@@ -121,6 +121,9 @@ async function jiosaavnSearchSongs(query, limit = 20) {
         year: s.release_year,
         duration: s.duration,
         image: s.image ? [{ url: s.image }] : [],
+        downloadUrl: s.file_url ? [{ url: s.file_url, quality: '320kbps' }] : [],
+        audioUrl: s.file_url,
+        file_url: s.file_url,
         explicit: s.explicit,
         hasLyrics: s.lyrics_available
       }));
@@ -161,6 +164,9 @@ async function jiosaavnGetSong(songId) {
         year: supaSong.release_year,
         duration: supaSong.duration,
         image: supaSong.image ? [{ url: supaSong.image }] : [],
+        downloadUrl: supaSong.file_url ? [{ url: supaSong.file_url, quality: '320kbps' }] : [],
+        audioUrl: supaSong.file_url,
+        file_url: supaSong.file_url,
         explicit: supaSong.explicit,
         hasLyrics: supaSong.lyrics_available
       };
@@ -229,18 +235,37 @@ async function jiosaavnGetRecommendations(songId) {
   return [];
 }
 
+function extractAudioUrl(s) {
+  if (!s) return '';
+  if (typeof s.downloadUrl === 'string' && s.downloadUrl.startsWith('http')) return s.downloadUrl;
+  if (typeof s.audioUrl === 'string' && s.audioUrl.startsWith('http')) return s.audioUrl;
+  if (typeof s.file_url === 'string' && s.file_url.startsWith('http')) return s.file_url;
+  if (Array.isArray(s.downloadUrl) && s.downloadUrl.length > 0) {
+    const last = s.downloadUrl[s.downloadUrl.length - 1];
+    if (last && typeof last.url === 'string' && last.url.startsWith('http')) return last.url;
+    if (typeof last === 'string' && last.startsWith('http')) return last;
+  }
+  if (Array.isArray(s.download_url) && s.download_url.length > 0) {
+    const last = s.download_url[s.download_url.length - 1];
+    if (last && typeof last.url === 'string' && last.url.startsWith('http')) return last.url;
+  }
+  return '';
+}
+
 function mapJioSaavnSong(s) {
   if (!s) return null;
-  const bestImage = s.image && s.image.length > 0 ? s.image[s.image.length - 1].url : 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop';
-  const bestDownload = s.downloadUrl && s.downloadUrl.length > 0 ? s.downloadUrl[s.downloadUrl.length - 1].url : '';
-  const primaryArtists = s.artists && s.artists.primary ? s.artists.primary.map(a => a.name).join(', ') : (s.primaryArtists || 'Unknown Artist');
-  const albumName = (s.album && s.album.name) || s.album || 'Single';
+  const bestImage = s.coverImage || (s.image && s.image.length > 0 ? s.image[s.image.length - 1].url : '') || s.image || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop';
+  const bestAudio = extractAudioUrl(s);
+  const primaryArtists = s.artist || (s.artists && s.artists.primary ? s.artists.primary.map(a => a.name).join(', ') : (s.primaryArtists || 'Unknown Artist'));
+  const albumName = (s.album && s.album.name) || s.album || s.movie || 'Single';
   const albumId = (s.album && s.album.id) || s.album_id || null;
   const artistId = (s.artists && s.artists.primary && s.artists.primary[0] ? s.artists.primary[0].id : null) || s.artist_id || null;
+  const songId = s.id || s.songId || s.song_id;
+
   return {
-    songId: s.id,
-    id: s.id,
-    jioId: s.id,
+    songId: String(songId),
+    id: String(songId),
+    jioId: String(songId),
     title: s.name || s.title || 'Unknown',
     artist: primaryArtists,
     album: albumName,
@@ -248,12 +273,13 @@ function mapJioSaavnSong(s) {
     artistId: artistId,
     language: (s.language || 'hindi').charAt(0).toUpperCase() + (s.language || 'hindi').slice(1),
     genre: s.genre || 'Music',
-    year: s.year || s.releaseDate || '',
+    year: s.year || s.releaseDate || s.release_year || '',
     duration: parseInt(s.duration, 10) || 0,
     coverImage: bestImage,
-    audioUrl: bestDownload,
-    downloadUrl: bestDownload,
-    moodTags: s.moodTags || 'neutral',
+    audioUrl: bestAudio,
+    downloadUrl: bestAudio,
+    file_url: bestAudio,
+    moodTags: s.moodTags || s.mood || 'neutral',
     hasLyrics: s.hasLyrics || s.lyrics_available || false,
     playCount: s.playCount || 0,
     source: 'jiosaavn',
@@ -263,16 +289,18 @@ function mapJioSaavnSong(s) {
 
 async function upsertSongToSupabase(s) {
   if (!s) return;
-  const songId = s.songId || s.id || s.jioId;
+  const songId = s.songId || s.id || s.jioId || s.song_id;
   if (!songId) return;
 
   try {
     const primaryArtist = s.artist || (s.artists && s.artists.primary ? s.artists.primary.map(a => a.name).join(', ') : 'Unknown Artist');
-    const albumName = (s.album && s.album.name) || s.album || 'Single';
+    const albumName = (s.album && s.album.name) || s.album || s.movie || 'Single';
     const albumId = s.albumId || (s.album && s.album.id) || null;
     const artistId = s.artistId || (s.artists && s.artists.primary && s.artists.primary[0] ? s.artists.primary[0].id : null) || null;
     const bestImage = s.coverImage || (s.image && s.image.length > 0 ? s.image[s.image.length - 1].url : '') || s.image || '';
-    const bestAudio = s.downloadUrl || s.audioUrl || s.file_url || (s.downloadUrl && s.downloadUrl.length > 0 ? s.downloadUrl[s.downloadUrl.length - 1].url : '');
+    const bestAudio = extractAudioUrl(s);
+
+    if (!bestAudio) return; // Do not upsert tracks with missing audio URLs
 
     await supabase.from('songs').upsert({
       song_id: String(songId),
@@ -478,9 +506,11 @@ seedDatabase();
 
 function mapSongResponse(s) {
   if (!s) return null;
+  const audio = extractAudioUrl(s);
   return {
     songId: s.song_id || s.id,
     id: s.song_id || s.id,
+    jioId: s.song_id || s.id,
     title: s.title,
     artist: s.artist,
     album: s.movie || s.album || 'Single',
@@ -490,7 +520,9 @@ function mapSongResponse(s) {
     releaseYear: s.release_year || s.year || 2024,
     duration: s.duration || 210,
     coverImage: s.image || s.coverImage || s.cover_image || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop',
-    audioUrl: s.file_url || s.audioUrl || '',
+    audioUrl: audio,
+    downloadUrl: audio,
+    file_url: audio,
     moodTags: s.mood || s.moodTags || 'romantic',
     createdBy: 'system',
     isActive: 1
