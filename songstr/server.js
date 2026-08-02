@@ -883,7 +883,7 @@ app.get('/api/search', async (req, res) => {
 // ============================================================
 app.get('/api/stream', async (req, res) => {
   try {
-    const { songId, jioId, title, artist, proxy } = req.query;
+    const { songId, jioId, title, artist } = req.query;
 
     let targetUrl = '';
 
@@ -922,29 +922,38 @@ app.get('/api/stream', async (req, res) => {
       return res.status(404).json({ error: 'Audio stream unavailable' });
     }
 
-    if (proxy === '1') {
-      try {
-        const audioStream = await axios.get(targetUrl, {
-          responseType: 'stream',
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-            'Referer': 'https://www.jiosaavn.com/'
-          }
-        });
-        res.setHeader('Content-Type', audioStream.headers['content-type'] || 'audio/mpeg');
-        if (audioStream.headers['content-length']) {
-          res.setHeader('Content-Length', audioStream.headers['content-length']);
-        }
-        res.setHeader('Accept-Ranges', 'bytes');
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        return audioStream.data.pipe(res);
-      } catch (proxyErr) {
-        console.warn('Proxy streaming fallback to redirect:', proxyErr.message);
-      }
+    const headers = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Referer': 'https://www.jiosaavn.com/'
+    };
+    if (req.headers.range) {
+      headers['Range'] = req.headers.range;
     }
 
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    return res.redirect(302, targetUrl);
+    try {
+      const audioStream = await axios.get(targetUrl, {
+        responseType: 'stream',
+        headers
+      });
+
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Content-Type', audioStream.headers['content-type'] || 'audio/mpeg');
+      if (audioStream.headers['content-length']) {
+        res.setHeader('Content-Length', audioStream.headers['content-length']);
+      }
+      if (audioStream.headers['content-range']) {
+        res.setHeader('Content-Range', audioStream.headers['content-range']);
+        res.status(206);
+      } else {
+        res.setHeader('Accept-Ranges', 'bytes');
+      }
+
+      return audioStream.data.pipe(res);
+    } catch (streamErr) {
+      console.warn('Proxy streaming error, falling back to redirect:', streamErr.message);
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      return res.redirect(302, targetUrl);
+    }
   } catch (err) {
     console.error('Stream error:', err.message);
     res.status(500).json({ error: 'Audio streaming failed' });
