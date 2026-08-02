@@ -851,7 +851,7 @@ app.get('/api/search', async (req, res) => {
 // ============================================================
 app.get('/api/stream', async (req, res) => {
   try {
-    const { songId, jioId, title, artist } = req.query;
+    const { songId, jioId, title, artist, proxy } = req.query;
 
     let targetUrl = '';
 
@@ -890,6 +890,28 @@ app.get('/api/stream', async (req, res) => {
       return res.status(404).json({ error: 'Audio stream unavailable' });
     }
 
+    if (proxy === '1') {
+      try {
+        const audioStream = await axios.get(targetUrl, {
+          responseType: 'stream',
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+            'Referer': 'https://www.jiosaavn.com/'
+          }
+        });
+        res.setHeader('Content-Type', audioStream.headers['content-type'] || 'audio/mpeg');
+        if (audioStream.headers['content-length']) {
+          res.setHeader('Content-Length', audioStream.headers['content-length']);
+        }
+        res.setHeader('Accept-Ranges', 'bytes');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        return audioStream.data.pipe(res);
+      } catch (proxyErr) {
+        console.warn('Proxy streaming fallback to redirect:', proxyErr.message);
+      }
+    }
+
+    res.setHeader('Access-Control-Allow-Origin', '*');
     return res.redirect(302, targetUrl);
   } catch (err) {
     console.error('Stream error:', err.message);

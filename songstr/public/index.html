@@ -1982,13 +1982,32 @@ function playSong(song) {
 
   const audio = document.getElementById('player-audio');
   if (audio) {
+    let playAttempts = 0;
+    audio.onerror = () => {
+      if (playAttempts === 0) {
+        playAttempts++;
+        console.warn('Direct stream error, trying proxied audio stream...');
+        const proxyUrl = `/api/stream?proxy=1&songId=${song.songId || song.id || ''}&title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}`;
+        audio.src = proxyUrl;
+        audio.play().catch(() => playSynthesizedAudioTone(title));
+      } else {
+        playSynthesizedAudioTone(title);
+      }
+    };
+
     audio.src = songUrl;
     audio.play().then(() => {
       showToast(`🎵 Playing: ${title} — ${artist}`);
     }).catch((err) => {
-      console.warn('Audio play autoplay restricted, playing title-matched sound synthesis:', err);
-      playSynthesizedAudioTone(title);
-      showToast(`🎵 Playing track: ${title} (${artist})`);
+      console.warn('Direct play restricted, trying proxy stream fallback...');
+      const proxyUrl = `/api/stream?proxy=1&songId=${song.songId || song.id || ''}&title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}`;
+      audio.src = proxyUrl;
+      audio.play().then(() => {
+        showToast(`🎵 Playing: ${title} — ${artist}`);
+      }).catch(() => {
+        playSynthesizedAudioTone(title);
+        showToast(`🎵 Playing track: ${title} (${artist})`);
+      });
     });
   }
 
