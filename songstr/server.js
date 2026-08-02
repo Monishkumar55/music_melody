@@ -121,9 +121,6 @@ async function jiosaavnSearchSongs(query, limit = 20) {
         year: s.release_year,
         duration: s.duration,
         image: s.image ? [{ url: s.image }] : [],
-        downloadUrl: s.file_url ? [{ url: s.file_url, quality: '320kbps' }] : [],
-        audioUrl: s.file_url,
-        file_url: s.file_url,
         explicit: s.explicit,
         hasLyrics: s.lyrics_available
       }));
@@ -164,9 +161,6 @@ async function jiosaavnGetSong(songId) {
         year: supaSong.release_year,
         duration: supaSong.duration,
         image: supaSong.image ? [{ url: supaSong.image }] : [],
-        downloadUrl: supaSong.file_url ? [{ url: supaSong.file_url, quality: '320kbps' }] : [],
-        audioUrl: supaSong.file_url,
-        file_url: supaSong.file_url,
         explicit: supaSong.explicit,
         hasLyrics: supaSong.lyrics_available
       };
@@ -235,37 +229,18 @@ async function jiosaavnGetRecommendations(songId) {
   return [];
 }
 
-function extractAudioUrl(s) {
-  if (!s) return '';
-  if (typeof s.downloadUrl === 'string' && s.downloadUrl.startsWith('http')) return s.downloadUrl;
-  if (typeof s.audioUrl === 'string' && s.audioUrl.startsWith('http')) return s.audioUrl;
-  if (typeof s.file_url === 'string' && s.file_url.startsWith('http')) return s.file_url;
-  if (Array.isArray(s.downloadUrl) && s.downloadUrl.length > 0) {
-    const last = s.downloadUrl[s.downloadUrl.length - 1];
-    if (last && typeof last.url === 'string' && last.url.startsWith('http')) return last.url;
-    if (typeof last === 'string' && last.startsWith('http')) return last;
-  }
-  if (Array.isArray(s.download_url) && s.download_url.length > 0) {
-    const last = s.download_url[s.download_url.length - 1];
-    if (last && typeof last.url === 'string' && last.url.startsWith('http')) return last.url;
-  }
-  return '';
-}
-
 function mapJioSaavnSong(s) {
   if (!s) return null;
-  const bestImage = s.coverImage || (s.image && s.image.length > 0 ? s.image[s.image.length - 1].url : '') || s.image || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop';
-  const bestAudio = extractAudioUrl(s);
-  const primaryArtists = s.artist || (s.artists && s.artists.primary ? s.artists.primary.map(a => a.name).join(', ') : (s.primaryArtists || 'Unknown Artist'));
-  const albumName = (s.album && s.album.name) || s.album || s.movie || 'Single';
+  const bestImage = s.image && s.image.length > 0 ? s.image[s.image.length - 1].url : 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop';
+  const bestDownload = s.downloadUrl && s.downloadUrl.length > 0 ? s.downloadUrl[s.downloadUrl.length - 1].url : '';
+  const primaryArtists = s.artists && s.artists.primary ? s.artists.primary.map(a => a.name).join(', ') : (s.primaryArtists || 'Unknown Artist');
+  const albumName = (s.album && s.album.name) || s.album || 'Single';
   const albumId = (s.album && s.album.id) || s.album_id || null;
   const artistId = (s.artists && s.artists.primary && s.artists.primary[0] ? s.artists.primary[0].id : null) || s.artist_id || null;
-  const songId = s.id || s.songId || s.song_id;
-
   return {
-    songId: String(songId),
-    id: String(songId),
-    jioId: String(songId),
+    songId: s.id,
+    id: s.id,
+    jioId: s.id,
     title: s.name || s.title || 'Unknown',
     artist: primaryArtists,
     album: albumName,
@@ -273,13 +248,12 @@ function mapJioSaavnSong(s) {
     artistId: artistId,
     language: (s.language || 'hindi').charAt(0).toUpperCase() + (s.language || 'hindi').slice(1),
     genre: s.genre || 'Music',
-    year: s.year || s.releaseDate || s.release_year || '',
+    year: s.year || s.releaseDate || '',
     duration: parseInt(s.duration, 10) || 0,
     coverImage: bestImage,
-    audioUrl: bestAudio,
-    downloadUrl: bestAudio,
-    file_url: bestAudio,
-    moodTags: s.moodTags || s.mood || 'neutral',
+    audioUrl: bestDownload,
+    downloadUrl: bestDownload,
+    moodTags: s.moodTags || 'neutral',
     hasLyrics: s.hasLyrics || s.lyrics_available || false,
     playCount: s.playCount || 0,
     source: 'jiosaavn',
@@ -289,18 +263,16 @@ function mapJioSaavnSong(s) {
 
 async function upsertSongToSupabase(s) {
   if (!s) return;
-  const songId = s.songId || s.id || s.jioId || s.song_id;
+  const songId = s.songId || s.id || s.jioId;
   if (!songId) return;
 
   try {
     const primaryArtist = s.artist || (s.artists && s.artists.primary ? s.artists.primary.map(a => a.name).join(', ') : 'Unknown Artist');
-    const albumName = (s.album && s.album.name) || s.album || s.movie || 'Single';
+    const albumName = (s.album && s.album.name) || s.album || 'Single';
     const albumId = s.albumId || (s.album && s.album.id) || null;
     const artistId = s.artistId || (s.artists && s.artists.primary && s.artists.primary[0] ? s.artists.primary[0].id : null) || null;
     const bestImage = s.coverImage || (s.image && s.image.length > 0 ? s.image[s.image.length - 1].url : '') || s.image || '';
-    const bestAudio = extractAudioUrl(s);
-
-    if (!bestAudio) return; // Do not upsert tracks with missing audio URLs
+    const bestAudio = s.downloadUrl || s.audioUrl || s.file_url || (s.downloadUrl && s.downloadUrl.length > 0 ? s.downloadUrl[s.downloadUrl.length - 1].url : '');
 
     await supabase.from('songs').upsert({
       song_id: String(songId),
@@ -506,11 +478,9 @@ seedDatabase();
 
 function mapSongResponse(s) {
   if (!s) return null;
-  const audio = extractAudioUrl(s);
   return {
     songId: s.song_id || s.id,
     id: s.song_id || s.id,
-    jioId: s.song_id || s.id,
     title: s.title,
     artist: s.artist,
     album: s.movie || s.album || 'Single',
@@ -520,9 +490,7 @@ function mapSongResponse(s) {
     releaseYear: s.release_year || s.year || 2024,
     duration: s.duration || 210,
     coverImage: s.image || s.coverImage || s.cover_image || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop',
-    audioUrl: audio,
-    downloadUrl: audio,
-    file_url: audio,
+    audioUrl: s.file_url || s.audioUrl || '',
     moodTags: s.mood || s.moodTags || 'romantic',
     createdBy: 'system',
     isActive: 1
@@ -878,162 +846,6 @@ app.get('/api/search', async (req, res) => {
   }
 });
 
-// ============================================================
-// AUDIO STREAMING & MUSIC PROXY ENDPOINTS (JIOSAAVN & DEEZER)
-// ============================================================
-app.get('/api/stream', async (req, res) => {
-  try {
-    const { songId, jioId, title, artist } = req.query;
-
-    let targetUrl = '';
-
-    const targetId = songId || jioId;
-    if (targetId) {
-      const songData = await jiosaavnGetSong(targetId);
-      if (songData) {
-        const mapped = mapJioSaavnSong(songData);
-        if (mapped && mapped.audioUrl && mapped.audioUrl.startsWith('http')) {
-          targetUrl = mapped.audioUrl;
-        }
-      }
-    }
-
-    if (!targetUrl && title) {
-      const query = `${title} ${artist || ''}`.trim();
-      const results = await jiosaavnSearchSongs(query, 5);
-      if (results && results.length > 0) {
-        const mapped = mapJioSaavnSong(results[0]);
-        if (mapped && mapped.audioUrl && mapped.audioUrl.startsWith('http')) {
-          targetUrl = mapped.audioUrl;
-        }
-      }
-    }
-
-    if (!targetUrl && title) {
-      try {
-        const deezerRes = await axios.get(`https://api.deezer.com/search?q=${encodeURIComponent(title + ' ' + (artist || ''))}`, { timeout: 4000 });
-        if (deezerRes.data && deezerRes.data.data && deezerRes.data.data.length > 0) {
-          targetUrl = deezerRes.data.data[0].preview;
-        }
-      } catch (_) {}
-    }
-
-    if (!targetUrl) {
-      return res.status(404).json({ error: 'Audio stream unavailable' });
-    }
-
-    const headers = {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Referer': 'https://www.jiosaavn.com/'
-    };
-    if (req.headers.range) {
-      headers['Range'] = req.headers.range;
-    }
-
-    try {
-      const audioStream = await axios.get(targetUrl, {
-        responseType: 'stream',
-        headers
-      });
-
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.setHeader('Content-Type', audioStream.headers['content-type'] || 'audio/mpeg');
-      if (audioStream.headers['content-length']) {
-        res.setHeader('Content-Length', audioStream.headers['content-length']);
-      }
-      if (audioStream.headers['content-range']) {
-        res.setHeader('Content-Range', audioStream.headers['content-range']);
-        res.status(206);
-      } else {
-        res.setHeader('Accept-Ranges', 'bytes');
-      }
-
-      return audioStream.data.pipe(res);
-    } catch (streamErr) {
-      console.warn('Proxy streaming error, falling back to redirect:', streamErr.message);
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      return res.redirect(302, targetUrl);
-    }
-  } catch (err) {
-    console.error('Stream error:', err.message);
-    res.status(500).json({ error: 'Audio streaming failed' });
-  }
-});
-
-app.get('/api/deezer/resolve', async (req, res) => {
-  try {
-    const { title = '', artist = '' } = req.query;
-    if (!title) return res.json({ previewUrl: null, coverImage: null });
-
-    const deezerRes = await axios.get(`https://api.deezer.com/search?q=${encodeURIComponent(title + ' ' + artist)}`, { timeout: 4000 });
-    if (deezerRes.data && deezerRes.data.data && deezerRes.data.data.length > 0) {
-      const track = deezerRes.data.data[0];
-      return res.json({
-        previewUrl: track.preview || null,
-        coverImage: track.album?.cover_big || track.album?.cover_medium || null,
-        title: track.title,
-        artist: track.artist?.name
-      });
-    }
-    res.json({ previewUrl: null, coverImage: null });
-  } catch (err) {
-    res.json({ previewUrl: null, coverImage: null });
-  }
-});
-
-app.get('/api/music/deezer/search', async (req, res) => {
-  try {
-    const { q = '', limit = 15 } = req.query;
-    if (!q) return res.json({ results: [] });
-
-    const deezerRes = await axios.get(`https://api.deezer.com/search?q=${encodeURIComponent(q)}&limit=${limit}`, { timeout: 4000 });
-    const results = (deezerRes.data?.data || []).map(t => ({
-      songId: `deezer_${t.id}`,
-      id: `deezer_${t.id}`,
-      title: t.title,
-      artist: t.artist?.name || 'Unknown',
-      album: t.album?.title || 'Single',
-      coverImage: t.album?.cover_big || t.album?.cover_medium,
-      audioUrl: t.preview,
-      downloadUrl: t.preview,
-      source: 'deezer',
-      duration: t.duration || 30
-    }));
-
-    res.json({ results });
-  } catch (err) {
-    res.status(500).json({ results: [] });
-  }
-});
-
-app.get('/api/music/deezer/track', async (req, res) => {
-  try {
-    const { id } = req.query;
-    if (!id) return res.status(400).json({ error: 'Track ID required' });
-
-    const cleanId = id.replace('deezer_', '');
-    const deezerRes = await axios.get(`https://api.deezer.com/track/${cleanId}`, { timeout: 4000 });
-    const t = deezerRes.data;
-    if (!t || t.error) return res.status(404).json({ error: 'Track not found' });
-
-    res.json({
-      track: {
-        songId: `deezer_${t.id}`,
-        id: `deezer_${t.id}`,
-        title: t.title,
-        artist: t.artist?.name || 'Unknown',
-        album: t.album?.title || 'Single',
-        coverImage: t.album?.cover_big || t.album?.cover_medium,
-        audioUrl: t.preview,
-        downloadUrl: t.preview,
-        source: 'deezer',
-        duration: t.duration || 30
-      }
-    });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch Deezer track' });
-  }
-});
 
 // ============================================================
 // AUTHENTICATION & SESSION ROUTES (SUPABASE INTEGRATED)
@@ -1451,6 +1263,135 @@ app.get('/api/activity/history', async (req, res) => {
   } catch (err) {
     console.error('History fetch error:', err.message);
     res.status(500).json({ error: 'Failed to fetch listening history' });
+  }
+});
+
+// ============================================================
+// USER MOODS LOGGING & PLAYLIST MANAGEMENT (SUPABASE DATABASE)
+// ============================================================
+app.post('/api/user_moods', async (req, res) => {
+  try {
+    const user = getReqUser(req);
+    const { mood, detected_mood, confidence, source, input_text } = req.body;
+    
+    if (user && user.id) {
+      await supabase.from('user_moods').insert({
+        user_id: user.id,
+        mood: mood || detected_mood || 'happy',
+        detected_mood: detected_mood || mood || 'happy',
+        confidence: parseFloat(confidence) || 1.0,
+        source: source || 'text',
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('User mood log error:', err.message);
+    res.status(500).json({ error: 'Failed to log mood' });
+  }
+});
+
+app.get('/api/user_moods', async (req, res) => {
+  try {
+    const user = getReqUser(req);
+    if (!user) return res.json({ moods: [] });
+
+    const { data: moods } = await supabase
+      .from('user_moods')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('timestamp', { ascending: false })
+      .limit(30);
+
+    res.json({ moods: moods || [] });
+  } catch (err) {
+    console.error('User mood fetch error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch user moods' });
+  }
+});
+
+app.get('/api/playlists', async (req, res) => {
+  try {
+    const user = getReqUser(req);
+    if (!user) return res.json({ playlists: [] });
+
+    const { data: playlists } = await supabase
+      .from('playlists')
+      .select('*, playlist_songs(song_id, added_at, songs(*))')
+      .eq('user_id', user.id)
+      .order('updated_at', { ascending: false });
+
+    res.json({ playlists: playlists || [] });
+  } catch (err) {
+    console.error('Playlists fetch error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch playlists' });
+  }
+});
+
+app.post('/api/playlists', async (req, res) => {
+  try {
+    const user = getReqUser(req);
+    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { title, coverImage } = req.body;
+    if (!title) return res.status(400).json({ error: 'Playlist title required' });
+
+    const { data: newPlaylist, error } = await supabase
+      .from('playlists')
+      .insert({
+        user_id: user.id,
+        title: title.trim(),
+        cover_image: coverImage || null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .select('*')
+      .single();
+
+    if (error) throw error;
+    res.status(201).json({ success: true, playlist: newPlaylist });
+  } catch (err) {
+    console.error('Create playlist error:', err.message);
+    res.status(500).json({ error: 'Failed to create playlist' });
+  }
+});
+
+app.post('/api/playlists/:id/songs', async (req, res) => {
+  try {
+    const user = getReqUser(req);
+    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { song } = req.body;
+    if (!song) return res.status(400).json({ error: 'Song required' });
+
+    const mapped = mapSongResponse(song);
+    await upsertSongToSupabase(mapped);
+
+    const songId = mapped.songId || mapped.id;
+    await supabase.from('playlist_songs').insert({
+      playlist_id: req.params.id,
+      song_id: songId,
+      added_at: new Date().toISOString()
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Add song to playlist error:', err.message);
+    res.status(500).json({ error: 'Failed to add song to playlist' });
+  }
+});
+
+app.delete('/api/playlists/:id', async (req, res) => {
+  try {
+    const user = getReqUser(req);
+    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+    await supabase.from('playlists').delete().eq('id', req.params.id).eq('user_id', user.id);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Delete playlist error:', err.message);
+    res.status(500).json({ error: 'Failed to delete playlist' });
   }
 });
 

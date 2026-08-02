@@ -1631,11 +1631,31 @@ function showScreen(name) {
 
   window.scrollTo(0, 0);
 
-  if (name === 'favorites') renderFavorites();
+  if (name === 'favorites' || name === 'saved') {
+    syncFavoritesFromSupabase();
+    renderFavorites();
+  }
   if (name === 'browse') renderMoodGrid();
   if (name === 'results') buildLangFilter(currentMood);
-  if (name === 'profile') updateNavUserUI();
+  if (name === 'profile') {
+    updateNavUserUI();
+    syncFavoritesFromSupabase();
+  }
   if (name === 'admin') switchAdminTab('stats');
+}
+
+async function syncFavoritesFromSupabase() {
+  try {
+    const res = await fetch('/api/favorites');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.favorites && Array.isArray(data.favorites) && data.favorites.length > 0) {
+        favorites = data.favorites;
+        try { localStorage.setItem('songstr_fav', JSON.stringify(favorites)); } catch(e) {}
+        renderFavorites();
+      }
+    }
+  } catch(e) {}
 }
 
 function togglePassVisibility(inputId, btn) {
@@ -1954,11 +1974,19 @@ function playSongSearch(index) {
 function playSong(song) {
   const title = song.title || 'Track';
   const artist = song.artist || 'Artist';
-  const songId = song.songId || song.id || song.jioId || '';
-  const audioCandidate = (typeof song.downloadUrl === 'string' && song.downloadUrl.startsWith('http')) ? song.downloadUrl : ((typeof song.audioUrl === 'string' && song.audioUrl.startsWith('http')) ? song.audioUrl : ((typeof song.file_url === 'string' && song.file_url.startsWith('http')) ? song.file_url : ''));
-
-  // Always route through /api/stream proxy to bypass Vercel domain Referer hotlink protection
-  let songUrl = `/api/stream?songId=${encodeURIComponent(songId)}&title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}&_ts=${Date.now()}`;
+  
+  // Build stream URL with JioSaavn priority
+  let songUrl;
+  if (song.downloadUrl && song.downloadUrl.startsWith('http')) {
+    // Direct JioSaavn download URL — bypass stream proxy
+    songUrl = song.downloadUrl;
+  } else if (song.jioId) {
+    songUrl = `/api/stream?jioId=${song.jioId}&title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}&_ts=${Date.now()}`;
+  } else if (song.songId) {
+    songUrl = `/api/stream?songId=${song.songId}&title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}&_ts=${Date.now()}`;
+  } else {
+    songUrl = `/api/stream?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}&_ts=${Date.now()}`;
+  }
 
   document.getElementById('p-title').textContent = title;
   document.getElementById('p-artist').innerHTML = `<span class="clickable-text" onclick="openArtistPage('${escapeHtml(artist)}')">${escapeHtml(artist)}</span> • <span class="clickable-text" onclick="openAlbumPage('${escapeHtml(song.album || song.movie || 'Single Album')}')">${escapeHtml(song.album || song.movie || 'Single Album')}</span>`;
@@ -1974,35 +2002,13 @@ function playSong(song) {
 
   const audio = document.getElementById('player-audio');
   if (audio) {
-    let playAttempts = 0;
-    audio.onerror = () => {
-      if (playAttempts === 0 && audioCandidate) {
-        playAttempts++;
-        console.warn('Proxy stream error, trying direct CDN link fallback...');
-        audio.src = audioCandidate;
-        audio.play().catch(() => playSynthesizedAudioTone(title));
-      } else {
-        playSynthesizedAudioTone(title);
-      }
-    };
-
     audio.src = songUrl;
     audio.play().then(() => {
       showToast(`🎵 Playing: ${title} — ${artist}`);
     }).catch((err) => {
-      console.warn('Proxy play restricted, trying direct link fallback...', err);
-      if (audioCandidate) {
-        audio.src = audioCandidate;
-        audio.play().then(() => {
-          showToast(`🎵 Playing: ${title} — ${artist}`);
-        }).catch(() => {
-          playSynthesizedAudioTone(title);
-          showToast(`🎵 Playing track: ${title} (${artist})`);
-        });
-      } else {
-        playSynthesizedAudioTone(title);
-        showToast(`🎵 Playing track: ${title} (${artist})`);
-      }
+      console.warn('Audio play autoplay restricted, playing title-matched sound synthesis:', err);
+      playSynthesizedAudioTone(title);
+      showToast(`🎵 Playing track: ${title} (${artist})`);
     });
   }
 
@@ -2249,8 +2255,19 @@ function analyzeFacialExpression() {
     stopCamera();
     hideLoading();
     showToast(`${MOOD_EMOJIS[detectedMood] || '😃'} Facial Emotion: ${MOOD_LABELS[detectedMood]} (${confidence}% confidence)!`);
+    logMoodToSupabase(detectedMood, confidence / 100, 'face', 'live_webcam');
     loadMoodResults(detectedMood);
   }, 1200);
+}
+
+function logMoodToSupabase(mood, confidence = 1.0, source = 'manual', text = '') {
+  try {
+    fetch('/api/user_moods', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mood, detected_mood: mood, confidence, source, input_text: text })
+    }).catch(() => {});
+  } catch(e) {}
 }
 
 function analyzeMoodFromText() {
@@ -2268,6 +2285,7 @@ function analyzeMoodFromText() {
 
   setTimeout(() => {
     hideLoading();
+    logMoodToSupabase(mood, 0.95, 'text', text);
     loadMoodResults(mood);
   }, 600);
 }
@@ -2364,6 +2382,7 @@ function analyzeSpokenText(text) {
   setTimeout(() => {
     hideLoading();
     showToast(`🎙️ Spoken Emotion: ${MOOD_LABELS[mood]} (${MOOD_EMOJIS[mood]})!`);
+    logMoodToSupabase(mood, 0.95, 'voice', text);
     loadMoodResults(mood);
   }, 900);
 }
