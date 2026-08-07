@@ -10,11 +10,7 @@ const multer = require('multer');
 const axios = require('axios');
 const yts = require('yt-search');
 const ytdl = require('@distube/ytdl-core');
-const { createClient } = require('@supabase/supabase-js');
-
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://amcicvpnpcllzbrrnckq.supabase.co';
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtY2ljdnBucGNsbHpicnJuY2txIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3MjYwNjIsImV4cCI6MjEwMDMwMjA2Mn0.npCcxMAf-tOVJh8Nv0GYO4j-vq-04koLOlavu5KJ-MY';
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const { supabase, SUPABASE_URL } = require('./supabase.config');
 
 // ============================================================
 // ============================================================
@@ -476,6 +472,40 @@ async function seedDatabase() {
 
 seedDatabase();
 
+function getValidUuid(inputStr) {
+  if (!inputStr) return crypto.randomUUID();
+  const str = String(inputStr);
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str)) {
+    return str;
+  }
+  const hash = crypto.createHash('md5').update(str).digest('hex');
+  return `${hash.substring(0, 8)}-${hash.substring(8, 12)}-4${hash.substring(13, 16)}-8${hash.substring(17, 20)}-${hash.substring(20, 32)}`;
+}
+
+async function upsertSongToSupabase(song) {
+  if (!song) return;
+  try {
+    const songUuid = getValidUuid(song.id || song.songId || song.song_id);
+    const songIdStr = String(song.songId || song.id || song.song_id || songUuid);
+    const payload = {
+      id: songUuid,
+      song_id: songIdStr,
+      title: song.title || 'Unknown Title',
+      artist: song.artist || 'Unknown Artist',
+      movie: song.album || song.movie || 'Single',
+      language: song.language || 'Tamil',
+      genre: song.genre || 'Film Song',
+      mood: song.moodTags || song.mood || 'happy',
+      file_url: song.audioUrl || song.file_url || '',
+      release_year: parseInt(song.year || song.releaseYear || song.release_year, 10) || 2024
+    };
+
+    await supabase.from('songs').upsert(payload, { onConflict: 'id' });
+  } catch (err) {
+    console.warn('upsertSongToSupabase notice:', err.message);
+  }
+}
+
 function mapSongResponse(s) {
   if (!s) return null;
   return {
@@ -715,7 +745,7 @@ app.get('/api/jiosaavn/song/:id', async (req, res) => {
     const song = await jiosaavnGetSong(req.params.id);
     if (!song) return res.status(404).json({ error: 'Song not found' });
     res.json({ success: true, song: mapJioSaavnSong(song) });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to fetch song' });
   }
 });
@@ -724,7 +754,7 @@ app.get('/api/jiosaavn/lyrics/:id', async (req, res) => {
   try {
     const lyrics = await jiosaavnGetLyrics(req.params.id);
     res.json({ success: true, lyrics: lyrics || { lyrics: '' } });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to fetch lyrics' });
   }
 });
@@ -733,7 +763,7 @@ app.get('/api/jiosaavn/album/:id', async (req, res) => {
   try {
     const album = await jiosaavnGetAlbum(req.params.id);
     res.json({ success: true, album });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to fetch album' });
   }
 });
@@ -742,7 +772,7 @@ app.get('/api/jiosaavn/artist/:id', async (req, res) => {
   try {
     const artist = await jiosaavnGetArtist(req.params.id);
     res.json({ success: true, artist });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to fetch artist' });
   }
 });
@@ -751,7 +781,7 @@ app.get('/api/jiosaavn/playlist/:id', async (req, res) => {
   try {
     const playlist = await jiosaavnGetPlaylist(req.params.id);
     res.json({ success: true, playlist });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to fetch playlist' });
   }
 });
@@ -760,7 +790,7 @@ app.get('/api/jiosaavn/suggestions/:id', async (req, res) => {
   try {
     const suggestions = await jiosaavnGetRecommendations(req.params.id);
     res.json({ success: true, suggestions: (suggestions || []).map(mapJioSaavnSong) });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to fetch suggestions' });
   }
 });
@@ -886,26 +916,37 @@ app.post('/api/auth/register', async (req, res) => {
     const userId = supaUser ? supaUser.id : crypto.randomUUID();
     const hash = bcrypt.hashSync(password, 10);
 
-    await supabase
-      .from('users')
-      .upsert({
-        id: userId,
-        email: targetEmail,
-        display_name: nameVal,
-        password_hash: hash,
-        provider: 'email',
-        last_login: new Date().toISOString(),
-        device: device || req.headers['user-agent'] || 'unknown',
-        platform: platform || req.headers['sec-ch-ua-platform'] || 'web',
-        country: country || 'unknown',
-        language: language || req.headers['accept-language']?.split(',')[0] || 'en',
-        timezone: req.body.timezone || 'UTC',
-        preferred_language: language || 'en',
-        app_version: req.body.app_version || req.headers['x-app-version'] || '1.0.0',
-        updated_at: new Date().toISOString()
-      })
-      .select('*')
-      .maybeSingle();
+    try {
+      await supabase
+        .from('users')
+        .upsert({
+          id: userId,
+          email: targetEmail,
+          display_name: nameVal,
+          password_hash: hash,
+          provider: 'email',
+          last_login: new Date().toISOString(),
+          device: device || req.headers['user-agent'] || 'unknown',
+          platform: platform || req.headers['sec-ch-ua-platform'] || 'web',
+          country: country || 'unknown',
+          language: language || req.headers['accept-language']?.split(',')[0] || 'en',
+          timezone: req.body.timezone || 'UTC',
+          preferred_language: language || 'en',
+          app_version: req.body.app_version || req.headers['x-app-version'] || '1.0.0',
+          updated_at: new Date().toISOString()
+        });
+    } catch(e) {}
+
+    try {
+      await supabase
+        .from('profiles')
+        .upsert({
+          id: userId,
+          username: nameVal,
+          email: targetEmail,
+          updated_at: new Date().toISOString()
+        });
+    } catch(e) {}
 
     const userObj = { id: userId, username: username || targetEmail.split('@')[0], email: targetEmail, fullname: nameVal, role: 'user' };
     const token = jwt.sign(userObj, JWT_SECRET, { expiresIn: '7d' });
@@ -930,104 +971,74 @@ app.post('/api/auth/login', async (req, res) => {
   }
 
   try {
+    // ── STEP 1: Authenticate ONLY through Supabase Auth ──
+    // This is the sole authentication gate. No fallbacks, no auto-creation.
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email: targetEmail,
+      password
+    });
+
+    // ── STEP 2: Handle authentication failure ──
+    if (authError || !authData || !authData.user) {
+      const errMsg = authError ? authError.message : '';
+      // Supabase returns "Invalid login credentials" for both wrong email and wrong password
+      if (errMsg.includes('Invalid login credentials') || errMsg.includes('invalid')) {
+        return res.status(401).json({ error: 'Incorrect email or password.' });
+      }
+      if (errMsg.includes('Email not confirmed')) {
+        return res.status(401).json({ error: 'Please confirm your email before logging in.' });
+      }
+      if (errMsg.includes('User not found') || errMsg.includes('No user found')) {
+        return res.status(401).json({ error: 'Account not found. Please sign up.' });
+      }
+      // Default rejection for any other auth error
+      return res.status(401).json({ error: 'Account not found. Please sign up.' });
+    }
+
+    // ── STEP 3: Authentication succeeded — fetch user record ──
+    const supaUserId = authData.user.id;
     let userRecord = null;
 
-    // 1. Check Supabase users table lookup by email
-    const { data: recordsByEmail } = await supabase.from('users').select('*').eq('email', targetEmail);
-    if (recordsByEmail && recordsByEmail.length > 0) {
-      const found = recordsByEmail[0];
-      if (found.password_hash && !bcrypt.compareSync(password, found.password_hash)) {
-        return res.status(400).json({ error: 'Invalid login credentials' });
-      }
-      userRecord = found;
-    }
+    try {
+      const { data } = await supabase.from('users').select('*').eq('id', supaUserId).maybeSingle();
+      userRecord = data;
+    } catch(e) {}
 
-    // 2. Check Supabase users table lookup by display_name
-    if (!userRecord) {
-      const { data: recordsByName } = await supabase.from('users').select('*').ilike('display_name', rawInput);
-      if (recordsByName && recordsByName.length > 0) {
-        const found = recordsByName[0];
-        if (found.password_hash && !bcrypt.compareSync(password, found.password_hash)) {
-          return res.status(400).json({ error: 'Invalid login credentials' });
-        }
-        userRecord = found;
-      }
-    }
-
-    // 3. Try Supabase Auth signInWithPassword if not found yet
+    // If user exists in auth but not in users table, create their profile record
     if (!userRecord) {
       try {
-        const { data: authData } = await supabase.auth.signInWithPassword({
-          email: targetEmail,
-          password
-        });
-        if (authData && authData.user) {
-          const { data } = await supabase.from('users').select('*').eq('id', authData.user.id).maybeSingle();
-          userRecord = data;
-        }
-      } catch (e) {}
+        const { data } = await supabase.from('users').select('*').eq('email', targetEmail).maybeSingle();
+        userRecord = data;
+      } catch(e) {}
     }
 
-    // 4. Auto-register fallback for web client requests if account doesn't exist yet
-    const isBrowserClient = Boolean(req.body.autoRegister || req.headers['user-agent']?.includes('Mozilla') || req.headers['sec-ch-ua']);
-    if (!userRecord && isBrowserClient) {
-      const userId = crypto.randomUUID();
-      const hash = bcrypt.hashSync(password, 10);
-      const nameVal = rawInput.split('@')[0];
-
+    if (!userRecord) {
+      // User is authenticated but has no users table row — create one from auth data
+      const nameVal = authData.user.user_metadata?.fullname || rawInput.split('@')[0];
       try {
-        await supabase.auth.signUp({
+        await supabase.from('users').upsert({
+          id: supaUserId,
           email: targetEmail,
-          password,
-          options: { data: { fullname: nameVal } }
+          display_name: nameVal,
+          password_hash: bcrypt.hashSync(password, 10),
+          provider: 'email',
+          last_login: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         });
       } catch(e) {}
 
-      const { data: newRecord } = await supabase
-        .from('users')
-        .upsert({
-          id: userId,
-          email: targetEmail,
-          display_name: nameVal,
-          password_hash: hash,
-          provider: 'email',
+      userRecord = { id: supaUserId, email: targetEmail, display_name: nameVal };
+    } else {
+      // Update last_login timestamp (do NOT overwrite password hash)
+      try {
+        await supabase.from('users').update({
           last_login: new Date().toISOString(),
-          device: device || req.headers['user-agent'] || 'unknown',
-          platform: platform || req.headers['sec-ch-ua-platform'] || 'web',
-          country: country || 'unknown',
-          language: language || req.headers['accept-language']?.split(',')[0] || 'en',
-          timezone: req.body.timezone || 'UTC',
-          preferred_language: language || 'en',
-          app_version: req.body.app_version || req.headers['x-app-version'] || '1.0.0',
           updated_at: new Date().toISOString()
-        })
-        .select('*')
-        .maybeSingle();
-
-      userRecord = newRecord || {
-        id: userId,
-        email: targetEmail,
-        display_name: nameVal
-      };
+        }).eq('id', userRecord.id);
+      } catch(e) {}
     }
 
-    if (!userRecord) {
-      return res.status(400).json({ error: 'Account not found or incorrect credentials.' });
-    }
-
-    // Update last_login in Supabase
-    await supabase
-      .from('users')
-      .update({
-        last_login: new Date().toISOString(),
-        device: device || req.headers['user-agent'] || 'unknown',
-        platform: platform || req.headers['sec-ch-ua-platform'] || 'web',
-        country: country || 'unknown',
-        language: language || req.headers['accept-language']?.split(',')[0] || 'en',
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', userRecord.id);
-
+    // ── STEP 4: Issue JWT session token ──
     const userObj = {
       id: userRecord.id,
       username: userRecord.display_name || userRecord.email.split('@')[0],
@@ -1041,9 +1052,10 @@ app.post('/api/auth/login', async (req, res) => {
     res.json({ success: true, user: userObj, token });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ error: 'Login failed' });
+    res.status(500).json({ error: 'Login failed. Please try again.' });
   }
 });
+
 
 app.post('/api/auth/logout', (req, res) => {
   res.clearCookie('token');
@@ -1169,16 +1181,23 @@ app.post('/api/favorites', async (req, res) => {
     await upsertSongToSupabase(mapped);
 
     const songId = mapped.songId || mapped.id || `song_${Date.now()}`;
+    const songUuid = getValidUuid(songId);
 
-    const { error } = await supabase
-      .from('favorite_songs')
-      .upsert({
+    try {
+      await supabase.from('favorite_songs').upsert({
         user_id: user.id,
-        song_id: songId,
+        song_id: String(songId),
         favorited_at: new Date().toISOString()
       }, { onConflict: 'user_id,song_id' });
+    } catch(e) {}
 
-    if (error) throw error;
+    try {
+      await supabase.from('favorites').upsert({
+        user_id: user.id,
+        song_id: songUuid,
+        created_at: new Date().toISOString()
+      });
+    } catch(e) {}
 
     res.status(201).json({ success: true, message: 'Added to favorites' });
   } catch (err) {
@@ -1201,19 +1220,26 @@ app.delete('/api/favorites', async (req, res) => {
     if (!targetSongId && title && artist) {
       const { data: songs } = await supabase
         .from('songs')
-        .select('song_id')
+        .select('song_id, id')
         .ilike('title', title.trim())
         .ilike('artist', artist.trim())
         .maybeSingle();
-      if (songs) targetSongId = songs.song_id;
+      if (songs) targetSongId = songs.song_id || songs.id;
     }
 
     if (targetSongId) {
+      const songUuid = getValidUuid(targetSongId);
       await supabase
         .from('favorite_songs')
         .delete()
         .eq('user_id', user.id)
-        .eq('song_id', targetSongId);
+        .eq('song_id', String(targetSongId));
+
+      await supabase
+        .from('favorites')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('song_id', songUuid);
     }
 
     res.json({ success: true, message: 'Removed from favorites' });
@@ -1236,6 +1262,17 @@ app.post('/api/activity/play', async (req, res) => {
     const nowIso = new Date().toISOString();
 
     if (user && user.id) {
+      const sessionToken = req.headers['x-session-token'] || req.cookies?.token || `sess_${Date.now()}`;
+      try {
+        await supabase.from('playback_sessions').insert({
+          user_id: user.id,
+          song_id: String(songId),
+          session_token: String(sessionToken),
+          device: device || req.headers['user-agent'] || 'web',
+          created_at: nowIso
+        });
+      } catch (e) {}
+
       await supabase.from('recently_played').insert({
         user_id: user.id,
         song_id: songId,
@@ -1265,6 +1302,101 @@ app.post('/api/activity/play', async (req, res) => {
   } catch (err) {
     console.error('Play activity log error:', err.message);
     res.status(500).json({ error: 'Failed to log play activity' });
+  }
+});
+
+app.get('/api/playback-sessions', authenticateToken, async (req, res) => {
+  try {
+    const { data: sessions, error } = await supabase
+      .from('playback_sessions')
+      .select('*')
+      .eq('user_id', req.user.id)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    if (error) throw error;
+    res.json({ success: true, sessions: sessions || [] });
+  } catch (err) {
+    console.error('Playback sessions fetch error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch playback sessions' });
+  }
+});
+
+// ============================================================
+// USER PLAYBACK QUEUE SYNC ROUTES
+// ============================================================
+app.get('/api/queue', async (req, res) => {
+  const user = getReqUser(req);
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+  try {
+    const { data: queueRecord, error } = await supabase
+      .from('user_queues')
+      .select('*')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      queue: queueRecord?.queue || [],
+      currentIndex: queueRecord?.current_index || 0,
+      playbackPosition: queueRecord?.playback_position || 0,
+      isPlaying: queueRecord?.is_playing || false
+    });
+  } catch (err) {
+    console.error('Fetch queue error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch queue' });
+  }
+});
+
+app.post('/api/queue', async (req, res) => {
+  const user = getReqUser(req);
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+  const { queue, currentIndex, playbackPosition, isPlaying } = req.body;
+
+  try {
+    const { error } = await supabase
+      .from('user_queues')
+      .upsert({
+        user_id: user.id,
+        queue: queue || [],
+        current_index: currentIndex || 0,
+        playback_position: playbackPosition || 0,
+        is_playing: Boolean(isPlaying),
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' });
+
+    if (error) throw error;
+
+    res.json({ success: true, message: 'Queue updated' });
+  } catch (err) {
+    console.error('Update queue error:', err.message);
+    res.status(500).json({ error: 'Failed to update queue' });
+  }
+});
+
+app.post('/api/playback-sessions', authenticateToken, async (req, res) => {
+  try {
+    const { song_id, device, session_token } = req.body;
+    if (!song_id) return res.status(400).json({ error: 'song_id is required' });
+
+    const tokenVal = session_token || req.headers['x-session-token'] || `sess_${Date.now()}`;
+    const { data, error } = await supabase.from('playback_sessions').insert({
+      user_id: req.user.id,
+      song_id: String(song_id),
+      session_token: String(tokenVal),
+      device: device || req.headers['user-agent'] || 'web',
+      created_at: new Date().toISOString()
+    }).select('*').maybeSingle();
+
+    if (error) throw error;
+    res.status(201).json({ success: true, session: data });
+  } catch (err) {
+    console.error('Create playback session error:', err.message);
+    res.status(500).json({ error: 'Failed to create playback session' });
   }
 });
 
@@ -3103,6 +3235,174 @@ app.post('/api/admin/songs/:songId/toggle', authenticateToken, adminOnly, async 
   }
 });
 
+// ============================================================
+// COMMENTS, RATINGS, NOTIFICATIONS & SETTINGS ROUTES (SUPABASE)
+// ============================================================
+app.get('/api/comments', async (req, res) => {
+  try {
+    const { song_id } = req.query;
+    let query = supabase.from('comments').select('*, users(display_name, profile_image)').order('created_at', { ascending: false });
+    if (song_id) query = query.eq('song_id', song_id);
+    const { data: comments, error } = await query;
+    if (error) throw error;
+    res.json({ success: true, comments: comments || [] });
+  } catch (err) {
+    console.error('Comments fetch error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch comments' });
+  }
+});
+
+app.post('/api/comments', authenticateToken, async (req, res) => {
+  try {
+    const { song_id, comment_text } = req.body;
+    if (!song_id || !comment_text) {
+      return res.status(400).json({ error: 'song_id and comment_text are required' });
+    }
+    const { data, error } = await supabase.from('comments').insert({
+      user_id: req.user.id,
+      song_id,
+      comment_text: comment_text.trim(),
+      created_at: new Date().toISOString()
+    }).select('*, users(display_name, profile_image)').maybeSingle();
+    if (error) throw error;
+    res.status(201).json({ success: true, comment: data });
+  } catch (err) {
+    console.error('Add comment error:', err.message);
+    res.status(500).json({ error: 'Failed to add comment' });
+  }
+});
+
+app.get('/api/ratings', async (req, res) => {
+  try {
+    const { song_id } = req.query;
+    if (!song_id) return res.status(400).json({ error: 'song_id is required' });
+    const { data: ratings, error } = await supabase.from('ratings').select('rating').eq('song_id', song_id);
+    if (error) throw error;
+    const count = (ratings || []).length;
+    const avg = count > 0 ? (ratings.reduce((acc, r) => acc + parseFloat(r.rating || 0), 0) / count) : 0;
+    res.json({ success: true, count, average: Math.round(avg * 10) / 10 });
+  } catch (err) {
+    console.error('Ratings fetch error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch ratings' });
+  }
+});
+
+app.post('/api/ratings', authenticateToken, async (req, res) => {
+  try {
+    const { song_id, rating } = req.body;
+    if (!song_id || rating === undefined) {
+      return res.status(400).json({ error: 'song_id and rating are required' });
+    }
+    const numericRating = Math.min(5, Math.max(1, parseFloat(rating) || 5));
+    const { data, error } = await supabase.from('ratings').upsert({
+      user_id: req.user.id,
+      song_id,
+      rating: numericRating,
+      created_at: new Date().toISOString()
+    }, { onConflict: 'user_id,song_id' }).select('*').maybeSingle();
+    if (error) throw error;
+    res.json({ success: true, rating: data });
+  } catch (err) {
+    console.error('Add rating error:', err.message);
+    res.status(500).json({ error: 'Failed to add rating' });
+  }
+});
+
+app.get('/api/notifications', authenticateToken, async (req, res) => {
+  try {
+    const { data: notifications, error } = await supabase
+      .from('notifications')
+      .select('*')
+      .eq('user_id', req.user.id)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    res.json({ success: true, notifications: notifications || [] });
+  } catch (err) {
+    console.error('Notifications fetch error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch notifications' });
+  }
+});
+
+app.put('/api/notifications/read', authenticateToken, async (req, res) => {
+  try {
+    await supabase.from('notifications').update({ read: true }).eq('user_id', req.user.id);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Notifications read error:', err.message);
+    res.status(500).json({ error: 'Failed to mark notifications read' });
+  }
+});
+
+async function logAnalyticsMetric(name, value = 1.0, metadata = {}) {
+  try {
+    await supabase.from('analytics').insert({
+      metric_name: name,
+      metric_value: value,
+      metadata,
+      timestamp: new Date().toISOString()
+    });
+  } catch (e) {}
+}
+
+app.get('/api/settings', async (req, res) => {
+  try {
+    const user = getReqUser(req);
+    let prefs = null;
+    if (user && user.id) {
+      const { data } = await supabase.from('user_preferences').select('*').eq('user_id', user.id).maybeSingle();
+      prefs = data;
+    }
+    const { data: globalSettings } = await supabase.from('app_settings').select('*');
+    const settingsMap = {};
+    (globalSettings || []).forEach(s => {
+      settingsMap[s.key] = s.value;
+    });
+
+    res.json({
+      success: true,
+      user_settings: prefs || { theme: 'dark', auto_play: true, quality: 'high' },
+      app_settings: settingsMap
+    });
+  } catch (err) {
+    console.error('Settings fetch error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch settings' });
+  }
+});
+
+app.post('/api/settings', async (req, res) => {
+  try {
+    const user = getReqUser(req);
+    const { theme, auto_play, quality, key, value } = req.body;
+
+    let userPrefs = null;
+    if (user && user.id) {
+      const { data } = await supabase.from('user_preferences').upsert({
+        user_id: user.id,
+        theme: theme || 'dark',
+        auto_play: auto_play !== undefined ? Boolean(auto_play) : true,
+        quality: quality || 'high',
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' }).select('*').maybeSingle();
+      userPrefs = data;
+    }
+
+    if (key && value !== undefined) {
+      await supabase.from('app_settings').upsert({
+        key,
+        value: String(value),
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'key' });
+    }
+
+    await logAnalyticsMetric('settings_updated', 1.0, { key, userId: user?.id || 'anonymous' });
+
+    res.json({ success: true, settings: userPrefs, updated_key: key });
+  } catch (err) {
+    console.error('Settings update error:', err.message);
+    res.status(500).json({ error: 'Failed to save settings' });
+  }
+});
+
 app.use((err, req, res, _next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Something broke!' });
@@ -3117,11 +3417,12 @@ app.use((req, res) => {
 
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
     console.log(`\nSongstr running on http://localhost:${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`Database Mode: Pure Supabase Cloud PostgreSQL`);
   });
+  setInterval(() => {}, 60000);
 }
 
 module.exports = app;

@@ -212,6 +212,29 @@ create table if not exists public.app_settings (
 );
 
 -- ============================================================
+-- 16. COMMENTS TABLE
+-- ============================================================
+create table if not exists public.comments (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references public.users(id) on delete cascade,
+  song_id text references public.songs(song_id) on delete cascade,
+  comment_text text not null,
+  created_at timestamptz default now()
+);
+
+-- ============================================================
+-- 17. RATINGS TABLE
+-- ============================================================
+create table if not exists public.ratings (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references public.users(id) on delete cascade,
+  song_id text references public.songs(song_id) on delete cascade,
+  rating numeric default 5.0,
+  created_at timestamptz default now(),
+  constraint unique_user_song_rating unique(user_id, song_id)
+);
+
+-- ============================================================
 -- AUTO-UPDATE TIMESTAMPS
 -- ============================================================
 create or replace function update_modified_column()
@@ -242,49 +265,72 @@ alter table public.language_preferences enable row level security;
 alter table public.user_preferences enable row level security;
 alter table public.playback_sessions enable row level security;
 alter table public.notifications enable row level security;
+alter table public.app_settings enable row level security;
+alter table public.comments enable row level security;
+alter table public.ratings enable row level security;
 
 -- Policies
-create policy "Users can view and edit their own user profile" 
-  on public.users for all using (auth.uid() = id);
+create policy "Allow public access on songs" 
+  on public.songs for all using (true) with check (true);
 
-create policy "Users can view and edit their own favorites" 
-  on public.favorite_songs for all using (auth.uid() = user_id);
+create policy "Allow public access on users" 
+  on public.users for all using (true) with check (true);
 
-create policy "Users can view and edit their own recently played" 
-  on public.recently_played for all using (auth.uid() = user_id);
+create policy "Allow public access on favorite_songs" 
+  on public.favorite_songs for all using (true) with check (true);
 
-create policy "Users can view and edit their own listening history" 
-  on public.listening_history for all using (auth.uid() = user_id);
+create policy "Allow public access on recently_played" 
+  on public.recently_played for all using (true) with check (true);
 
-create policy "Users can view and edit their own playlists" 
-  on public.playlists for all using (auth.uid() = user_id);
+create policy "Allow public access on listening_history" 
+  on public.listening_history for all using (true) with check (true);
 
-create policy "Users can view and edit their own playlist songs" 
-  on public.playlist_songs for all using (
-    exists (
-      select 1 from public.playlists 
-      where public.playlists.id = playlist_songs.playlist_id 
-      and public.playlists.user_id = auth.uid()
-    )
-  );
+create policy "Allow public access on playlists" 
+  on public.playlists for all using (true) with check (true);
 
-create policy "Users can view and edit their own search history" 
-  on public.search_history for all using (auth.uid() = user_id);
+create policy "Allow public access on playlist_songs" 
+  on public.playlist_songs for all using (true) with check (true);
 
-create policy "Users can view and edit their own moods" 
-  on public.user_moods for all using (auth.uid() = user_id);
+create policy "Allow public access on search_history" 
+  on public.search_history for all using (true) with check (true);
 
-create policy "Users can view and edit their own language preferences" 
-  on public.language_preferences for all using (auth.uid() = user_id);
+create policy "Allow public access on user_moods" 
+  on public.user_moods for all using (true) with check (true);
 
-create policy "Users can view and edit their own user preferences" 
-  on public.user_preferences for all using (auth.uid() = user_id);
+create policy "Allow public access on language_preferences" 
+  on public.language_preferences for all using (true) with check (true);
 
-create policy "Users can view and edit their own playback sessions" 
-  on public.playback_sessions for all using (auth.uid() = user_id);
+create policy "Allow public access on user_preferences" 
+  on public.user_preferences for all using (true) with check (true);
 
-create policy "Users can view and edit their own notifications" 
-  on public.notifications for all using (auth.uid() = user_id);
+create policy "Allow public access on playback_sessions" 
+  on public.playback_sessions for all using (true) with check (true);
+
+create policy "Allow public access on notifications" 
+  on public.notifications for all using (true) with check (true);
+
+create policy "Allow public access on app_settings" 
+  on public.app_settings for all using (true) with check (true);
+
+create policy "Allow public access on comments" 
+  on public.comments for all using (true) with check (true);
+
+create policy "Allow public access on ratings" 
+  on public.ratings for all using (true) with check (true);
+
+-- ============================================================
+-- 18. USER_QUEUES TABLE (CROSS-PLATFORM PLAYBACK SYNC)
+-- ============================================================
+create table if not exists public.user_queues (
+  user_id uuid primary key references public.users(id) on delete cascade,
+  queue jsonb default '[]'::jsonb,
+  current_index integer default 0,
+  playback_position numeric default 0.0,
+  is_playing boolean default false,
+  updated_at timestamptz default now()
+);
+
+create trigger update_user_queues_modtime before update on public.user_queues for each row execute procedure update_modified_column();
 
 -- ============================================================
 -- INDEXES FOR PERFORMANCE OPTIMIZATION
@@ -297,5 +343,49 @@ create index if not exists idx_playlist_songs_playlist_id on public.playlist_son
 create index if not exists idx_search_history_user_id on public.search_history(user_id);
 create index if not exists idx_user_moods_user_id on public.user_moods(user_id);
 create index if not exists idx_language_preferences_user_id on public.language_preferences(user_id);
+create index if not exists idx_comments_song_id on public.comments(song_id);
+create index if not exists idx_ratings_song_id on public.ratings(song_id);
 
--- ==========================================================================================
+-- ============================================================
+-- SUPABASE REALTIME PUBLICATION ENABLEMENT
+-- ============================================================
+do $$
+begin
+  alter publication supabase_realtime add table public.favorite_songs;
+exception when others then null; end $$;
+
+do $$
+begin
+  alter publication supabase_realtime add table public.playlists;
+exception when others then null; end $$;
+
+do $$
+begin
+  alter publication supabase_realtime add table public.playlist_songs;
+exception when others then null; end $$;
+
+do $$
+begin
+  alter publication supabase_realtime add table public.recently_played;
+exception when others then null; end $$;
+
+do $$
+begin
+  alter publication supabase_realtime add table public.listening_history;
+exception when others then null; end $$;
+
+do $$
+begin
+  alter publication supabase_realtime add table public.user_queues;
+exception when others then null; end $$;
+
+do $$
+begin
+  alter publication supabase_realtime add table public.user_preferences;
+exception when others then null; end $$;
+
+do $$
+begin
+  alter publication supabase_realtime add table public.users;
+exception when others then null; end $$;
+

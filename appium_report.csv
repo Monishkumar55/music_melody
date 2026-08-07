@@ -1,0 +1,629 @@
+Test ID,Component,Action/State,Description,Steps,Expected,Status,File
+APP-001,ContentView,View Declaration,Verify SwiftUI layout structure matches custom view 'ContentView',"1. Instantiate ContentView container inside simulator.
+2. Validate body hierarchy elements are drawn.",UI component ContentView should render its child elements without constraints failure.,Pass,Views.swift/ContentView.swift
+APP-002,MoodHeaderView,View Declaration,Verify SwiftUI layout structure matches custom view 'MoodHeaderView',"1. Instantiate MoodHeaderView container inside simulator.
+2. Validate body hierarchy elements are drawn.",UI component MoodHeaderView should render its child elements without constraints failure.,Pass,Views.swift/ContentView.swift
+APP-003,RecommendationCard,View Declaration,Verify SwiftUI layout structure matches custom view 'RecommendationCard',"1. Instantiate RecommendationCard container inside simulator.
+2. Validate body hierarchy elements are drawn.",UI component RecommendationCard should render its child elements without constraints failure.,Pass,Views.swift/ContentView.swift
+APP-004,ContentView,State variable: selectedMood,Verify state property wrapper '@State private var selectedMood' tracks view lifecycle changes,"1. Locate reference view variable 'selectedMood'.
+2. Trigger input event updates.
+3. Assert view updates reactively.",Variable 'selectedMood' dynamically re-renders SwiftUI layout upon state mutation.,Pass,ContentView.swift
+APP-005,ContentView,State variable: textInput,Verify state property wrapper '@State private var textInput' tracks view lifecycle changes,"1. Locate reference view variable 'textInput'.
+2. Trigger input event updates.
+3. Assert view updates reactively.",Variable 'textInput' dynamically re-renders SwiftUI layout upon state mutation.,Pass,ContentView.swift
+APP-006,ContentView,State variable: recommendedSong,Verify state property wrapper '@State private var recommendedSong' tracks view lifecycle changes,"1. Locate reference view variable 'recommendedSong'.
+2. Trigger input event updates.
+3. Assert view updates reactively.",Variable 'recommendedSong' dynamically re-renders SwiftUI layout upon state mutation.,Pass,ContentView.swift
+APP-007,ContentView,State variable: isLoading,Verify state property wrapper '@State private var isLoading' tracks view lifecycle changes,"1. Locate reference view variable 'isLoading'.
+2. Trigger input event updates.
+3. Assert view updates reactively.",Variable 'isLoading' dynamically re-renders SwiftUI layout upon state mutation.,Pass,ContentView.swift
+APP-008,ContentView,State variable: errorMessage,Verify state property wrapper '@State private var errorMessage' tracks view lifecycle changes,"1. Locate reference view variable 'errorMessage'.
+2. Trigger input event updates.
+3. Assert view updates reactively.",Variable 'errorMessage' dynamically re-renders SwiftUI layout upon state mutation.,Pass,ContentView.swift
+APP-009,ContentView,State variable: isAnimating,Verify state property wrapper '@State private var isAnimating' tracks view lifecycle changes,"1. Locate reference view variable 'isAnimating'.
+2. Trigger input event updates.
+3. Assert view updates reactively.",Variable 'isAnimating' dynamically re-renders SwiftUI layout upon state mutation.,Pass,ContentView.swift
+APP-010,Controller/Model,Method: analyzeMood(),Verify event action method 'analyzeMood()' executes successfully on tap,"1. Select button associated with method 'analyzeMood'.
+2. Dispatch tap gesture trigger.
+3. Assert correct state updates.",Triggers model mutations or API requests mapping to method 'analyzeMood' definition.,Pass,ContentView.swift
+APP-011,Controller/Model,Method: toggleMood(),Verify event action method 'toggleMood()' executes successfully on tap,"1. Select button associated with method 'toggleMood'.
+2. Dispatch tap gesture trigger.
+3. Assert correct state updates.",Triggers model mutations or API requests mapping to method 'toggleMood' definition.,Pass,ContentView.swift
+APP-012,TextField style,Layout assert: TextField Border,Validate SwiftUI attribute: .textFieldStyle(.roundedBorder),"1. Inspect UI builder node with TextField style.
+2. Assert modifier .textFieldStyle(.roundedBorder) exists.",Rounded border matches iOS design guidelines.,Pass,Views.swift/ContentView.swift
+APP-013,TextField bounds,Layout assert: TextField Horizontal Padding,Validate SwiftUI attribute: .padding(.horizontal),"1. Inspect UI builder node with TextField bounds.
+2. Assert modifier .padding(.horizontal) exists.",Has margin spacing to ensure screen boundary isolation.,Pass,Views.swift/ContentView.swift
+APP-014,Button accent,Layout assert: Analyze Mood button background,Validate SwiftUI attribute: .background(Color.accentColor),"1. Inspect UI builder node with Button accent.
+2. Assert modifier .background(Color.accentColor) exists.",Theme accent color correctly applied as fill.,Pass,Views.swift/ContentView.swift
+APP-015,Button label,Layout assert: Analyze Mood button text color,Validate SwiftUI attribute: .foregroundColor(.white),"1. Inspect UI builder node with Button label.
+2. Assert modifier .foregroundColor(.white) exists.",Label matches accessibility standard contrast.,Pass,Views.swift/ContentView.swift
+APP-016,Button corners,Layout assert: Analyze Mood button cornerRadius,Validate SwiftUI attribute: .cornerRadius(12),"1. Inspect UI builder node with Button corners.
+2. Assert modifier .cornerRadius(12) exists.",Buttons have smooth rounded borders of 12pt.,Pass,Views.swift/ContentView.swift
+APP-017,Disabled State,Layout assert: Button Disabled State loading,Validate SwiftUI attribute: .disabled(isLoading || ...),"1. Inspect UI builder node with Disabled State.
+2. Assert modifier .disabled(isLoading || ...) exists.",Locks user interaction while API calls are executing.,Fail,Views.swift/ContentView.swift
+APP-018,Animations,Layout assert: Transition animation for RecommendationCard,Validate SwiftUI attribute: .transition(.opacity.combined(...)),"1. Inspect UI builder node with Animations.
+2. Assert modifier .transition(.opacity.combined(...)) exists.",Renders recommendation with smooth fade and slide transition.,Fail,Views.swift/ContentView.swift
+APP-019,Toolbar Item,Layout assert: Wand button for random selection,"Validate SwiftUI attribute: Image(systemName: ""wand.and.stars"")","1. Inspect UI builder node with Toolbar Item.
+2. Assert modifier Image(systemName: ""wand.and.stars"") exists.",Toolbar action renders system SF Symbol icon correctly.,Pass,Views.swift/ContentView.swift
+APP-020,Heart State,Layout assert: Heart button default state,"Validate SwiftUI attribute: Image(systemName: ""heart"")","1. Inspect UI builder node with Heart State.
+2. Assert modifier Image(systemName: ""heart"") exists.",Unliked songs display empty heart outline icon.,Fail,Views.swift/ContentView.swift
+APP-021,Heart State,Layout assert: Heart button selected state,"Validate SwiftUI attribute: Image(systemName: ""heart.fill"")","1. Inspect UI builder node with Heart State.
+2. Assert modifier Image(systemName: ""heart.fill"") exists.",Liked songs display red filled heart icon with spring animation.,Fail,Views.swift/ContentView.swift
+APP-022,Music Control,Layout assert: Play button image,"Validate SwiftUI attribute: systemImage: ""play.fill""","1. Inspect UI builder node with Music Control.
+2. Assert modifier systemImage: ""play.fill"" exists.",Play button renders standard playback symbol.,Pass,Views.swift/ContentView.swift
+APP-023,Mood Enum Model,Case mapping: happy,Verify Mood case 'happy' exists and maps to label and emoji symbols.,"1. Retrieve Mood enum case list.
+2. Assert instance contains label and icon definitions for 'happy'.",Contains correct text tag and emoji icon.,Pass,Models.swift
+APP-024,Mood Enum Model,Case mapping: sad,Verify Mood case 'sad' exists and maps to label and emoji symbols.,"1. Retrieve Mood enum case list.
+2. Assert instance contains label and icon definitions for 'sad'.",Contains correct text tag and emoji icon.,Pass,Models.swift
+APP-025,Mood Enum Model,Case mapping: angry,Verify Mood case 'angry' exists and maps to label and emoji symbols.,"1. Retrieve Mood enum case list.
+2. Assert instance contains label and icon definitions for 'angry'.",Contains correct text tag and emoji icon.,Pass,Models.swift
+APP-026,Mood Enum Model,Case mapping: relaxed,Verify Mood case 'relaxed' exists and maps to label and emoji symbols.,"1. Retrieve Mood enum case list.
+2. Assert instance contains label and icon definitions for 'relaxed'.",Contains correct text tag and emoji icon.,Pass,Models.swift
+APP-027,Mood Enum Model,Case mapping: energetic,Verify Mood case 'energetic' exists and maps to label and emoji symbols.,"1. Retrieve Mood enum case list.
+2. Assert instance contains label and icon definitions for 'energetic'.",Contains correct text tag and emoji icon.,Pass,Models.swift
+APP-028,Mood Enum Model,Case mapping: stressed,Verify Mood case 'stressed' exists and maps to label and emoji symbols.,"1. Retrieve Mood enum case list.
+2. Assert instance contains label and icon definitions for 'stressed'.",Contains correct text tag and emoji icon.,Pass,Models.swift
+APP-029,Mood Enum Model,Case mapping: romantic,Verify Mood case 'romantic' exists and maps to label and emoji symbols.,"1. Retrieve Mood enum case list.
+2. Assert instance contains label and icon definitions for 'romantic'.",Contains correct text tag and emoji icon.,Pass,Models.swift
+APP-030,Mood Enum Model,Case mapping: neutral,Verify Mood case 'neutral' exists and maps to label and emoji symbols.,"1. Retrieve Mood enum case list.
+2. Assert instance contains label and icon definitions for 'neutral'.",Contains correct text tag and emoji icon.,Pass,Models.swift
+APP-031,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 31,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-032,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 32,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-033,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 33,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-034,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 34,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-035,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 35,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-036,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 36,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-037,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 37,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-038,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 38,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-039,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 39,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-040,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 40,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-041,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 41,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-042,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 42,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-043,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 43,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-044,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 44,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-045,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 45,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-046,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 46,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-047,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 47,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-048,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 48,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-049,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 49,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-050,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 50,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-051,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 51,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-052,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 52,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-053,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 53,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-054,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 54,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-055,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 55,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-056,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 56,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-057,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 57,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-058,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 58,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-059,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 59,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-060,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 60,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-061,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 61,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-062,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 62,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-063,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 63,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-064,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 64,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-065,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 65,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-066,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 66,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-067,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 67,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-068,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 68,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-069,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 69,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-070,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 70,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-071,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 71,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-072,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 72,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-073,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 73,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-074,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 74,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-075,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 75,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-076,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 76,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-077,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 77,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-078,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 78,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-079,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 79,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-080,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 80,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-081,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 81,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-082,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 82,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-083,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 83,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-084,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 84,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-085,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 85,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-086,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 86,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-087,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 87,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-088,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 88,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-089,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 89,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-090,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 90,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-091,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 91,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-092,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 92,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-093,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 93,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-094,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 94,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-095,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 95,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-096,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 96,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-097,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 97,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-098,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 98,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-099,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 99,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-100,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 100,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-101,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 101,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-102,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 102,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-103,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 103,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-104,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 104,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-105,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 105,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-106,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 106,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-107,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 107,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-108,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 108,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-109,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 109,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-110,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 110,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-111,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 111,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-112,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 112,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-113,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 113,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-114,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 114,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-115,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 115,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-116,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 116,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-117,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 117,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-118,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 118,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-119,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 119,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-120,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 120,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-121,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 121,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-122,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 122,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-123,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 123,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-124,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 124,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-125,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 125,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-126,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 126,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-127,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 127,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-128,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 128,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-129,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 129,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-130,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 130,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-131,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 131,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-132,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 132,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-133,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 133,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-134,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 134,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-135,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 135,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-136,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 136,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-137,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 137,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-138,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 138,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-139,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 139,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-140,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 140,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-141,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 141,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-142,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 142,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-143,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 143,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-144,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 144,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-145,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 145,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-146,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 146,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-147,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 147,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-148,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 148,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-149,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 149,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-150,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 150,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-151,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 151,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-152,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 152,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-153,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 153,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-154,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 154,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-155,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 155,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-156,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 156,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-157,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 157,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-158,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 158,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-159,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 159,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-160,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 160,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-161,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 161,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-162,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 162,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-163,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 163,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-164,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 164,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-165,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 165,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-166,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 166,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-167,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 167,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-168,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 168,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-169,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 169,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-170,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 170,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-171,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 171,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-172,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 172,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-173,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 173,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-174,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 174,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-175,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 175,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-176,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 176,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-177,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 177,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-178,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 178,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-179,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 179,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-180,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 180,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-181,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 181,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-182,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 182,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-183,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 183,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-184,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 184,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-185,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 185,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-186,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 186,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-187,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 187,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-188,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 188,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-189,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 189,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-190,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 190,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-191,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 191,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-192,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 192,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-193,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 193,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-194,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 194,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-195,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 195,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-196,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 196,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-197,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 197,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-198,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 198,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-199,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 199,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-200,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 200,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-201,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 201,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-202,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 202,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-203,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 203,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-204,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 204,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-205,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 205,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-206,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 206,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-207,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 207,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-208,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 208,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-209,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 209,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-210,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 210,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-211,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 211,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-212,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 212,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-213,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 213,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-214,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 214,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-215,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 215,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-216,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 216,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-217,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 217,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-218,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 218,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-219,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 219,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-220,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 220,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-221,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 221,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-222,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 222,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-223,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 223,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-224,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 224,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-225,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 225,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-226,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 226,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-227,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 227,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-228,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 228,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-229,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 229,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-230,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 230,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-231,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 231,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-232,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 232,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-233,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 233,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-234,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 234,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-235,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 235,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-236,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 236,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-237,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 237,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-238,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 238,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-239,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 239,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-240,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 240,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-241,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 241,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-242,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 242,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-243,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 243,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-244,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 244,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-245,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 245,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-246,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 246,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-247,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 247,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-248,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 248,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-249,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 249,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-250,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 250,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-251,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 251,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-252,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 252,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-253,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 253,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-254,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 254,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-255,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 255,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-256,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 256,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-257,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 257,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-258,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 258,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-259,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 259,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-260,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 260,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-261,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 261,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-262,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 262,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-263,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 263,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-264,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 264,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-265,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 265,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-266,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 266,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-267,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 267,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-268,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 268,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-269,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 269,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-270,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 270,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-271,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 271,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-272,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 272,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-273,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 273,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-274,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 274,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-275,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 275,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-276,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 276,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-277,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 277,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-278,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 278,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-279,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 279,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-280,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 280,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-281,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 281,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-282,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 282,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-283,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 283,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-284,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 284,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-285,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 285,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-286,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 286,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-287,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 287,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-288,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 288,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-289,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 289,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-290,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 290,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-291,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 291,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-292,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 292,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-293,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 293,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-294,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 294,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-295,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 295,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-296,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 296,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-297,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 297,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-298,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 298,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-299,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 299,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-300,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 300,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-301,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 301,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-302,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 302,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-303,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 303,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-304,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 304,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-305,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 305,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-306,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 306,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-307,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 307,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-308,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 308,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-309,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 309,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift
+APP-310,App Preview,Previews View,Check ContentView_Previews returns active simulator preview view 310,"1. Launch Xcode canvas.
+2. Start canvas rendering.",Canvas correctly renders ContentView layout preview.,Pass,ContentView.swift

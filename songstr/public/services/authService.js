@@ -74,7 +74,10 @@ export const AuthService = {
     try {
       const token = localStorage.getItem('songstr_token');
       if (token) {
-        const res = await fetch('/api/auth/me');
+        const res = await fetch('/api/auth/me', {
+          headers: { 'Authorization': `Bearer ${token}` },
+          credentials: 'include'
+        });
         if (res.ok) {
           const data = await res.json();
           if (data.user) return { loggedIn: true, user: data.user };

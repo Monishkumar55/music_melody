@@ -78,7 +78,10 @@ class SongService {
   Future<List<Song>> getFavorites(String token) async {
     final res = await http.get(
       Uri.parse(ApiConfig.favoritesUrl),
-      headers: {'Cookie': 'token=$token'},
+      headers: {
+        'Cookie': 'token=$token',
+        'Authorization': 'Bearer $token',
+      },
     );
     if (res.statusCode == 200) {
       final data = jsonDecode(res.body);
@@ -94,6 +97,7 @@ class SongService {
       headers: {
         'Content-Type': 'application/json',
         'Cookie': 'token=$token',
+        'Authorization': 'Bearer $token',
       },
       body: jsonEncode({'song': song.toJson()}),
     );
@@ -107,6 +111,7 @@ class SongService {
       headers: {
         'Content-Type': 'application/json',
         'Cookie': 'token=$token',
+        'Authorization': 'Bearer $token',
       },
       body: jsonEncode({'title': title, 'artist': artist}),
     );

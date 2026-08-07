@@ -1,9 +1,5 @@
 const axios = require('axios');
-const { createClient } = require('@supabase/supabase-js');
-
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://amcicvpnpcllzbrrnckq.supabase.co';
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtY2ljdnBucGNsbHpicnJuY2txIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3MjYwNjIsImV4cCI6MjEwMDMwMjA2Mn0.npCcxMAf-tOVJh8Nv0GYO4j-vq-04koLOlavu5KJ-MY';
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const { supabase } = require('./supabase.config');
 
 const API_MIRRORS = [
   'https://saavn.sumit.co',
@@ -109,6 +105,7 @@ function mapJioSaavnSong(s, language, mood) {
     title: s.name || s.title || 'Unknown',
     artist: primaryArtists,
     movie: albumName,
+    image: bestImage,
     language: language,
     genre: s.genre || 'Film Song',
     mood: mood,
@@ -126,7 +123,7 @@ async function fetchSongsForQuery(query) {
       if (res.data && res.data.success && res.data.data && res.data.data.results) {
         return res.data.data.results;
       }
-    } catch (err) {
+    } catch {
       // Try next mirror
     }
   }

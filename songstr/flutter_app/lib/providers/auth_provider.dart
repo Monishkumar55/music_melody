@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../services/supabase_sync_service.dart';
 import '../models/user.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -17,6 +18,9 @@ class AuthProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     await _authService.init();
+    if (_authService.isLoggedIn) {
+      SupabaseSyncService.instance.initRealtimeSubscription();
+    }
     _isLoading = false;
     notifyListeners();
   }
@@ -27,6 +31,7 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
     try {
       await _authService.login(username, password);
+      SupabaseSyncService.instance.initRealtimeSubscription();
       _isLoading = false;
       notifyListeners();
       return true;
@@ -44,6 +49,7 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
     try {
       await _authService.register(username, email, fullname, password);
+      SupabaseSyncService.instance.initRealtimeSubscription();
       _isLoading = false;
       notifyListeners();
       return true;
@@ -56,9 +62,11 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
+    SupabaseSyncService.instance.dispose();
     await _authService.logout();
     notifyListeners();
   }
+
 
   void clearError() {
     _error = null;

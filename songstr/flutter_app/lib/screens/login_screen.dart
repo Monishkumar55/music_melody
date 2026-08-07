@@ -13,7 +13,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _usernameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _fullnameCtrl = TextEditingController();
-  final _passwordCtrl = TextEditingController();
+  final _passwordCtrl = TextEditingController(); 
   bool _obscurePassword = true;
 
   @override

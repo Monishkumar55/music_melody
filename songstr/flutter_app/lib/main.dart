@@ -7,10 +7,22 @@ import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 
-void main() {
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'config/api_config.dart';
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await Supabase.initialize(
+      url: ApiConfig.supabaseUrl,
+      anonKey: ApiConfig.supabaseAnonKey,
+    );
+  } catch (e) {
+    debugPrint('Supabase init error: $e');
+  }
   runApp(const SongstrApp());
 }
+
 
 class SongstrApp extends StatelessWidget {
   const SongstrApp({super.key});

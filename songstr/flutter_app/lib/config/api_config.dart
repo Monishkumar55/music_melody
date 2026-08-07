@@ -30,5 +30,8 @@ class ApiConfig {
   static String get meUrl => '$baseUrl/api/auth/me';
   static String get profileUrl => '$baseUrl/api/profile';
   static String get favoritesUrl => '$baseUrl/api/favorites';
+  static const String supabaseUrl = 'https://amcicvpnpcllzbrrnckq.supabase.co';
+  static const String supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtY2ljdnBucGNsbHpicnJuY2txIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3MjYwNjIsImV4cCI6MjEwMDMwMjA2Mn0.npCcxMAf-tOVJh8Nv0GYO4j-vq-04koLOlavu5KJ-MY';
   static String get suggestMoodUrl => '$baseUrl/api/suggest-mood';
 }
+
